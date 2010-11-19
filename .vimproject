@@ -1,10 +1,18 @@
-ruby=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
+rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
  bin=bin {
  }
  lib=lib {
+  sources=rbbt/sources{
+   organism.rb
+   go.rb
+   entrez.rb
+  }
  }
  test=test {
   test_helper.rb
+  sources=rbbt/sources{
+   test_entrez.rb
+  }
  }
  data=data{
  }
