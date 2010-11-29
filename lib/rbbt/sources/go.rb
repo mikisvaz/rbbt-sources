@@ -1,4 +1,4 @@
-require 'rbbt/util/base'
+require 'rbbt-util'
 
 # This module holds helper methods to deal with the Gene Ontology files. Right
 # now all it does is provide a translation form id to the actual names.

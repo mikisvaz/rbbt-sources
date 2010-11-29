@@ -1,4 +1,4 @@
-require 'rbbt/util/base'
+require 'rbbt-util'
 module Organism
   class OrganismNotProcessedError < StandardError; end
 

@@ -3,18 +3,19 @@ require 'rbbt/sources/entrez'
 require 'test/unit'
 
 class TestEntrez < Test::Unit::TestCase
+  $yeast_tax = 4932
 
   def test_entrez2native
-    tax   = 559292
-    fix   = proc{|code| code.sub(/SGD:S0/,'S0') }
-    check = proc{|code| code.match(/^S0/)}
-    lexicon = Entrez.entrez2native(tax, 5, fix, check)
+    tax    = $yeast_tax
+    fix    = proc{|line| line.sub(/SGD:S0/,'S0') }
+    select = proc{|line| line.match(/\tSGD:S0/)}
+    lexicon = Entrez.entrez2native(tax, :fix => fix, :select => select)
 
     assert(lexicon['855611'].include? 'S000005056') 
   end
 
   def test_entrez2pubmed
-    tax   = 559292
+    tax   = $yeast_tax
 
     data = Entrez.entrez2pubmed(tax)
     assert(data['850320'].include? '15102838') 

@@ -1,7 +1,4 @@
-require 'rbbt/util/base'
-require 'rbbt/util/filecache'
-require 'rbbt/util/open'
-require 'rbbt/sources/gscholar'
+require 'rbbt-util'
 require 'libxml'
 
 # This module offers an interface with PubMed, to perform queries, and
