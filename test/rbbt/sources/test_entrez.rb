@@ -3,7 +3,7 @@ require 'rbbt/sources/entrez'
 require 'test/unit'
 
 class TestEntrez < Test::Unit::TestCase
-  $yeast_tax = 4932
+  $yeast_tax = 559292
 
   def test_entrez2native
     tax    = $yeast_tax
