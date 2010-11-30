@@ -3,6 +3,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  }
  lib=lib {
   sources=rbbt/sources{
+   biomart.rb
    bibtex.rb
    entrez.rb
    go.rb

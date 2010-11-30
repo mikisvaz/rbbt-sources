@@ -90,9 +90,9 @@ module Entrez
       geneid.each{|p|
         next if p.nil?
         if FileCache.found(gene_filename p)
-          missing << p 
+          list[p] = Gene.new(Open.read(FileCache.path(gene_filename p)))
         else
-          list[p] = Gene.new(Open.read(FileCache.path(p)))
+          missing << p 
         end
       }
 
@@ -101,7 +101,7 @@ module Entrez
 
       genes.each{|p, xml|
         filename = gene_filename p    
-        FileCache.add(filename,xml) if FileCache.found(filename)
+        FileCache.add(filename,xml) unless FileCache.found(filename)
         list[p] =  Gene.new(xml)
       }
 
@@ -113,7 +113,7 @@ module Entrez
         return Gene.new(Open.read(FileCache.path(filename)))
       else
         xml = get_online(geneid)
-        FileCache.add(filename,xml) if FileCache.found(filename).nil?
+        FileCache.add(filename, xml) unless FileCache.found(filename)
 
         return Gene.new(xml)
       end

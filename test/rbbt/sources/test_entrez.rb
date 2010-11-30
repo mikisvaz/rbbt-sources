@@ -34,7 +34,7 @@ class TestEntrez < Test::Unit::TestCase
     geneids = 9129
     assert_equal([["PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)"]], Entrez.get_gene(geneids).description)
 
-    geneids = [9129,728049]
+    geneids = [9129, 728049]
     assert_equal([["PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)"]], Entrez.get_gene(geneids)[9129].description)
   end
 
