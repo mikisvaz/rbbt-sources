@@ -23,8 +23,15 @@ class TestBioMart < Test::Unit::TestCase
 
     assert(data['856452']['protein_id'].include? 'AAB68382')
     assert(data['856452']['external_gene_id'].include? 'CUP1-2')
- end
+  end
 
+  def test_tsv
+    data = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => true, :wget_options => { :quiet => false})
+
+    assert(data['856452']['Protein ID'].include? 'AAB68382')
+    assert_equal 'Entrez Gene', data.key_field
+    assert_equal ['Protein ID', 'RefSeq Peptide'], data.fields
+  end
 end
 
 

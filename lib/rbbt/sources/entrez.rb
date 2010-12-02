@@ -14,7 +14,10 @@ module Entrez
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs
 
-    TSV.new(Rbbt.find_datafile('gene_info'), options)
+    tsv = TSV.new(Rbbt.find_datafile('gene_info'), options)
+    tsv.key_field = "Entrez Gene ID"
+    tsv.fields    = ["Native ID"]
+    tsv
   end
 
   def self.entrez2pubmed(taxs)
