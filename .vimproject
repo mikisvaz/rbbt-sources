@@ -19,15 +19,17 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    }
    Sce=Sce{
     Rakefile
-    }
+   }
   }
  }
  test=test {
   test_helper.rb
   sources=rbbt/sources{
-   test_entrez.rb
-   test_go.rb
    test_pubmed.rb
+   test_go.rb
+   test_biomart.rb
+   test_entrez.rb
+   test_organism.rb
   }
  }
  data=data{

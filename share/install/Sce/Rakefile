@@ -18,7 +18,7 @@ file 'lexicon' do |t|
 
   lexicon.smart_merge BioMart.tsv('scerevisiae_gene_ensembl', ['Entrez Gene ID', 'entrezgene'],[['Interpro Description' , "interpro_description"]], []), "Entrez Gene ID"
 
-  lexicon = lexicon.slice *(lexicon.fields - ["Entrez Gene ID"])
+  lexicon = lexicon.slice (lexicon.fields - ["Entrez Gene ID"])
 
   File.open(t.name, 'w') do |f| f.puts lexicon end
 end
@@ -27,13 +27,13 @@ file 'identifiers' do |t|
   identifiers = TSV.new(Open.open("ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"), :native => 0, :extra => [], :keep_empty => true)
   identifiers.key_field = "SGD ID"
   identifiers.fields = []
-  
-  entrez =  Entrez.entrez2native(559292, :fix => proc{|code| code.sub(/SGD:S0/,'S0') }, :check => proc{|code| code.match(/^S0/)})
+
+  entrez =  Entrez.entrez2native(559292, :fix => proc{|line| line.sub(/SGD:S0/,'S0') }, :select => proc{|line| line.match(/\tS0/)})
   entrez.fields = ["SGD ID"]
 
   identifiers.smart_merge entrez, "SGD ID"
 
-  identifiers.smart_merge BioMart.tsv('scerevisiae_gene_ensembl', ['Entrez Gene ID', 'entrezgene'],
+  biomart = BioMart.tsv('scerevisiae_gene_ensembl', ['Entrez Gene ID', 'entrezgene'],
                                   [['Associated Gene Name' , "external_gene_id"], 
                                   ['Ensembl Gene ID', "ensembl_gene_id"  ],
                                   ['Ensembl Protein ID', "ensembl_peptide_id"  ],
@@ -44,9 +44,10 @@ file 'identifiers' do |t|
                                   ['EMBL (Genbank) ID' , "embl"] , 
                                   # Affymetrix
                                   ['Affy yeast 2',"affy_yeast_2"],
-                                  ['Affy yg s98', "affy_yg_s98"]]
-                                  ), "Entrez Gene ID"
+                                  ['Affy yg s98', "affy_yg_s98"]], 
+                                  nil, nil, :wget_options => {:quiet => false})
 
+  identifiers.smart_merge biomart, "Entrez Gene ID"
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
