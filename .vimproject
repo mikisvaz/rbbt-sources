@@ -1,4 +1,5 @@
 rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
+ Rakefile
  bin=bin {
  }
  lib=lib {
@@ -14,11 +15,16 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  }
  share=share{
   install=install{
-   Hsa=Hsa{
-    Rakefile
+   lib=lib{
+    helpers.rb
    }
-   Sce=Sce{
-    Rakefile
+   Organism=Organism{
+    Hsa=Hsa{
+     Rakefile
+    }
+    Sce=Sce{
+     Rakefile
+    }
    }
   }
  }

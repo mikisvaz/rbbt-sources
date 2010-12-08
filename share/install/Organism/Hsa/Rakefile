@@ -1,0 +1,83 @@
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', '..', 'lib'))
+require 'rbbt/sources/biomart'
+require 'rbbt/sources/entrez'
+require File.join(File.dirname(__FILE__), '../../lib/helpers')
+
+$taxs = [559292,4932]
+$native = "SGD ID"
+$url = "ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"
+$biomart_db = 'hsapiens_gene_ensembl'
+$biomart_main = ['Entrez Gene ID', 'entrezgene']
+$biomart_lexicon = [ 
+  [ 'Associated Gene Name' , "external_gene_id"], 
+  [ 'HGNC symbol', "hgnc_symbol"  ],
+  [ 'HGNC automatic gene name', "hgnc_automatic_gene_name"  ],
+  [ 'HGNC curated gene name ', "hgnc_curated_gene_name"  ],
+]
+
+$biomart_identifiers = [ 
+  [ 'Ensembl Gene ID', "ensembl_gene_id"  ],
+  [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
+  [ 'Associated Gene Name', "external_gene_id"  ],
+  [ 'CCDS ID', "ccds"  ],
+  [ 'Protein ID', "protein_id"  ],
+  [ 'RefSeq Protein ID', "refseq_peptide"  ],
+  [ 'Unigene ID', "unigene"  ],
+  [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
+  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
+  [ 'HGNC ID', "hgnc_id", 'HGNC'],
+  [ 'EMBL (Genbank) ID' , "embl"] , 
+
+  # Affymetrix
+  [ 'AFFY HC G110', 'affy_hc_g110' ],
+  [ 'AFFY HG FOCUS', 'affy_hg_focus' ],
+  [ 'AFFY HG U133-PLUS-2', 'affy_hg_u133_plus_2' ],
+  [ 'AFFY HG U133A_2', 'affy_hg_u133a_2' ],
+  [ 'AFFY HG U133A', 'affy_hg_u133a' ],
+  [ 'AFFY HG U133B', 'affy_hg_u133b' ],
+  [ 'AFFY HG U95AV2', 'affy_hg_u95av2' ],
+  [ 'AFFY HG U95B', 'affy_hg_u95b' ],
+  [ 'AFFY HG U95C', 'affy_hg_u95c' ],
+  [ 'AFFY HG U95D', 'affy_hg_u95d' ],
+  [ 'AFFY HG U95E', 'affy_hg_u95e' ],
+  [ 'AFFY HG U95A', 'affy_hg_u95a' ],
+  [ 'AFFY HUGENEFL', 'affy_hugenefl' ],
+  [ 'AFFY HuEx', 'affy_huex_1_0_st_v2' ],
+  [ 'AFFY HuGene', 'affy_hugene_1_0_st_v1' ],
+  [ 'AFFY U133 X3P', 'affy_u133_x3p' ],
+  [ 'Agilent WholeGenome',"agilent_wholegenome" ],
+  [ 'Agilent CGH 44b', 'agilent_cgh_44b' ],
+  [ 'Codelink ID', 'codelink' ],
+  [ 'Illumina HumanWG 6 v2', 'illumina_humanwg_6_v2' ],
+  [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
+]
+
+
+
+file 'name' do |t|
+  File.open(t.name, 'w') do |f| f.puts "Homo sapiens" end
+end
+
+file 'lexicon' do |t|
+  lexicon = tsv_file('http://www.genenames.org/cgi-bin/hgnc_downloads.cgi?title=HGNC+output+data&hgnc_dbtag=on&col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_prev_sym&col=gd_prev_name&col=gd_aliases&col=gd_name_aliases&col=gd_pub_acc_ids&status=Approved&status_opt=2&level=pri&=on&where=&order_by=gd_app_sym_sort&limit=&format=text&submit=submit&.cgifields=&.cgifields=level&.cgifields=chr&.cgifields=status&.cgifields=hgnc_dbtag',
+                     "HGNC ID", nil, :flatten => true, :header_hash => '')
+  merge_biomart lexicon, $biomart_db, $biomart_main, $biomart_lexicon, "HGNC ID"
+
+  File.open(t.name, 'w') do |f| f.puts lexicon end
+end
+
+file 'identifiers' do |t|
+  identifiers = BioMart.tsv($biomart_db, $biomart_main, $biomart_identifiers)
+  $biomart_identifiers.each do |name, key, prefix|
+    if prefix
+      identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
+    end
+  end
+
+  File.open(t.name, 'w') do |f| f.puts identifiers end
+end
+
+
+task :default => ['name', 'lexicon', 'identifiers']
+
+

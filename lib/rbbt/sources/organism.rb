@@ -1,4 +1,5 @@
 require 'rbbt-util'
+require 'rbbt/util/data_module'
 
 module Organism
   class OrganismNotProcessedError < StandardError; end
@@ -6,16 +7,9 @@ module Organism
   def self.datadir(org)
     File.join(Rbbt.datadir, 'organisms', org)
   end 
-
-  def self.lexicon(org)
-    datafile = org + '/lexicon'
-    Rbbt.add_datafiles datafile => ['orgs', org]
-    TSV.new(Rbbt.find_datafile(datafile), :persistence => true)
-  end
-
-  def self.identifiers(org)
-    datafile = org + '/identifiers'
-    Rbbt.add_datafiles datafile => ['orgs', org]
-    TSV.new(Rbbt.find_datafile(datafile), :persistence => true)
-  end
+  
+  extend DataModule
+  
+  Hsa = with_key('Hsa')
+  Sce = with_key('Sce')
 end

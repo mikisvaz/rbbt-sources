@@ -1,53 +1,49 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', '..', '..', 'lib'))
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', '..', 'lib'))
 require 'rbbt/sources/biomart'
 require 'rbbt/sources/entrez'
+require File.join(File.dirname(__FILE__), '../../lib/helpers')
+
+$taxs = [559292,4932]
+$native = "SGD ID"
+$url = "ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"
+$biomart_db = 'scerevisiae_gene_ensembl'
+$biomart_main = ['Entrez Gene ID', 'entrezgene']
+
 
 file 'name' do |t|
   File.open(t.name, 'w') do |f| f.puts "Saccharomyces cerevisiae" end
 end
 
 file 'lexicon' do |t|
-  lexicon = TSV.new(Open.open("ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"), :native => 0, :extra => [3,4,5], :keep_empty => true)
-  lexicon.key_field = "SGD ID"
-  lexicon.fields = ["F3", "F4", "F5"]
-  
-  entrez =  Entrez.entrez2native(559292, :fix => proc{|code| code.sub(/SGD:S0/,'S0') }, :check => proc{|code| code.match(/^S0/)})
-  entrez.fields = ["SGD ID"]
+  lexicon = tsv_file($url, [$native, 0], [3, 4, 5], :keep_empty => true)
 
-  lexicon.smart_merge entrez, "SGD ID"
+  merge_entrez(lexicon, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tS0/)})
 
-  lexicon.smart_merge BioMart.tsv('scerevisiae_gene_ensembl', ['Entrez Gene ID', 'entrezgene'],[['Interpro Description' , "interpro_description"]], []), "Entrez Gene ID"
+  merge_biomart(lexicon, $biomart_db, $biomart_main, [['Interpro Description' , "interpro_description"]])
 
-  lexicon = lexicon.slice (lexicon.fields - ["Entrez Gene ID"])
+  lexicon = lexicon.slice(lexicon.fields - ["Entrez Gene ID"])
 
   File.open(t.name, 'w') do |f| f.puts lexicon end
 end
 
 file 'identifiers' do |t|
-  identifiers = TSV.new(Open.open("ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"), :native => 0, :extra => [], :keep_empty => true)
-  identifiers.key_field = "SGD ID"
-  identifiers.fields = []
+  identifiers = tsv_file($url, [$native, 0], [3, 4, 5], :keep_empty => true)
 
-  entrez =  Entrez.entrez2native(559292, :fix => proc{|line| line.sub(/SGD:S0/,'S0') }, :select => proc{|line| line.match(/\tS0/)})
-  entrez.fields = ["SGD ID"]
+  merge_entrez(identifiers, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tS0/)})
 
-  identifiers.smart_merge entrez, "SGD ID"
+  merge_biomart(identifiers, $biomart_db, $biomart_main,
+                [['Associated Gene Name' , "external_gene_id"], 
+                  ['Ensembl Gene ID', "ensembl_gene_id"  ],
+                  ['Ensembl Protein ID', "ensembl_peptide_id"  ],
+                  ['RefSeq Protein ID' , "refseq_peptide"] , 
+                  ['UniProt/SwissProt ID' , "uniprot_swissprot"] , 
+                  ['UniProt/SwissProt Accession' , "uniprot_swissprot_accession"] , 
+                  ['Protein ID' , "protein_id"] , 
+                  ['EMBL (Genbank) ID' , "embl"] , 
+                  # Affymetrix
+                  ['Affy yeast 2',"affy_yeast_2"],
+                  ['Affy yg s98', "affy_yg_s98"]])
 
-  biomart = BioMart.tsv('scerevisiae_gene_ensembl', ['Entrez Gene ID', 'entrezgene'],
-                                  [['Associated Gene Name' , "external_gene_id"], 
-                                  ['Ensembl Gene ID', "ensembl_gene_id"  ],
-                                  ['Ensembl Protein ID', "ensembl_peptide_id"  ],
-                                  ['RefSeq Protein ID' , "refseq_peptide"] , 
-                                  ['UniProt/SwissProt ID' , "uniprot_swissprot"] , 
-                                  ['UniProt/SwissProt Accession' , "uniprot_swissprot_accession"] , 
-                                  ['Protein ID' , "protein_id"] , 
-                                  ['EMBL (Genbank) ID' , "embl"] , 
-                                  # Affymetrix
-                                  ['Affy yeast 2',"affy_yeast_2"],
-                                  ['Affy yg s98', "affy_yg_s98"]], 
-                                  nil, nil, :wget_options => {:quiet => false})
-
-  identifiers.smart_merge biomart, "Entrez Gene ID"
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 

@@ -50,8 +50,12 @@ module BioMart
       attrs.each{|name|
         value = parts.shift
         data[main][name] ||= []
-        next if value.nil?
-        data[main][name] << value
+        next if value.nil? or value.empty?
+        if data[main][name]
+          data[main][name] = [value]
+        else
+          data[main][name] << value unless data[main][name].include? value
+        end
       }
     }
 
@@ -98,7 +102,7 @@ module BioMart
   end
 
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
-    codes = attrs.collect{|attr| attr.last}
+    codes = attrs.collect{|attr| attr[1]}
     data = query(database, main.last, codes, filters, data, open_options)
     tsv = TSV.new({})
 
