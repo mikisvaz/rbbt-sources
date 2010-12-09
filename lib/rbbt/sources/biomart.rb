@@ -1,4 +1,5 @@
 require 'rbbt-util'
+require 'rbbt/util/log'
 
 # This module interacts with BioMart. It performs queries to BioMart and
 # synthesises a hash with the results. Note that this module connects to the
@@ -8,6 +9,7 @@ require 'rbbt-util'
 module BioMart
   
   class BioMart::QueryError < StandardError; end
+
   private
 
   @@biomart_query_xml = <<-EOT
@@ -23,7 +25,6 @@ module BioMart
   EOT
 
    
-
 
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     attrs   ||= []
@@ -79,22 +80,29 @@ module BioMart
   # cause an error if the BioMart WS does not allow filtering with that
   # attribute.
   def self.query(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
+    open_options = Misc.add_defaults open_options, :nocache => false
     attrs   ||= []
     data    ||= {}
     
+    Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
+
+    max_items = 2
     chunks = []
     chunk = []
     attrs.each{|a|
       chunk << a
-      if chunk.length == 2
+      if chunk.length == max_items
         chunks << chunk
         chunk = []
       end
     }
 
     chunks << chunk if chunk.any?
+    
 
-    chunks.each{|chunk|
+    Log.low "Chunks: #{chunks.length}"
+    chunks.each_with_index{|chunk,i|
+      Log.low "Chunk #{ i }: [#{chunk * ", "}]"
       data = get(database, main, chunk, filters, data, open_options)
     }
 

@@ -14,6 +14,7 @@ begin
     gem.test_files = Dir['test/**/test_*.rb']
 
     gem.add_dependency('rbbt-util')
+    gem.add_dependency('rbbt-text')
     gem.add_dependency('mechanize')
     gem.add_dependency('libxml-ruby')
   end
