@@ -5,28 +5,34 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rbbt-sources}
-  s.version = "0.0.0"
+  s.version = "0.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Miguel Vazquez"]
-  s.date = %q{2010-11-19}
+  s.date = %q{2010-12-10}
   s.description = %q{Data sources like PubMed, Entrez Gene, or Gene Ontology}
   s.email = %q{miguel.vazquez@fdi.ucm.es}
   s.files = [
     "lib/rbbt/sources/bibtex.rb",
+    "lib/rbbt/sources/biomart.rb",
     "lib/rbbt/sources/entrez.rb",
     "lib/rbbt/sources/go.rb",
     "lib/rbbt/sources/gscholar.rb",
     "lib/rbbt/sources/organism.rb",
-    "lib/rbbt/sources/pubmed.rb"
+    "lib/rbbt/sources/pubmed.rb",
+    "share/install/Organism/Hsa/Rakefile",
+    "share/install/Organism/Sce/Rakefile",
+    "share/install/lib/helpers.rb"
   ]
   s.homepage = %q{http://github.com/mikisvaz/rbbt-sources}
   s.require_paths = ["lib"]
   s.rubygems_version = %q{1.3.7}
   s.summary = %q{Data sources for the Ruby Bioinformatics Toolkit (rbbt)}
   s.test_files = [
+    "test/rbbt/sources/test_biomart.rb",
     "test/rbbt/sources/test_entrez.rb",
     "test/rbbt/sources/test_go.rb",
+    "test/rbbt/sources/test_organism.rb",
     "test/rbbt/sources/test_pubmed.rb",
     "test/test_helper.rb"
   ]
@@ -37,15 +43,18 @@ Gem::Specification.new do |s|
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rbbt-util>, [">= 0"])
+      s.add_runtime_dependency(%q<rbbt-text>, [">= 0"])
       s.add_runtime_dependency(%q<mechanize>, [">= 0"])
       s.add_runtime_dependency(%q<libxml-ruby>, [">= 0"])
     else
       s.add_dependency(%q<rbbt-util>, [">= 0"])
+      s.add_dependency(%q<rbbt-text>, [">= 0"])
       s.add_dependency(%q<mechanize>, [">= 0"])
       s.add_dependency(%q<libxml-ruby>, [">= 0"])
     end
   else
     s.add_dependency(%q<rbbt-util>, [">= 0"])
+    s.add_dependency(%q<rbbt-text>, [">= 0"])
     s.add_dependency(%q<mechanize>, [">= 0"])
     s.add_dependency(%q<libxml-ruby>, [">= 0"])
   end
