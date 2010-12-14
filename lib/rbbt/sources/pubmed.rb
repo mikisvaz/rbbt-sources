@@ -20,7 +20,7 @@ module PubMed
     if pmids.is_a? Array
       list = {}
       articles.each{|article|
-        pmid = article.scan(/<PMID>(.*?)<\/PMID>/).flatten.first
+        pmid = article.scan(/<PMID[^>]*?>(.*?)<\/PMID>/).flatten.first
         list[pmid] = article
       }
       return list
