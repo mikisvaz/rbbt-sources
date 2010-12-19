@@ -77,6 +77,23 @@ file 'identifiers' do |t|
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
+file 'gene_go' do |t|
+  url = "http://cvsweb.geneontology.org/cgi-bin/cvsweb.cgi/go/gene-associations/gene_association.goa_human.gz?rev=HEAD"
+  tsv = TSV.new(Open.open(url, :gzip => true), :native => 2, :extra => 4)
+
+  index = TSV.index(Organism::Hsa.identifiers, :persistence => true)
+  new = TSV.new({})
+  tsv.through do |key, values|
+    next if index[key].nil?
+    new_key = index[key].first
+    new[new_key] = values
+  end
+
+  
+  new.key_field = "Associated Gene Name"
+  new.fields = ["GO Term"]
+  Open.write(t.name, new.to_s)
+end
 
 task :default => ['name', 'lexicon', 'identifiers']
 
