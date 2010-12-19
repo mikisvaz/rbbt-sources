@@ -7,6 +7,10 @@ module Organism
   def self.datadir(org)
     File.join(Rbbt.datadir, 'organisms', org)
   end 
+
+  def self.normalize(org, list)
+    TSV.index(Organism.identifiers(org), :persistence => true).values_at(*list).collect{|r| r ?  r.first : nil}
+  end
   
   extend DataModule
   
