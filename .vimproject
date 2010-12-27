@@ -11,6 +11,10 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    gscholar.rb
    organism.rb
    pubmed.rb
+   polysearch.rb
+   CTCAE.rb
+   COSTART.rb
+   Reactome.rb
   }
  }
  share=share{
