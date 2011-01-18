@@ -54,7 +54,7 @@ $biomart_identifiers = [
 
 
 
-file 'name' do |t|
+file 'scientific_name' do |t|
   File.open(t.name, 'w') do |f| f.puts "Homo sapiens" end
 end
 

@@ -10,7 +10,7 @@ $biomart_db = 'scerevisiae_gene_ensembl'
 $biomart_main = ['Entrez Gene ID', 'entrezgene']
 
 
-file 'name' do |t|
+file 'scientific_name' do |t|
   File.open(t.name, 'w') do |f| f.puts "Saccharomyces cerevisiae" end
 end
 
@@ -27,7 +27,7 @@ file 'lexicon' do |t|
 end
 
 file 'identifiers' do |t|
-  identifiers = tsv_file($url, [$native, 0], [3, 4, 5], :keep_empty => true)
+  identifiers = tsv_file($url, [$native, 0], [["Ensembl Gene ID", 3], ["Associated Gene Name",4], ["Associated Gene Name Alias", 5]], :keep_empty => true)
 
   merge_entrez(identifiers, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tS0/)})
 
