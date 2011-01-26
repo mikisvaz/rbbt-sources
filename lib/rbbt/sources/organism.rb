@@ -38,3 +38,5 @@ module Organism
   Hsa = with_key('Hsa')
   Sce = with_key('Sce')
 end
+
+p Organism::Hsa.gene_positions

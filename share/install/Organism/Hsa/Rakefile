@@ -52,6 +52,15 @@ $biomart_identifiers = [
   [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
 ]
 
+$biomart_positions = [
+  ['Chromosome Name','chromosome_name'],
+  ['Strand','strand'],
+  ['Gene Start (bp)','start_position'],
+  ['Gene End','end_position'],
+  ['Transcript Start','transcript_start'],
+  ['Transcript End','transcript_end'],
+]
+
 
 
 file 'scientific_name' do |t|
@@ -95,6 +104,12 @@ file 'gene_go' do |t|
   Open.write(t.name, new.to_s)
 end
 
-task :default => ['name', 'lexicon', 'identifiers']
+file 'gene_positions' do |t|
+  positions = BioMart.tsv($biomart_db, $biomart_main, $biomart_positions)
+
+  Open.write(t.name, positions.to_s)
+end
+
+task :default => ['name', 'lexicon', 'identifiers', 'gene_positions']
 
 
