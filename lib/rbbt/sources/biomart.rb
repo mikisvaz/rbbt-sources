@@ -10,6 +10,8 @@ module BioMart
   
   class BioMart::QueryError < StandardError; end
 
+  BIOMART_URL = 'http://biomart.org/biomart/martservice?query='
+
   private
 
   @@biomart_query_xml = <<-EOT
@@ -23,8 +25,14 @@ module BioMart
 </Dataset>
 </Query>
   EOT
-
    
+  def self.set_archive(date)
+    @archive_url = BIOMART_URL.sub(/www\.biomar\./, date + '.archive.ensemble')
+  end
+
+  def self.unset_archive
+    @archive_url = nil
+  end
 
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     attrs   ||= []
@@ -37,7 +45,12 @@ module BioMart
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
-    response = Open.read('http://www.biomart.org/biomart/martservice?query=' + query.gsub(/\n/,' '), open_options)
+    if @archive_url
+      response = Open.read(@archive_url + query.gsub(/\n/,' '), open_options)
+    else
+      response = Open.read(BIOMART_URL + query.gsub(/\n/,' '), open_options)
+    end
+
     if response =~ /Query ERROR:/
       raise BioMart::QueryError, response
     end

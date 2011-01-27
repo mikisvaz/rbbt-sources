@@ -55,7 +55,7 @@ $biomart_identifiers = [
 $biomart_positions = [
   ['Chromosome Name','chromosome_name'],
   ['Strand','strand'],
-  ['Gene Start (bp)','start_position'],
+  ['Gene Start','start_position'],
   ['Gene End','end_position'],
   ['Transcript Start','transcript_start'],
   ['Transcript End','transcript_end'],
@@ -105,7 +105,9 @@ file 'gene_go' do |t|
 end
 
 file 'gene_positions' do |t|
+  BioMart.set_archive('may2009')
   positions = BioMart.tsv($biomart_db, $biomart_main, $biomart_positions)
+  BioMart.unset_archive
 
   Open.write(t.name, positions.to_s)
 end

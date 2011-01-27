@@ -10,7 +10,12 @@ module Organism
 
   def self.normalize(org, list, options = {})
     options = Misc.add_defaults options, :persistence => true
-    TSV.index(Organism.identifiers(org), options).values_at(*list).collect{|r| r ?  r.first : nil}
+    if Array === list
+      TSV.index(Organism.identifiers(org), options).values_at(*list).collect{|r| r ?  r.first : nil}
+    else
+      r = TSV.index(Organism.identifiers(org), options)[list]
+      r.nil? ? nil : r.first
+    end
   end
 
   def self.guess_id(org, values)
@@ -38,5 +43,3 @@ module Organism
   Hsa = with_key('Hsa')
   Sce = with_key('Sce')
 end
-
-p Organism::Hsa.gene_positions
