@@ -1,6 +1,7 @@
 require 'rbbt-util'
 require 'rbbt/util/data_module'
 
+
 module Organism
   class OrganismNotProcessedError < StandardError; end
 
@@ -11,8 +12,10 @@ module Organism
   def self.normalize(org, list, options = {})
     options = Misc.add_defaults options, :persistence => true
     if Array === list
+      return [] if list.empty?
       TSV.index(Organism.identifiers(org), options).values_at(*list).collect{|r| r ?  r.first : nil}
     else
+      return [] if list.nil?
       r = TSV.index(Organism.identifiers(org), options)[list]
       r.nil? ? nil : r.first
     end
