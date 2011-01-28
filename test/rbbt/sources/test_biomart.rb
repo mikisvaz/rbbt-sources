@@ -4,7 +4,7 @@ require 'test/unit'
 
 class TestBioMart < Test::Unit::TestCase
 
-  def test_get
+  def _test_get
     assert_raise BioMart::QueryError do 
       BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],['with_unknownattr'])
     end
@@ -23,7 +23,7 @@ class TestBioMart < Test::Unit::TestCase
     assert(data['852236']['external_gene_id'].include? 'YBL044W')
   end
 
-  def test_tsv
+  def _test_tsv
     data = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false})
 
     assert(data['852236']['Protein ID'].include? 'CAA84864')

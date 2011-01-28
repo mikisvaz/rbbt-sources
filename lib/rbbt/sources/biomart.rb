@@ -51,7 +51,7 @@ module BioMart
       response = Open.read(BIOMART_URL + query.gsub(/\n/,' '), open_options)
     end
 
-    if response =~ /Query ERROR:/
+    if response.empty? or response =~ /Query ERROR:/
       raise BioMart::QueryError, response
     end
 

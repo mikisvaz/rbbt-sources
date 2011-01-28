@@ -5,8 +5,8 @@ require 'set'
 
 module Entrez
 
-  Rbbt.add_datafiles "gene_info" => ['databases/entrez', 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene_info.gz'],
-    "gene2pubmed" => ["databases/entrez", "ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz" ]
+  Rbbt.claim "gene_info", 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene_info.gz', 'databases/entrez' 
+  Rbbt.claim "gene2pubmed", 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz', 'databases/entrez' 
 
   def self.entrez2native(taxs, options = {})
     options = Misc.add_defaults options, :native => 1, :extra => 5, :flatten => true, :persistence => true
@@ -14,7 +14,7 @@ module Entrez
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs
 
-    tsv = TSV.new(Rbbt.find_datafile('gene_info'), options)
+    tsv = TSV.new(Rbbt.files.databases.entrez.gene_info, options)
     tsv.key_field = "Entrez Gene ID"
     tsv.fields    = ["Native ID"]
     tsv
@@ -27,7 +27,7 @@ module Entrez
     taxs = taxs.collect{|t| t.to_s}
     options.merge! :grep => taxs
 
-    TSV.new(Rbbt.find_datafile('gene2pubmed'), options)
+    TSV.new(Rbbt.files.databases.entrez.gene2pubmed, options)
   end
   
   class Gene

@@ -4,9 +4,8 @@ require 'rbbt-util'
 # now all it does is provide a translation form id to the actual names.
 module GO
 
-  Rbbt.add_datafiles :gene_ontology => ['databases/GO', 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo'],
-    :goslim_generic => ['databases/GO', 'http://www.geneontology.org/GO_slims/goslim_generic.obo']
-
+  Rbbt.claim :gene_ontology, 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo', 'databases/GO'
+  Rbbt.claim :goslim_generic, 'http://www.geneontology.org/GO_slims/goslim_generic.obo', 'databases/GO'
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
   TSV_GENE_ONTOLOGY = File.join(TSV.cachedir, 'gene_ontology')

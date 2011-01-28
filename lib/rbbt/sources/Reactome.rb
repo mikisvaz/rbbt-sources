@@ -2,7 +2,7 @@ require 'rbbt-util'
 
 module Reactome
 
-  Rbbt.add_datafiles "Reactome" => ['Reactome', 
+  Rbbt.claim "Reactome", 
     Proc.new do
       headers = ["Uniprot ID#1", "Ensembl Gene ID#2","Entrez Gene ID#1", "Uniprot ID#2", "Ensembl Gene ID#2", "Entrez Gene ID#2" , "Type", "Reaction", "PMID"]
 
@@ -11,6 +11,6 @@ module Reactome
       tsv.fields    = headers
 
       tsv.to_s
-    end
+    end, 'Reactome'
   ]
 end

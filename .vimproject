@@ -9,8 +9,10 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    entrez.rb
    go.rb
    gscholar.rb
-   organism.rb
    pubmed.rb
+
+   organism.rb
+
    polysearch.rb
    CTCAE.rb
    COSTART.rb
