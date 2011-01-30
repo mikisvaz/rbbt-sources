@@ -9,15 +9,23 @@ module Organism
     File.join(Rbbt.datadir, 'organisms', org)
   end 
 
-  def self.normalize(org, list, options = {})
-    options = Misc.add_defaults options, :persistence => true
+  def self.normalize(org, list, field = nil, others = nil, options = {})
+    return [] if list.nil? or list.empty?
+    options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
+    double = Misc.process_options options, :double
+    
     if Array === list
-      return [] if list.empty?
-      TSV.index(Organism.identifiers(org), options).values_at(*list).collect{|r| r ?  r.first : nil}
+      if double
+        index.values_at *list
+      else
+        index.values_at(*list).collect{|e| Misc.first e}
+      end
     else
-      return [] if list.nil?
-      r = TSV.index(Organism.identifiers(org), options)[list]
-      r.nil? ? nil : r.first
+      if double
+        index[list]
+      else
+        index[list].first
+      end
     end
   end
 

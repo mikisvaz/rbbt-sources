@@ -18,7 +18,7 @@ class TestEntrez < Test::Unit::TestCase
     tax   = $yeast_tax
 
     data = Entrez.entrez2pubmed(tax)
-    assert(data['850320'].include? '15102838') 
+    assert(data['850320'].include? '1574125') 
   end
 
   def test_getonline
