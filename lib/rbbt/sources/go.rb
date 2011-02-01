@@ -8,7 +8,7 @@ module GO
   Rbbt.claim :goslim_generic, 'http://www.geneontology.org/GO_slims/goslim_generic.obo', 'databases/GO'
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
-  TSV_GENE_ONTOLOGY = File.join(TSV.cachedir, 'gene_ontology')
+  TSV_GENE_ONTOLOGY = File.join(Persistence.cachedir, 'gene_ontology')
 
   # This method needs to be called before any translations can be made, it is
   # called automatically the first time the id2name method is called. It loads
