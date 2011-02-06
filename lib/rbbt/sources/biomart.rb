@@ -27,7 +27,8 @@ module BioMart
   EOT
    
   def self.set_archive(date)
-    @archive_url = BIOMART_URL.sub(/www\.biomar\./, date + '.archive.ensemble')
+    @archive_url = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
+    ddd "New url #{ @archive_url }"
   end
 
   def self.unset_archive

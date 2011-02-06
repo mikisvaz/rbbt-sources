@@ -8,6 +8,7 @@ $native = "SGD ID"
 $url = "ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"
 $biomart_db = 'hsapiens_gene_ensembl'
 $biomart_main = ['Entrez Gene ID', 'entrezgene']
+$biomart_ensembl = ['Ensemble Gene ID', 'ensembl_gene_id']
 $biomart_lexicon = [ 
   [ 'Associated Gene Name' , "external_gene_id"], 
   [ 'HGNC symbol', "hgnc_symbol"  ],
@@ -106,7 +107,7 @@ end
 
 file 'gene_positions' do |t|
   BioMart.set_archive('may2009')
-  positions = BioMart.tsv($biomart_db, $biomart_main, $biomart_positions)
+  positions = BioMart.tsv($biomart_db, $biomart_ensembl, $biomart_positions, [])
   BioMart.unset_archive
 
   Open.write(t.name, positions.to_s)

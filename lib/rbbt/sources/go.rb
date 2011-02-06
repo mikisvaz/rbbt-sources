@@ -15,8 +15,9 @@ module GO
   # the gene_ontology.obo file and extracts all the fields, although right now,
   # only the name field is used.
   def self.init
-    info = TCHash.new(TSV_GENE_ONTOLOGY, true)
-    File.open(Rbbt.find_datafile('gene_ontology')).read.split(/\[Term\]/).each{|term| 
+    init = Persistence.persist_tsv('gene_ontology', :Misc) do 
+      info = {}
+      File.open(Rbbt.files.databases.GO.gene_ontology).read.split(/\[Term\]/).each{|term| 
         term_info = {}
 
         term.split(/\n/). select{|l| l =~ /:/}.each{|l| 
@@ -32,12 +33,12 @@ module GO
         next if term_info["id"].nil?
         info[term_info["id"]] = term_info
       }
-    info.close
+      info
+    end
   end
 
   def self.info
-    self.init unless File.exists? TSV_GENE_ONTOLOGY
-    TCHash.get(TSV_GENE_ONTOLOGY)
+    self.init
   end
 
   def self.goterms

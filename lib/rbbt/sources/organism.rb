@@ -9,11 +9,29 @@ module Organism
     File.join(Rbbt.datadir, 'organisms', org)
   end 
 
-  def self.normalize(org, list, field = nil, others = nil, options = {})
+  def self.attach_translations(org, tsv, target = nil, fields = nil, options = {})
+    Log.high "Attaching Translations for #{ org.inspect }, target #{target.inspect}, fields #{fields.inspect}"
+    options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
+    double = Misc.process_options options, :double
+   
+    options.merge :target => target unless target.nil?
+    options.merge :fields => fields unless fields.nil?
+
+    index = identifiers(org).tsv :key => target, :fields => fields, :persistence => true
+
+    tsv.attach index, [:key]
+  end
+
+  def self.normalize(org, list, target = nil, fields = nil, options = {})
     return [] if list.nil? or list.empty?
     options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
     double = Misc.process_options options, :double
-    
+   
+    options.merge :target => target unless target.nil?
+    options.merge :fields => fields unless fields.nil?
+
+    index = identifiers(org).index options
+
     if Array === list
       if double
         index.values_at *list
