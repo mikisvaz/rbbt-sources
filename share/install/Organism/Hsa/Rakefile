@@ -8,7 +8,7 @@ $native = "SGD ID"
 $url = "ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"
 $biomart_db = 'hsapiens_gene_ensembl'
 $biomart_main = ['Entrez Gene ID', 'entrezgene']
-$biomart_ensembl = ['Ensemble Gene ID', 'ensembl_gene_id']
+$biomart_ensembl = ['Ensembl Gene ID', 'ensembl_gene_id']
 $biomart_lexicon = [ 
   [ 'Associated Gene Name' , "external_gene_id"], 
   [ 'HGNC symbol', "hgnc_symbol"  ],
