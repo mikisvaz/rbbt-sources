@@ -7,10 +7,10 @@ def tsv_file(url, native, extra, options = {})
 
   case
   when Array === native
-    options = Misc.add_defaults options, :native => native.last 
+    options = Misc.add_defaults options, :key => native.last 
     key_field = native.first
   when (String === native or Integer === native)
-    options = Misc.add_defaults options, :native => native
+    options = Misc.add_defaults options, :key => native
     key_field = nil
   else
     key_field = nil
@@ -18,10 +18,10 @@ def tsv_file(url, native, extra, options = {})
 
   case
   when (Array === extra and Array === extra.first)
-    options = Misc.add_defaults options, :extra => extra.collect{|e| e.last}
+    options = Misc.add_defaults options, :fields => extra.collect{|e| e.last}
     fields = extra.collect{|e| e.first}
   when (Array === extra and not Array === extra.first)
-    options = Misc.add_defaults options, :extra => extra
+    options = Misc.add_defaults options, :fields => extra
     fields = (1..extra.length).to_a.collect{|i| "Field#{i}"}
   else
     fields = nil

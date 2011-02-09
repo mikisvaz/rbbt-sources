@@ -17,7 +17,7 @@ module GO
   def self.init
     init = Persistence.persist_tsv('gene_ontology', :Misc) do 
       info = {}
-      File.open(Rbbt.files.databases.GO.gene_ontology).read.split(/\[Term\]/).each{|term| 
+      Rbbt.files.databases.GO.gene_ontology.read.split(/\[Term\]/).each{|term| 
         term_info = {}
 
         term.split(/\n/). select{|l| l =~ /:/}.each{|l| 

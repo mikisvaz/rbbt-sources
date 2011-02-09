@@ -132,7 +132,11 @@ module Entrez
     when Entrez::Gene === gene
       gene_text = gene.text
     when String === gene || Fixnum === gene
-      gene_text =  get_gene(gene).text
+      begin
+        gene_text =  get_gene(gene).text
+      rescue CMD::CMDError
+        return 0
+      end
     else
       return 0
     end

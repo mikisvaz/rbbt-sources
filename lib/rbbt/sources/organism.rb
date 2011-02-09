@@ -58,7 +58,7 @@ module Organism
   end
 
   def self.name(organism)
-    Open.read(Organism.scientific_name(organism)).strip
+    Organism.scientific_name(organism).read.strip
   end
 
   def self.organism(name)

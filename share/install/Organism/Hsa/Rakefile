@@ -70,7 +70,7 @@ end
 
 file 'lexicon' do |t|
   lexicon = tsv_file('http://www.genenames.org/cgi-bin/hgnc_downloads.cgi?title=HGNC+output+data&hgnc_dbtag=on&col=gd_hgnc_id&col=gd_app_sym&col=gd_app_name&col=gd_prev_sym&col=gd_prev_name&col=gd_aliases&col=gd_name_aliases&col=gd_pub_acc_ids&status=Approved&status_opt=2&level=pri&=on&where=&order_by=gd_app_sym_sort&limit=&format=text&submit=submit&.cgifields=&.cgifields=level&.cgifields=chr&.cgifields=status&.cgifields=hgnc_dbtag',
-                     "HGNC ID", nil, :flatten => true, :header_hash => '')
+                     "HGNC ID", nil, :type => :flat, :header_hash => '')
   merge_biomart lexicon, $biomart_db, $biomart_main, $biomart_lexicon, "HGNC ID"
 
   File.open(t.name, 'w') do |f| f.puts lexicon end
@@ -89,7 +89,7 @@ end
 
 file 'gene_go' do |t|
   url = "http://cvsweb.geneontology.org/cgi-bin/cvsweb.cgi/go/gene-associations/gene_association.goa_human.gz?rev=HEAD"
-  tsv = TSV.new(Open.open(url, :gzip => true), :native => 2, :extra => 4)
+  tsv = TSV.new(Open.open(url, :gzip => true), :key => 2, :fields => 4)
 
   index = TSV.index(Organism::Hsa.identifiers, :persistence => true)
   new = TSV.new({})

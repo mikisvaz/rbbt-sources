@@ -40,7 +40,7 @@ class TestEntrez < Test::Unit::TestCase
 
   def test_similarity
     assert(Entrez.gene_text_similarity(9129, "PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)") > 0)
-    assert_equal(0, Entrez.gene_text_similarity("NON EXISTEN GENEID", "PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)"))
+    assert_equal(0, Entrez.gene_text_similarity("NON EXISTENT GENEID", "PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)"))
   end
 
 end
