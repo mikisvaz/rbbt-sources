@@ -29,7 +29,7 @@ def tsv_file(url, native, extra, options = {})
 
   tsv = TSV.new(Open.open(url), options)
   tsv.key_field ||= key_field
-  tsv.fields ||= fields
+  tsv.fields    ||= fields
   tsv
 end
 

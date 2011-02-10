@@ -9,7 +9,7 @@ module Entrez
   Rbbt.claim "gene2pubmed", 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz', 'databases/entrez' 
 
   def self.entrez2native(taxs, options = {})
-    options = Misc.add_defaults options, :key => 1, :fields => 6, :persistence => true, :merge => true
+    options = Misc.add_defaults options, :key => 1, :fields => 5, :persistence => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs.collect{|t| "^#{ t }"}

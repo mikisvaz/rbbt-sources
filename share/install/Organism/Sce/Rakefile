@@ -17,9 +17,9 @@ end
 file 'lexicon' do |t|
   lexicon = tsv_file($url, [$native, 0], [3, 4, 5], :keep_empty => true)
 
-  merge_entrez(lexicon, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tS0/)})
+  lexicon = merge_entrez(lexicon, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tSGD:S0/)})
 
-  merge_biomart(lexicon, $biomart_db, $biomart_main, [['Interpro Description' , "interpro_description"]])
+  lexicon = merge_biomart(lexicon, $biomart_db, $biomart_main, [['Interpro Description' , "interpro_description"]])
 
   lexicon = lexicon.slice(lexicon.fields - ["Entrez Gene ID"])
 
@@ -29,9 +29,9 @@ end
 file 'identifiers' do |t|
   identifiers = tsv_file($url, [$native, 0], [["Ensembl Gene ID", 3], ["Associated Gene Name",4], ["Associated Gene Name Alias", 5]], :keep_empty => true)
 
-  merge_entrez(identifiers, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tSGD:S0/)})
+  identifiers = merge_entrez(identifiers, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tSGD:S0/)})
 
-  merge_biomart(identifiers, $biomart_db, $biomart_main,
+  identifiers = merge_biomart(identifiers, $biomart_db, $biomart_main,
                 [['Associated Gene Name' , "external_gene_id"], 
                   ['Ensembl Gene ID', "ensembl_gene_id"  ],
                   ['Ensembl Protein ID', "ensembl_peptide_id"  ],
