@@ -11,13 +11,12 @@ module Organism
 
   def self.attach_translations(org, tsv, target = nil, fields = nil, options = {})
     Log.high "Attaching Translations for #{ org.inspect }, target #{target.inspect}, fields #{fields.inspect}"
-    options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
-    double = Misc.process_options options, :double
+    options = Misc.add_defaults options, :persistence => true, :case_insensitive => true
    
-    options.merge :target => target unless target.nil?
-    options.merge :fields => fields unless fields.nil?
+    options.merge! :key    => target unless target.nil?
+    options.merge! :fields => fields unless fields.nil?
 
-    index = identifiers(org).tsv :key => target, :fields => fields, :persistence => true
+    index = identifiers(org).tsv options
 
     tsv.attach index, [:key]
   end

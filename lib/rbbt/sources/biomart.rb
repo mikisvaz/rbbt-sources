@@ -28,10 +28,11 @@ module BioMart
    
   def self.set_archive(date)
     @archive_url = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
-    ddd "New url #{ @archive_url }"
+    Log.debug "Using Archive URL #{ @archive_url }"
   end
 
   def self.unset_archive
+    Log.debug "Restoring current version URL #{BIOMART_URL}"
     @archive_url = nil
   end
 
@@ -42,7 +43,7 @@ module BioMart
   
     query = @@biomart_query_xml.dup
     query.sub!(/<!--DATABASE-->/,database)
-    query.sub!(/<!--FILTERS-->/, filters.collect{|name| "<Filter name = \"#{ name }\" excluded = \"0\"/>"}.join("\n") )
+    query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{v * ","}\"/>" }.join("\n") )
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
@@ -66,7 +67,7 @@ module BioMart
         value = parts.shift
         data[main][name] ||= []
         next if value.nil? or value.empty?
-        if data[main][name]
+        if data[main][name].empty?
           data[main][name] = [value]
         else
           data[main][name] << value unless data[main][name].include? value
