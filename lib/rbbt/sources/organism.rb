@@ -11,8 +11,8 @@ module Organism
 
   def self.attach_translations(org, tsv, target = nil, fields = nil, options = {})
     Log.high "Attaching Translations for #{ org.inspect }, target #{target.inspect}, fields #{fields.inspect}"
-    options = Misc.add_defaults options, :persistence => true, :case_insensitive => true
-   
+    options = Misc.add_defaults options, :persistence => true, :case_insensitive => false
+
     options.merge! :key    => target unless target.nil?
     options.merge! :fields => fields unless fields.nil?
 
@@ -25,7 +25,7 @@ module Organism
     return [] if list.nil? or list.empty?
     options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
     double = Misc.process_options options, :double
-   
+
     options.merge :target => target unless target.nil?
     options.merge :fields => fields unless fields.nil?
 
@@ -65,9 +65,9 @@ module Organism
       organism == name or Organism.name(organism) =~ /#{ name }/i
     }.first
   end
-  
+
   extend DataModule
-  
+
   Hsa = with_key('Hsa')
   Sce = with_key('Sce')
 end
