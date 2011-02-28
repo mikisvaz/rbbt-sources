@@ -24,6 +24,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
     helpers.rb
    }
    Organism=Organism{
+    organism_helpers.rb
     Hsa=Hsa{
      Rakefile
     }

@@ -37,6 +37,7 @@ module BioMart
   end
 
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
+    repeats = true
     attrs   ||= []
     filters ||= ["with_#{main}"]
     data    ||= {}
@@ -70,7 +71,7 @@ module BioMart
         if data[main][name].empty?
           data[main][name] = [value]
         else
-          data[main][name] << value unless data[main][name].include? value
+          data[main][name] << value unless repeats or data[main][name].include?(value)
         end
       }
     }

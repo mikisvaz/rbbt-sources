@@ -29,6 +29,7 @@ module Organism
     options.merge! :target => target unless target.nil?
     options.merge! :fields => fields unless fields.nil?
 
+    ddd options
     index = identifiers(org).index options
 
     if Array === list
