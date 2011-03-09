@@ -1,8 +1,11 @@
 require 'rbbt-util'
-require 'rbbt/util/data_module'
+require 'rbbt/util/resource'
 
 
 module Organism
+  extend Resource
+  relative_to Rbbt, "share/organisms"
+
   class OrganismNotProcessedError < StandardError; end
 
   def self.datadir(org)
@@ -29,7 +32,6 @@ module Organism
     options.merge! :target => target unless target.nil?
     options.merge! :fields => fields unless fields.nil?
 
-    ddd options
     index = identifiers(org).index options
 
     if Array === list
@@ -54,7 +56,7 @@ module Organism
   end
 
   def self.organisms
-    Dir.glob(File.join(PKGData.sharedir_for_file(__FILE__), 'install/Organism/*/Rakefile')).collect{|f| File.basename(File.dirname(f))}
+    Dir.glob(File.join(Rbbt.share.organisms.find, '*')).collect{|f| File.basename(f)}
   end
 
   def self.name(organism)
@@ -67,8 +69,44 @@ module Organism
     }.first
   end
 
-  extend DataModule
+  def self.find_gene_at(org, chromosome, positions)
+    chromosome = chromosome.to_s
+    chromosome_bed = Persistence.persist(Organism.gene_positions(org), "Gene_positions[#{chromosome}]", :fwt, :chromosome => chromosome, :range => true) do |file, options|
+      tsv = file.tsv(:persistence => false, :type => :list)
+      tsv.select("Chromosome Name" => chromosome).collect do |gene, values|
+        [gene, values.values_at("Gene Start", "Gene End").collect{|p| p.to_i}]
+      end
+    end
 
-  Hsa = with_key('Hsa')
-  Sce = with_key('Sce')
+    if Array === positions
+      positions.collect{|position| chromosome_bed[position]}.collect
+    else
+      chromosome_bed[positions]
+    end
+  end
+
+  def self.find_transcript_at(org, chromosome, positions)
+    chromosome = chromosome.to_s
+    chromosome_bed = Persistence.persist(Organism.transcript_positions(org), "Transcript_positions[#{chromosome}]", :fwt, :chromosome => chromosome, :range => true) do |file, options|
+      tsv = file.tsv(:persistence => false, :type => :list)
+      tsv.select("Chromosome Name" => chromosome).collect do |transcript, values|
+        [transcript, values.values_at("Transcript Start", "Transcript End").collect{|p| p.to_i}]
+      end
+    end
+
+    if Array === positions
+      positions.collect{|position| chromosome_bed[position]}.collect
+    else
+      chromosome_bed[positions]
+    end
+  end
+
+
+  ["Hsa", "Sce"].each do |organism|
+    rakefile = Rbbt["share/install/Organism/#{ organism }/Rakefile"]
+    rakefile.lib_dir = Resource.caller_lib_dir __FILE__
+    rakefile.pkgdir = 'phgx'
+    Organism[organism].define_as_rake rakefile
+    module_eval "#{ organism } = with_key '#{organism}'"
+  end
 end

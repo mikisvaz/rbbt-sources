@@ -1,4 +1,4 @@
-require 'rbbt-util'
+require 'rbbt/util/tsv'
 require 'rbbt/util/log'
 
 # This module interacts with BioMart. It performs queries to BioMart and
@@ -40,8 +40,9 @@ module BioMart
     repeats = true
     attrs   ||= []
     filters ||= ["with_#{main}"]
-    data    ||= {}
-  
+
+    open_options = Misc.add_defaults open_options, :keep_empty => false
+
     query = @@biomart_query_xml.dup
     query.sub!(/<!--DATABASE-->/,database)
     query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{v * ","}\"/>" }.join("\n") )
@@ -58,23 +59,15 @@ module BioMart
       raise BioMart::QueryError, response
     end
 
-    response.each_line{|l|
-      parts = l.chomp.split(/\t/)
-      main = parts.shift
-      next if main.nil? || main.empty?
+    response = TSV.new(StringIO.new(response), open_options.merge(:merge => true))
+    response.key_field = main
+    response.fields = attrs
 
-      data[main] ||= {}
-      attrs.each{|name|
-        value = parts.shift
-        data[main][name] ||= []
-        next if value.nil? or value.empty?
-        if data[main][name].empty?
-          data[main][name] = [value]
-        else
-          data[main][name] << value unless repeats or data[main][name].include?(value)
-        end
-      }
-    }
+    if data.nil?
+      data = response
+    else
+      data.attach response
+    end
 
     data
   end
@@ -98,8 +91,7 @@ module BioMart
   def self.query(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     open_options = Misc.add_defaults open_options, :nocache => false
     attrs   ||= []
-    data    ||= {}
-    
+      
     Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
 
     max_items = 2
@@ -127,12 +119,7 @@ module BioMart
 
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     codes = attrs.collect{|attr| attr[1]}
-    data = query(database, main.last, codes, filters, data, open_options)
-    tsv = TSV.new({})
-
-    data.each do |key, info|
-      tsv[key] = info.values_at(*codes)
-    end
+    tsv = query(database, main.last, codes, filters, data, open_options)
 
     tsv.key_field = main.first
     tsv.fields    = attrs.collect{|attr| attr.first} 

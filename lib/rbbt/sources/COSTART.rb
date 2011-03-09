@@ -2,8 +2,7 @@ require 'rbbt-util'
 
 module COSTART
 
-  Rbbt.claim "COSTART", 
-    Proc.new{
+  Rbbt.share.databases.COSTART.COSTART.define_as_proc do 
       terms = ["#COSTART Terms"]
       Open.open('http://hedwig.mgh.harvard.edu/biostatistics/files/costart.html').lines.each do |line|
         puts line
@@ -12,5 +11,5 @@ module COSTART
       end
       
       terms * "\n"
-    }, 'COSTART'
+  end
 end

@@ -4,8 +4,8 @@ require 'rbbt-util'
 # now all it does is provide a translation form id to the actual names.
 module GO
 
-  Rbbt.claim :gene_ontology, 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo', 'databases/GO'
-  Rbbt.claim :goslim_generic, 'http://www.geneontology.org/GO_slims/goslim_generic.obo', 'databases/GO'
+  Rbbt.share.databases.GO.gene_ontology.define_as_url 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo'
+  Rbbt.share.databases.GO.gslim_generic.define_as_url 'http://www.geneontology.org/GO_slims/goslim_generic.obo'
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
   TSV_GENE_ONTOLOGY = File.join(Persistence.cachedir, 'gene_ontology')
@@ -17,7 +17,7 @@ module GO
   def self.init
     init = Persistence.persist_tsv('gene_ontology', :Misc) do 
       info = {}
-      Rbbt.files.databases.GO.gene_ontology.read.split(/\[Term\]/).each{|term| 
+      Rbbt.share.databases.GO.gene_ontology.read.split(/\[Term\]/).each{|term| 
         term_info = {}
 
         term.split(/\n/). select{|l| l =~ /:/}.each{|l| 
