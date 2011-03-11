@@ -1,5 +1,6 @@
 require 'rbbt/util/tsv'
 require 'rbbt/util/log'
+require 'cgi'
 
 # This module interacts with BioMart. It performs queries to BioMart and
 # synthesises a hash with the results. Note that this module connects to the
@@ -41,11 +42,11 @@ module BioMart
     attrs   ||= []
     filters ||= ["with_#{main}"]
 
-    open_options = Misc.add_defaults open_options, :keep_empty => false
+    open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
 
     query = @@biomart_query_xml.dup
     query.sub!(/<!--DATABASE-->/,database)
-    query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{v * ","}\"/>" }.join("\n") )
+    query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{Array === v ? v * "," : v}\"/>" }.join("\n") )
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
@@ -59,7 +60,7 @@ module BioMart
       raise BioMart::QueryError, response
     end
 
-    response = TSV.new(StringIO.new(response), open_options.merge(:merge => true))
+    response = TSV.new(StringIO.new(response), open_options)
     response.key_field = main
     response.fields = attrs
 

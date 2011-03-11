@@ -33,6 +33,15 @@ $biomart_transcript_sequence = [
   ['cDNA','cdna'],
 ]
 
+$biomart_transcript_3utr = [
+  ["3' UTR", '3utr'],
+]
+
+$biomart_transcript_5utr = [
+  ["5' UTR", '5utr'],
+]
+
+
 $biomart_protein_sequence = [
   ['Protein Sequence','peptide'],
 ]
@@ -45,11 +54,10 @@ $biomart_transcript_exons = [
 ]
 
 $biomart_exons = [
-  $biomart_ensembl_exon,
+  $biomart_ensembl_gene,
+  ['Exon Strand','strand'],
   ['Exon Chr Start','exon_chrom_start'],
   ['Exon Chr End','exon_chrom_end'],
-  ['Exon Strand','strand'],
-  ['Constitutive Exon','is_constitutive'],
 ]
 
 #{{{ Variations
@@ -106,16 +114,45 @@ file 'identifiers' do |t|
 end
 
 file 'gene_transcripts' do |t|
-  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], :keep_empty => tru)
+  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat)
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
 
 file 'transcripts' => 'gene_positions' do |t|
-  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [])
+  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list)
   transcripts.attach TSV.new('gene_positions'), "Chromosome Name"
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
+end
+
+file 'transcript_3utr' do |t|
+  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :single)
+
+  File.open(t.name, 'w') do |f| 
+    f.puts "#: :type=:single#cast=to_i"
+    f.puts "#Ensembl Transcript ID\t3' UTR Length"
+    utrs.each do |seq,trans|
+      trans.each do |tran|
+        f.puts [tran, seq.length] * "\t"
+      end
+    end
+  end
+end
+
+
+file 'transcript_5utr' do |t|
+  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :single)
+
+  File.open(t.name, 'w') do |f| 
+    f.puts "#: :type=:single#cast=to_i"
+    f.puts "#Ensembl Transcript ID\t5' UTR Length"
+    utrs.each do |seq,trans|
+      trans.each do |tran|
+        f.puts [tran, seq.length] * "\t"
+      end
+    end
+  end
 end
 
 file 'gene_positions' do |t|
@@ -125,29 +162,38 @@ file 'gene_positions' do |t|
 end
 
 file 'gene_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [])
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :single, :merge => false)
 
-  # The output is swapped! Gene sequence is first and then ensembl gene id.
-  kf = sequences.key_field
-  sequences.key_field =  sequences.fields.first
-  sequences.fields = [kf]
-
-  File.open(t.name, 'w') do |f| f.puts sequences.reorder(kf).to_s end
+  File.open(t.name, 'w') do |f| 
+    f.puts "#: :type=:single"
+    f.puts "#Ensembl Gene ID\tProtein Sequence"
+    sequences.each do |seq, gene|
+      f.write gene 
+      f.write "\t" 
+      f.write seq
+      f.write "\n"
+    end
+  end
 end
 
 file 'protein_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [])
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :single, :merge => false)
 
-  # The output is swapped! Gene sequence is first and then ensembl protein id.
-  kf = sequences.key_field
-  sequences.key_field = sequences.fields.first
-  sequences.fields = [kf]
-
-  File.open(t.name, 'w') do |f| f.puts sequences.reorder(kf).to_s end
+  File.open(t.name, 'w') do |f| 
+    f.puts "#: :type=:single"
+    f.puts "#Ensembl Protein ID\tProtein Sequence"
+    sequences.each do |seq, gene|
+      f.write gene 
+      f.write "\t" 
+      f.write seq
+      f.write "\n"
+    end
+  end
 end
 
-file 'exons' do |t|
-  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [])
+file 'exons' => 'gene_positions' do |t|
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list)
+  exons.attach TSV.new('gene_positions'), "Chromosome Name"
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
@@ -159,34 +205,42 @@ file 'transcript_exons' do |t|
 end
 
 file 'transcript_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [])
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :single, :merge => false)
 
-  # The output is swapped! Gene sequence is first and then ensembl gene id.
-  kf = sequences.key_field
-  sequences.key_field =  sequences.fields.first
-  sequences.fields = [kf]
-
-  File.open(t.name, 'w') do |f| f.puts sequences.reorder(kf).to_s end
+  File.open(t.name, 'w') do |f| 
+    f.puts "#: :type=:single"
+    f.puts "#Ensembl Transcript ID\tProtein Sequence"
+    sequences.each do |seq, gene|
+      f.write gene 
+      f.write "\t" 
+      f.write seq
+      f.write "\n"
+    end
+  end
 end
 
 
+$biomart_variation_filter = ["snptype_filters", "COMPLEX_INDEL,COMPLEX_INDEL&NMD_TRANSCRIPT,COMPLEX_INDEL&SPLICE_SITE,ESSENTIAL_SPLICE_SITE&INTRONIC,ESSENTIAL_SPLICE_SITE&INTRONIC&NMD_TRANSCRIPT,FRAMESHIFT_CODING,FRAMESHIFT_CODING&NMD_TRANSCRIPT,FRAMESHIFT_CODING&SPLICE_SITE,FRAMESHIFT_CODING&SPLICE_SITE&NMD_TRANSCRIPT,NON_SYNONYMOUS_CODING,NON_SYNONYMOUS_CODING&NMD_TRANSCRIPT,NON_SYNONYMOUS_CODING&SPLICE_SITE,NON_SYNONYMOUS_CODING&SPLICE_SITE&NMD_TRANSCRIPT,REGULATORY_REGION,SPLICE_SITE&3PRIME_UTR,SPLICE_SITE&3PRIME_UTR&NMD_TRANSCRIPT,SPLICE_SITE&5PRIME_UTR,SPLICE_SITE&5PRIME_UTR&NMD_TRANSCRIPT,SPLICE_SITE&INTRONIC,SPLICE_SITE&INTRONIC&NMD_TRANSCRIPT,SPLICE_SITE&SYNONYMOUS_CODING,SPLICE_SITE&SYNONYMOUS_CODING&NMD_TRANSCRIPT,STOP_GAINED,STOP_GAINED&FRAMESHIFT_CODING,STOP_GAINED&FRAMESHIFT_CODING&NMD_TRANSCRIPT,STOP_GAINED&NMD_TRANSCRIPT,STOP_GAINED&SPLICE_SITE,STOP_GAINED&SPLICE_SITE&NMD_TRANSCRIPT,STOP_LOST,STOP_LOST&NMD_TRANSCRIPT,STOP_LOST&SPLICE_SITE,STOP_LOST&SPLICE_SITE&NMD_TRANSCRIPT,SYNONYMOUS_CODING,SYNONYMOUS_CODING&NMD_TRANSCRIPT"]
+#$biomart_variation_filter = ["snptype_filters", "COMPLEX_INDEL,SYNONYMOUS_CODING"]
+$biomart_variation_filter = ["snptype_filters", 'COMPLEX_INDEL&NMD_TRANSCRIPT']
+
 file 'germline_variations' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variations, [], nil, :keep_empty => true)
+  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variations, [], nil, :keep_empty => true, :type => :list, :merge => false)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
 file 'germline_variation_positions' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variation_positions, [], nil, :keep_empty => true)
+  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variation_positions, [], nil, :keep_empty => true, :type => :list, :merge => false)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
 file 'somatic_variations' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variations, [], nil, :keep_empty => true)
+  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variations, [], nil, :keep_empty => true, :type => :list, :merge => false)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
 file 'somatic_variation_positions' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variation_positions, [], nil, :keep_empty => true)
+  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variation_positions, [], nil, :keep_empty => true, :type => :list, :merge => false)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
@@ -199,4 +253,45 @@ file 'gene_pmids' do |t|
   Open.write(t.name, text)
 end
 
+file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts transcript_exons) do |t|
+  require 'rbbt/sources/organism/sequence'
 
+  exons = TSV.new('exons', :persistence => true)
+  exon_transcripts = TSV.new('transcript_exons', :double, :key => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true, :persistence => true )
+  gene_transcripts = TSV.new('gene_transcripts', :flat, :persistence => true )
+  transcript_info = TSV.new('transcripts', :list, :persistence => true )
+  transcript_exons = TSV.new('transcript_exons', :double, :fields => ["Ensembl Exon ID","Exon Rank in Transcript"], :persistence => true )
+
+
+  string = "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
+  exons.each do |exon, info|
+    gene, start, finish, strand, chr = info
+
+    transcripts = Organism::Hsa.coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
+
+    transcript_offsets = {}
+    transcripts.each do |transcript|
+      offset = Organism::Hsa.exon_offset_in_transcript(exon, transcript, exons, transcript_exons)
+      transcript_offsets[transcript] = offset unless offset.nil?
+    end
+    
+    string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
+  end
+
+  Open.write(t.name, string)
+end
+
+rule /may2009\/(.*)/ do |t|
+  t.name =~ /may2009\/(.*)/ 
+  task = $1
+  old_pwd = FileUtils.pwd
+  begin
+    FileUtils.mkdir 'may2009' unless File.exists? 'may2009'
+    FileUtils.cd File.join('may2009')
+    BioMart.set_archive 'may2009'
+    Rake::Task[task].invoke
+    BioMart.unset_archive 
+  ensure
+    FileUtils.cd old_pwd
+  end
+end

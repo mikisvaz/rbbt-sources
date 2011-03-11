@@ -69,39 +69,6 @@ module Organism
     }.first
   end
 
-  def self.find_gene_at(org, chromosome, positions)
-    chromosome = chromosome.to_s
-    chromosome_bed = Persistence.persist(Organism.gene_positions(org), "Gene_positions[#{chromosome}]", :fwt, :chromosome => chromosome, :range => true) do |file, options|
-      tsv = file.tsv(:persistence => false, :type => :list)
-      tsv.select("Chromosome Name" => chromosome).collect do |gene, values|
-        [gene, values.values_at("Gene Start", "Gene End").collect{|p| p.to_i}]
-      end
-    end
-
-    if Array === positions
-      positions.collect{|position| chromosome_bed[position]}.collect
-    else
-      chromosome_bed[positions]
-    end
-  end
-
-  def self.find_transcript_at(org, chromosome, positions)
-    chromosome = chromosome.to_s
-    chromosome_bed = Persistence.persist(Organism.transcript_positions(org), "Transcript_positions[#{chromosome}]", :fwt, :chromosome => chromosome, :range => true) do |file, options|
-      tsv = file.tsv(:persistence => false, :type => :list)
-      tsv.select("Chromosome Name" => chromosome).collect do |transcript, values|
-        [transcript, values.values_at("Transcript Start", "Transcript End").collect{|p| p.to_i}]
-      end
-    end
-
-    if Array === positions
-      positions.collect{|position| chromosome_bed[position]}.collect
-    else
-      chromosome_bed[positions]
-    end
-  end
-
-
   ["Hsa", "Sce"].each do |organism|
     rakefile = Rbbt["share/install/Organism/#{ organism }/Rakefile"]
     rakefile.lib_dir = Resource.caller_lib_dir __FILE__
@@ -109,4 +76,7 @@ module Organism
     Organism[organism].define_as_rake rakefile
     module_eval "#{ organism } = with_key '#{organism}'"
   end
+
 end
+
+
