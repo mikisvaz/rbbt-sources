@@ -127,7 +127,7 @@ file 'transcripts' => 'gene_positions' do |t|
 end
 
 file 'transcript_3utr' do |t|
-  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :single)
+  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :flat, :merge => true)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single#cast=to_i"
@@ -142,7 +142,7 @@ end
 
 
 file 'transcript_5utr' do |t|
-  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :single)
+  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :merge => true)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single#cast=to_i"
@@ -162,33 +162,38 @@ file 'gene_positions' do |t|
 end
 
 file 'gene_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :single, :merge => false)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :flat, :merge => true)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
     f.puts "#Ensembl Gene ID\tProtein Sequence"
-    sequences.each do |seq, gene|
-      f.write gene 
-      f.write "\t" 
-      f.write seq
-      f.write "\n"
+    sequences.each do |seq, genes|
+      genes.each do |gene|
+        f.write gene 
+        f.write "\t" 
+        f.write seq
+        f.write "\n"
+      end
     end
   end
 end
 
 file 'protein_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :single, :merge => false)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :merge => true)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
     f.puts "#Ensembl Protein ID\tProtein Sequence"
-    sequences.each do |seq, gene|
-      f.write gene 
-      f.write "\t" 
-      f.write seq
-      f.write "\n"
+    sequences.each do |seq, genes|
+      genes.each do |gene|
+        f.write gene 
+        f.write "\t" 
+        f.write seq
+        f.write "\n"
+      end
     end
   end
+
 end
 
 file 'exons' => 'gene_positions' do |t|
@@ -205,16 +210,18 @@ file 'transcript_exons' do |t|
 end
 
 file 'transcript_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :single, :merge => false)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :merge => true)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
     f.puts "#Ensembl Transcript ID\tProtein Sequence"
-    sequences.each do |seq, gene|
-      f.write gene 
-      f.write "\t" 
-      f.write seq
-      f.write "\n"
+    sequences.each do |seq, genes|
+      genes.each do |gene|
+        f.write gene 
+        f.write "\t" 
+        f.write seq
+        f.write "\n"
+      end
     end
   end
 end

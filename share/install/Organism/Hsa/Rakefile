@@ -3,7 +3,6 @@ require 'rbbt/sources/biomart'
 require 'rbbt/sources/entrez'
 require File.join(File.dirname(__FILE__), '../../lib/helpers')
 
-$namespace = "Hsa"
 $taxs = [9606]
 $scientific_name = "Homo sapiens"
 
@@ -53,4 +52,5 @@ $biomart_identifiers = [
   [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
 ]
 
+$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
 load File.join(File.dirname(__FILE__), '../organism_helpers.rb')

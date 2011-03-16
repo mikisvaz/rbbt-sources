@@ -67,7 +67,7 @@ module BioMart
     if data.nil?
       data = response
     else
-      data.attach response
+      data = data.paste response, open_options
     end
 
     data
@@ -111,7 +111,7 @@ module BioMart
 
     Log.low "Chunks: #{chunks.length}"
     chunks.each_with_index{|chunk,i|
-      Log.low "Chunk #{ i }: [#{chunk * ", "}]"
+      Log.low "Chunk #{ i + 1 } / #{chunks.length}: [#{chunk * ", "}]"
       data = get(database, main, chunk, filters, data, open_options)
     }
 
