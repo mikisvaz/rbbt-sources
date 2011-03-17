@@ -42,8 +42,6 @@ module BioMart
     attrs   ||= []
     filters ||= ["with_#{main}"]
 
-    open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
-
     query = @@biomart_query_xml.dup
     query.sub!(/<!--DATABASE-->/,database)
     query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{Array === v ? v * "," : v}\"/>" }.join("\n") )
@@ -60,14 +58,17 @@ module BioMart
       raise BioMart::QueryError, response
     end
 
-    response = TSV.new(StringIO.new(response), open_options)
-    response.key_field = main
-    response.fields = attrs
+    result_file = TmpFile.tmp_file
+    Open.write(result_file, response)
 
     if data.nil?
-      data = response
+      data = result_file
     else
-      data = data.paste response, open_options
+      new_datafile = TmpFile.tmp_file
+      TSV.paste_merge data, result_file, new_datafile
+      FileUtils.rm data
+      data = new_datafile
+      FileUtils.rm result_file
     end
 
     data
@@ -93,6 +94,8 @@ module BioMart
     open_options = Misc.add_defaults open_options, :nocache => false
     attrs   ||= []
       
+    open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
+
     Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
 
     max_items = 2
@@ -115,7 +118,13 @@ module BioMart
       data = get(database, main, chunk, filters, data, open_options)
     }
 
-    data
+    result = TSV.new(data, open_options)
+    result.key_field = main
+    result.fields = attrs
+    result.filename = "BioMart: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}"
+    
+    FileUtils.rm data
+    result
   end
 
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})

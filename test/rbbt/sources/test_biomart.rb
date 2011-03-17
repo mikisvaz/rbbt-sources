@@ -9,11 +9,13 @@ class TestBioMart < Test::Unit::TestCase
       BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],['with_unknownattr'])
     end
 
-    data = BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],[], nil, :nocache => false, :wget_options => { :quiet => false})
-    assert(data['852236']['protein_id'].include? 'CAA84864')
+    data = BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],[], nil, :nocache => false, :merge => true, :wget_options => {:quiet => false})
+    tsv = TSV.new data, :double, :merge => true
+    assert(tsv['852236'][0].include? 'CAA84864')
 
     data = BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['external_gene_id'],[], data, :nocache => false, :wget_options => { :quiet => false} )
-    assert(data['852236']['external_gene_id'].include? 'YBL044W')
+    tsv = TSV.new data, :double, :merge => true
+    assert(tsv['852236'][1].include? 'YBL044W')
   end
 
   def test_query
