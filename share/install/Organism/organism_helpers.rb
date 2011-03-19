@@ -288,14 +288,15 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   Open.write(t.name, string)
 end
 
-rule /may2009\/(.*)/ do |t|
-  t.name =~ /may2009\/(.*)/ 
-  task = $1
+rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
+  t.name =~ /([a-z]{3}[0-9]{4})\/(.*)/i
+  archive = $1
+  task    = $2
   old_pwd = FileUtils.pwd
   begin
-    FileUtils.mkdir 'may2009' unless File.exists? 'may2009'
-    FileUtils.cd File.join('may2009')
-    BioMart.set_archive 'may2009'
+    FileUtils.mkdir archive unless File.exists? archive
+    FileUtils.cd File.join(archive)
+    BioMart.set_archive archive
     Rake::Task[task].invoke
     BioMart.unset_archive 
   ensure
