@@ -5,27 +5,28 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rbbt-sources}
-  s.version = "0.2.2"
+  s.version = "0.3.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Miguel Vazquez"]
-  s.date = %q{2011-01-30}
+  s.date = %q{2011-03-19}
   s.description = %q{Data sources like PubMed, Entrez Gene, or Gene Ontology}
   s.email = %q{miguel.vazquez@fdi.ucm.es}
   s.files = [
     "lib/rbbt/sources/COSTART.rb",
     "lib/rbbt/sources/CTCAE.rb",
-    "lib/rbbt/sources/Reactome.rb",
     "lib/rbbt/sources/bibtex.rb",
     "lib/rbbt/sources/biomart.rb",
     "lib/rbbt/sources/entrez.rb",
     "lib/rbbt/sources/go.rb",
     "lib/rbbt/sources/gscholar.rb",
     "lib/rbbt/sources/organism.rb",
+    "lib/rbbt/sources/organism/sequence.rb",
     "lib/rbbt/sources/polysearch.rb",
     "lib/rbbt/sources/pubmed.rb",
     "share/install/Organism/Hsa/Rakefile",
     "share/install/Organism/Sce/Rakefile",
+    "share/install/Organism/organism_helpers.rb",
     "share/install/lib/helpers.rb"
   ]
   s.homepage = %q{http://github.com/mikisvaz/rbbt-sources}
