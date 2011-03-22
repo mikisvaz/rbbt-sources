@@ -4,6 +4,8 @@ require 'bio'
 # Sequence analyses
 module Organism
   extend WorkFlow
+  relative_to Rbbt, "share/organisms"
+  self.jobdir = Rbbt.var.organism.find
 
   def self.coding_transcripts_for_exon(org, exon, exon_transcripts, transcript_info)
     exon_transcripts ||= Organism.transcript_exons(org).tsv(:double, :key => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true, :persistence => true )
@@ -201,16 +203,59 @@ module Organism
     position_offsets
   end
 
-  task_option :org, "Organism", :string
+  task_option :organism, "Organism", :string, "Hsa"
   task_option :genomic_mutations, "Position (chr:position), Allele", :tsv
-  task :genomic_mutation_to_protein_mutation => :tsv do |org, genomic_mutations|
+  task_dependencies nil
+  task :genomic_mutations_to_genes => :tsv do |org,genomic_mutations|
+    genomic_mutations = case
+                        when TSV === genomic_mutations
+                          genomic_mutations
+                        else
+                          TSV.new StringIO.new(genomic_mutations), :list
+                        end
+    genomic_mutations.key_field = "Position"
+    genomic_mutations.fields = ["Mutation"]
+
+    positions = genomic_mutations.keys.collect{|l| l.split(":")}
+
+    step(:resources, "Load Resources")
+    genes_at_positions = Hash[*genomic_mutations.keys.zip(Organism.genes_at_genomic_positions(org, positions)).flatten]
+
+    genomic_mutations.add_field "#{org.sub(/\/.*/,'')}:Ensembl Gene ID" do |position, values|
+      genes_at_positions[position]
+    end
+
+    genomic_mutations
+  end
+
+
+  task_description <<-EOF
+Translates a collection of mutations in genomic coordinates into mutations in aminoacids for the
+protein products of transcripts including those positions.
+  EOF
+  task_option :organism, "Organism", :string, "Hsa"
+  task_option :genomic_mutations, "Position (chr:position), Allele", :tsv
+  task_dependencies nil
+  task :genomic_mutations_to_protein_mutations => :tsv do |org,genomic_mutations|
+    genomic_mutations = case
+                        when TSV === genomic_mutations
+                          genomic_mutations
+                        else
+                          TSV.new StringIO.new(genomic_mutations), :list
+                        end
+
+    genomic_mutations.key_field = "Position"
+    genomic_mutations.fields = ["Mutation"]
+
     positions = genomic_mutations.keys.collect{|l| l.split(":")}
 
     step(:prepare, "Prepare Results")
     results = TSV.new({})
     results.key_field = "Position"
-    results.fields = ["Ensembl Transcript ID", "Mutation"]
+    results.fields = ["#{org.sub(/\/.*/,'')}:Ensembl Transcript ID", "Protein Mutation"]
     results.type = :double
+    results.filename = path
+
 
     step(:resources, "Load Resources")
     transcript_sequence = Organism.transcript_sequence(org).tsv(:single, :persistence => true)
@@ -229,7 +274,6 @@ module Organism
 
       transcripts.each do |transcript, offset_info|
         offset, strand = offset_info
-        ddd strand
         begin
           codon = Organism.codon_at_transcript_position(org, transcript, offset, transcript_sequence, transcript_5utr)
         rescue
@@ -237,12 +281,9 @@ module Organism
           next
         end
 
-        ddd codon
         if not codon.nil?
           alleles.each do |allele|
-            ddd allele
             allele = Misc::BASE2COMPLEMENT[allele] if strand == -1
-            ddd allele
             change = Organism.codon_change(allele, *codon.values_at(0,1))
             pos_code = position * ":"
             mutation = [change.first, codon.last + 1, change.last] * ""
@@ -323,7 +364,7 @@ X	10085674	C	T
   #positions =  positions.select ["10:98099540"]
 
   Organism.basedir = Rbbt.tmp.organism.sequence.jobs.find :user
-  job =  Organism.job :genomic_mutation_to_protein_mutation, "Metastasis", org, positions.slice("Tumor")
+  job =  Organism.job :genomic_mutations_to_protein_mutations, "Metastasis", org, positions.slice("Tumor")
   job.run
 
   while not job.done?

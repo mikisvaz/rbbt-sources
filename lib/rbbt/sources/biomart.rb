@@ -1,3 +1,4 @@
+require 'rbbt'
 require 'rbbt/util/tsv'
 require 'rbbt/util/log'
 require 'cgi'
@@ -12,6 +13,8 @@ module BioMart
   class BioMart::QueryError < StandardError; end
 
   BIOMART_URL = 'http://biomart.org/biomart/martservice?query='
+
+  MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.yaml
 
   private
 
@@ -28,12 +31,14 @@ module BioMart
   EOT
    
   def self.set_archive(date)
+    @archive = date
     @archive_url = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
     Log.debug "Using Archive URL #{ @archive_url }"
   end
 
   def self.unset_archive
     Log.debug "Restoring current version URL #{BIOMART_URL}"
+    @archive = nil
     @archive_url = nil
   end
 
@@ -61,15 +66,16 @@ module BioMart
     result_file = TmpFile.tmp_file
     Open.write(result_file, response)
 
+    new_datafile = TmpFile.tmp_file
     if data.nil?
-      data = result_file
+      TSV.merge_rows Open.open(result_file), new_datafile
+      data = new_datafile
     else
-      new_datafile = TmpFile.tmp_file
       TSV.paste_merge data, result_file, new_datafile
       FileUtils.rm data
       data = new_datafile
-      FileUtils.rm result_file
     end
+    FileUtils.rm result_file
 
     data
   end
@@ -91,7 +97,8 @@ module BioMart
   # cause an error if the BioMart WS does not allow filtering with that
   # attribute.
   def self.query(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
-    open_options = Misc.add_defaults open_options, :nocache => false
+    open_options = Misc.add_defaults open_options, :nocache => false, :filename => nil, :field_names => nil
+    filename, field_names = Misc.process_options open_options, :filename, :field_names
     attrs   ||= []
       
     open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
@@ -118,22 +125,41 @@ module BioMart
       data = get(database, main, chunk, filters, data, open_options)
     }
 
-    result = TSV.new(data, open_options)
-    result.key_field = main
-    result.fields = attrs
-    result.filename = "BioMart: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}"
-    
-    FileUtils.rm data
-    result
+    open_options[:filename] ||= "BioMart: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}" 
+    if filename.nil?
+      results = TSV.new data, open_options
+      results.key_field = main
+      results.fields = attrs
+      results
+    else
+      Open.write(filename) do |f|
+        f.puts "#: " << Misc.hash2string(TSV::EXTRA_ACCESSORS.collect{|key| [key, open_options[key]]})
+        if field_names.nil?
+          f.puts "#" << [main, attrs].flatten * "\t"
+        else
+          f.puts "#" << field_names * "\t"
+        end
+        f.write Open.read(data)
+      end
+      FileUtils.rm data
+      filename
+    end
   end
 
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
-    codes = attrs.collect{|attr| attr[1]}
-    tsv = query(database, main.last, codes, filters, data, open_options)
+    if @archive_url 
+      attrs = attrs.reject{|attr| MISSING_IN_ARCHIVE[@archive].include? attr[1]}
+    end
 
-    tsv.key_field = main.first
-    tsv.fields    = attrs.collect{|attr| attr.first} 
-    tsv
+    codes = attrs.collect{|attr| attr[1]}
+    if open_options[:filename].nil?
+      tsv = query(database, main.last, codes, filters, data, open_options)
+      tsv.key_field = main.first
+      tsv.fields    = attrs.collect{|attr| attr.first} 
+      tsv
+    else
+      query(database, main.last, codes, filters, data, open_options.merge(:field_names => [main.first, attrs.collect{|attr| attr.first}].flatten))
+    end
   end
 end
 

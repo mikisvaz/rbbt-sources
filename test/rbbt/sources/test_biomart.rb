@@ -1,5 +1,6 @@
 require File.dirname(__FILE__) + '/../../test_helper'
 require 'rbbt/sources/biomart'
+require 'rbbt/util/tmpfile'
 require 'test/unit'
 
 class TestBioMart < Test::Unit::TestCase
@@ -20,16 +21,28 @@ class TestBioMart < Test::Unit::TestCase
 
   def test_query
     data = BioMart.query('scerevisiae_gene_ensembl','entrezgene', ['protein_id','refseq_peptide','external_gene_id','ensembl_gene_id'], [], nil, :nocache => false, :wget_options => { :quiet => false})
-
     assert(data['852236']['external_gene_id'].include? 'YBL044W')
+
+    TmpFile.with_file do |f|
+      filename = BioMart.query('scerevisiae_gene_ensembl','entrezgene', ['protein_id','refseq_peptide','external_gene_id','ensembl_gene_id'], [], nil, :nocache => false, :wget_options => { :quiet => false}, :filename => f)
+      data = TSV.new Open.open(filename)
+      assert(data['852236']['external_gene_id'].include? 'YBL044W')
+    end
   end
 
   def test_tsv
     data = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false})
-
     assert(data['852236']['Protein ID'].include? 'CAA84864')
     assert_equal 'Entrez Gene', data.key_field
     assert_equal ['Protein ID', 'RefSeq Peptide'], data.fields
+
+    TmpFile.with_file do |f|
+      filename = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false}, :filename => f)
+      data = TSV.new Open.open(filename, :merge => true)
+      assert(data['852236']['Protein ID'].include? 'CAA84864')
+      assert_equal 'Entrez Gene', data.key_field
+      assert_equal ['Protein ID', 'RefSeq Peptide'], data.fields
+    end
   end
 end
 

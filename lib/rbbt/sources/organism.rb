@@ -29,6 +29,7 @@ module Organism
     options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
     double = Misc.process_options options, :double
 
+
     options.merge! :target => target unless target.nil?
     options.merge! :fields => fields unless fields.nil?
 

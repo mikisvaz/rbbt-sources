@@ -103,7 +103,7 @@ file 'scientific_name' do |t|
 end
 
 file 'identifiers' do |t|
-  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [])
+  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
   $biomart_identifiers.each do |name, key, prefix|
     if prefix
       identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
@@ -114,20 +114,20 @@ file 'identifiers' do |t|
 end
 
 file 'gene_transcripts' do |t|
-  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat)
+  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
 
 file 'transcripts' => 'gene_positions' do |t|
-  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list)
+  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
   transcripts.attach TSV.new('gene_positions'), "Chromosome Name"
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
 
 file 'transcript_3utr' do |t|
-  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :flat, :merge => true)
+  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single#cast=to_i"
@@ -142,7 +142,7 @@ end
 
 
 file 'transcript_5utr' do |t|
-  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :merge => true)
+  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single#cast=to_i"
@@ -162,7 +162,7 @@ file 'gene_positions' do |t|
 end
 
 file 'gene_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :flat, :merge => true)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
@@ -179,7 +179,7 @@ file 'gene_sequence' do |t|
 end
 
 file 'protein_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :merge => true)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
@@ -197,20 +197,20 @@ file 'protein_sequence' do |t|
 end
 
 file 'exons' => 'gene_positions' do |t|
-  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list)
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => $namespace)
   exons.attach TSV.new('gene_positions'), "Chromosome Name"
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
 
 file 'transcript_exons' do |t|
-  exons = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_exons, [], nil, :keep_empty => true)
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_exons, [], nil, :keep_empty => true, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
 
 file 'transcript_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :merge => true)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
@@ -232,28 +232,28 @@ $biomart_variation_filter = ["snptype_filters", "COMPLEX_INDEL,COMPLEX_INDEL&NMD
 $biomart_variation_filter = ["snptype_filters", 'COMPLEX_INDEL&NMD_TRANSCRIPT']
 
 file 'germline_variations' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variations, [], nil, :keep_empty => true, :type => :list, :merge => false)
-  File.open(t.name, 'w') do |f| f.puts variations.to_s end
+  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variations, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
 end
 
 file 'germline_variation_positions' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variation_positions, [], nil, :keep_empty => true, :type => :list, :merge => false)
+  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variation_positions, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
 file 'somatic_variations' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variations, [], nil, :keep_empty => true, :type => :list, :merge => false)
+  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variations, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
 file 'somatic_variation_positions' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variation_positions, [], nil, :keep_empty => true, :type => :list, :merge => false)
+  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variation_positions, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
   File.open(t.name, 'w') do |f| f.puts variations.to_s end
 end
 
 file 'gene_pmids' do |t|
   tsv =  Entrez.entrez2pubmed($taxs)
-  text = "#Entrez Gene ID\tPMID"
+  text = "#: :namespace=#{$namespace}"
+  text += "#Entrez Gene ID\tPMID"
   tsv.each do |gene, pmids|
     text << "\n" << gene << "\t" << pmids * "|"
   end
@@ -270,7 +270,8 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   transcript_exons = TSV.new('transcript_exons', :double, :fields => ["Ensembl Exon ID","Exon Rank in Transcript"], :persistence => true )
 
 
-  string = "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
+  string = "#: :namespace=#{$namespace}"
+  string += "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
   exons.each do |exon, info|
     gene, start, finish, strand, chr = info
 
