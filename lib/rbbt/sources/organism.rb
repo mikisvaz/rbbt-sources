@@ -70,7 +70,7 @@ module Organism
     }.first
   end
 
-  ["Hsa", "Sce"].each do |organism|
+  ["Hsa", "Rno", "Sce"].each do |organism|
     rakefile = Rbbt["share/install/Organism/#{ organism }/Rakefile"]
     rakefile.lib_dir = Resource.caller_lib_dir __FILE__
     rakefile.pkgdir = 'phgx'
