@@ -1,5 +1,6 @@
 require 'rbbt-util'
 require 'rbbt/util/resource'
+require 'rbbt/util/tsv/misc'
 
 
 module Organism
@@ -50,11 +51,17 @@ module Organism
     end
   end
 
-  def self.guess_id(org, values)
-    identifiers = TSV.new(Organism.identifiers(org), :persistence => true)
+  def self.guess_id(org, values, identifiers = nil)
+    identifiers ||= TSV.new(Organism.identifiers(org), :persistence => true)
     field_matches = identifiers.field_matches(values)
     field_matches.sort_by{|field, matches| matches.uniq.length}.last
   end
+
+  def self.guess_id(org, values)
+    field_matches = TSV.field_match_counts(Organism.identifiers(org).find, values)
+    field_matches.sort_by{|field, count| count.to_i}.last
+  end
+
 
   def self.organisms
     Dir.glob(File.join(Rbbt.share.organisms.find, '*')).collect{|f| File.basename(f)}

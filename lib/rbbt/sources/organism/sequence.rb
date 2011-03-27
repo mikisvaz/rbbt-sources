@@ -213,8 +213,8 @@ module Organism
                         else
                           TSV.new StringIO.new(genomic_mutations), :list
                         end
-    genomic_mutations.key_field = "Position"
-    genomic_mutations.fields = ["Mutation"]
+    genomic_mutations.key_field ||= "Position"
+    genomic_mutations.fields ||= ["Mutation"]
 
     positions = genomic_mutations.keys.collect{|l| l.split(":")}
 

@@ -17,8 +17,8 @@ class TestEntrez < Test::Unit::TestCase
   def test_guess_id
     ensembl = %w(YOL044W YDR289C YAL034C YGR246C ARS519 tH(GUG)E2 YDR218C YLR002C YGL224C)
     gene_name = %w(SNR64 MIP1 MRPS18 TFB2 JEN1 IVY1 TRS33 GAS3)
-    assert_equal "Ensembl Gene ID", Organism::Sce.guess_id(ensembl).first
     assert_equal "Associated Gene Name", Organism::Sce.guess_id(gene_name).first
+    assert_equal "Ensembl Gene ID", Organism::Sce.guess_id(ensembl).first
   end
 
   def test_organisms
