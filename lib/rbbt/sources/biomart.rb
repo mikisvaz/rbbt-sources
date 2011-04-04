@@ -148,7 +148,7 @@ module BioMart
 
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     if @archive_url 
-      attrs = attrs.reject{|attr| MISSING_IN_ARCHIVE[@archive].include? attr[1]}
+      attrs = attrs.reject{|attr| (MISSING_IN_ARCHIVE[@archive] || []).include? attr[1]}
     end
 
     codes = attrs.collect{|attr| attr[1]}
