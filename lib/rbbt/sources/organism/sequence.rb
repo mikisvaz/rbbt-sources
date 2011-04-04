@@ -156,6 +156,7 @@ module Organism
     transcript_offsets = {}
     exons.each do |exon|
       transcript_offsets[exon] ||= {}
+      offsets = nil
       offsets = exon_offsets[exon].zip_fields
 
       offsets.collect do |transcript, offset|
@@ -203,8 +204,87 @@ module Organism
     position_offsets
   end
 
+  def self.exon_junctures_at_chromosome_positions(org, chromosome, positions)
+    chromosome = chromosome.to_s
+    chromosome_start = Persistence.persist(Organism.exons(org), "Exon_start[#{chromosome}]", :fwt, :chromosome => chromosome, :range => false) do |file, options|
+      tsv = file.tsv(:persistence => true, :type => :list)
+      tsv.select("Chromosome Name" => chromosome).collect do |exon, values|
+        [exon, values["Exon Chr Start"].to_i]
+      end
+    end
+    chromosome_end = Persistence.persist(Organism.exons(org), "Exon_end[#{chromosome}]", :fwt, :chromosome => chromosome, :range => false) do |file, options|
+      tsv = file.tsv(:persistence => true, :type => :list)
+      tsv.select("Chromosome Name" => chromosome).collect do |exon, values|
+        [exon, values["Exon Chr End"].to_i]
+      end
+    end
+
+    if Array === positions
+      positions.collect{|position| 
+        position = position.to_i
+        chromosome_start[(position - 2)..(position + 2)] + chromosome_end[(position - 2)..(position + 2)];
+      }
+    else
+      position = positions.to_i
+      chromosome_start[(position - 2)..(position + 2)] + chromosome_end[(position - 2)..(position + 2)];
+    end
+ 
+  end
+
+  def self.exon_junctures_at_genomic_positions(org, positions)
+    positions = [positions] unless Array === positions.first
+
+    exons = []
+    chromosomes = {}
+    indices     = {}
+    positions.each_with_index do |info,i|
+      chr, pos = info
+      chromosomes[chr] ||= []
+      indices[chr] ||= []
+      chromosomes[chr] << pos
+      indices[chr] << i
+    end
+
+    chromosomes.each do |chr, pos_list|
+      chr_exons = exon_junctures_at_chromosome_positions(org, chr, pos_list)
+      chr_exons.zip(indices[chr]).each do |exon, index| exons[index] = exon end
+    end
+
+    exons
+  end
+
   task_option :organism, "Organism", :string, "Hsa"
-  task_option :genomic_mutations, "Position (chr:position), Allele", :tsv
+  task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
+  task_dependencies nil
+  task :genomic_mutations_in_exon_junctures => :tsv do |org,genomic_mutations|
+    genomic_mutations = case
+                        when TSV === genomic_mutations
+                          genomic_mutations
+                        else
+                          TSV.new StringIO.new(genomic_mutations), :list
+                        end
+    genomic_mutations.key_field ||= "Position"
+    genomic_mutations.fields    ||= ["Mutation"]
+
+    positions = genomic_mutations.keys.collect{|l| l.split(":")}
+
+    step(:resources, "Load Resources")
+
+    exon_junctures = {}
+    genomic_mutations.keys.zip(Organism.exon_junctures_at_genomic_positions(org, positions)).each do |position, exons|
+      exon_junctures[position] = exons 
+    end
+
+    genomic_mutations.add_field "Exon Junctures" do |position, values|
+      exon_junctures[position] * "|"
+    end
+
+    genomic_mutations.to_s :sort, true
+  end
+
+
+  task_option :organism, "Organism", :string, "Hsa"
+  task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
   task_dependencies nil
   task :genomic_mutations_to_genes => :tsv do |org,genomic_mutations|
     genomic_mutations = case
@@ -214,7 +294,7 @@ module Organism
                           TSV.new StringIO.new(genomic_mutations), :list
                         end
     genomic_mutations.key_field ||= "Position"
-    genomic_mutations.fields ||= ["Mutation"]
+    genomic_mutations.fields    ||= ["Mutation"]
 
     positions = genomic_mutations.keys.collect{|l| l.split(":")}
 
@@ -234,7 +314,7 @@ Translates a collection of mutations in genomic coordinates into mutations in am
 protein products of transcripts including those positions.
   EOF
   task_option :organism, "Organism", :string, "Hsa"
-  task_option :genomic_mutations, "Position (chr:position), Allele", :tsv
+  task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
   task_dependencies nil
   task :genomic_mutations_to_protein_mutations => :tsv do |org,genomic_mutations|
     genomic_mutations = case
@@ -244,8 +324,8 @@ protein products of transcripts including those positions.
                           TSV.new StringIO.new(genomic_mutations), :list
                         end
 
-    genomic_mutations.key_field = "Position"
-    genomic_mutations.fields = ["Mutation"]
+    genomic_mutations.key_field ||= "Position"
+    genomic_mutations.fields    ||= ["Mutation"]
 
     positions = genomic_mutations.keys.collect{|l| l.split(":")}
 
@@ -270,7 +350,7 @@ protein products of transcripts including those positions.
 
     step(:aminoacid, "Translate mutation to amino acid substitutions")
     offsets.each do |position, transcripts|
-      alleles = genomic_mutations[position * ":"].collect{|allele| Misc.IUPAC_to_base(allele)}.flatten
+      alleles = Misc.IUPAC_to_base(genomic_mutations[position * ":"]["Mutation"])
 
       transcripts.each do |transcript, offset_info|
         offset, strand = offset_info
@@ -281,7 +361,7 @@ protein products of transcripts including those positions.
           next
         end
 
-        if not codon.nil?
+        if not codon.nil? and not codon.empty?
           alleles.each do |allele|
             allele = Misc::BASE2COMPLEMENT[allele] if strand == -1
             change = Organism.codon_change(allele, *codon.values_at(0,1))
@@ -333,7 +413,19 @@ X	10085674	C	T
 21 19638426 G T
   EOF
 
+  exon_juncture_test = <<-EOF
+#Position Mutation
+7:150753996 T
+  EOF
 
+
+  job =  Organism.job :genomic_mutations_in_exon_junctures, "Test1", TSV.new(StringIO.new(exon_juncture_test), :list, :sep => " "), :organism => "Hsa"
+  job.run
+  job.clean if job.error?
+  puts job.messages
+  puts job.read
+
+  exit
 #  # Build 36
 #  picmi_test = <<-EOF
 ##Chromosome	Name	Position	Reference	Tumor
