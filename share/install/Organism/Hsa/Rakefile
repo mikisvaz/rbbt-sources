@@ -7,6 +7,8 @@ $taxs = [9606]
 $scientific_name = "Homo sapiens"
 
 $biomart_db = 'hsapiens_gene_ensembl'
+$biomart_db_germline_variation = 'hsapiens_snp'
+$biomart_db_somatic_variation = 'hsapiens_snp_som'
 
 $biomart_lexicon = [ 
   [ 'Associated Gene Name' , "external_gene_id"], 

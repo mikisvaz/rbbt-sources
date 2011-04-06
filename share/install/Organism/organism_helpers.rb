@@ -2,8 +2,6 @@ $biomart_ensembl_gene = ['Ensembl Gene ID', 'ensembl_gene_id']
 $biomart_ensembl_protein = ['Ensembl Protein ID', 'ensembl_peptide_id']
 $biomart_ensembl_exon = ['Ensembl Exon ID', 'ensembl_exon_id']
 $biomart_ensembl_transcript = ['Ensembl Transcript ID', 'ensembl_transcript_id']
-$biomart_somatic_variation_id = ['Variation ID', "somatic_reference_id" ]
-$biomart_germline_variation_id = ['Variation ID', "external_id" ]
 
 $biomart_gene_positions = [
   ['Chromosome Name','chromosome_name'],
@@ -58,42 +56,6 @@ $biomart_exons = [
   ['Exon Strand','strand'],
   ['Exon Chr Start','exon_chrom_start'],
   ['Exon Chr End','exon_chrom_end'],
-]
-
-#{{{ Variations
-
-$biomart_germline_variation_positions = [
-  ['Chromosome Location (bp)', "chromosome_location" ],
-  ['SNP Chromosome Strand', "snp_chromosome_strand" ],
-  ['Transcript location (bp)', "transcript_location" ],
-  ['Allele', "allele" ],
-  ['Protein Allele', "peptide_shift" ],
-  ['CDS Start', "cds_start_2076" ],
-  ['CDS End', "cds_end_2076" ],
-]
-
-$biomart_germline_variations = [
-    $biomart_ensembl_gene,
-    ['Source', "source_name" ],
-    ['Validated', "validated" ],
-    ['Consequence Type', "synonymous_status" ],
-]
-
-$biomart_somatic_variation_positions = [
-    ['Chromosome Location (bp)' , "somatic_chromosome_location" ] ,
-    ['SNP Chromosome Strand' , "somatic_snp_chromosome_strand" ] ,
-    ['Transcript location (bp)' , "somatic_transcript_location" ] ,
-    ['Allele' , "somatic_allele" ] ,
-    ['Protein Allele' , "somatic_peptide_shift" ] , 
-    ['CDS Start' , "somatic_cds_start_2076" ] ,
-    ['CDS End' , "somatic_cds_end_2076" ] , 
-]
-
-$biomart_somatic_variations = [
-    $biomart_ensembl_gene,
-    ['Source' , "somatic_source_name" ] ,
-    ['Validated' , "somatic_validated" ] ,
-    ['Consequence Type' , "somatic_synonymous_status" ] , 
 ]
 
 #{{{ Rules
@@ -227,28 +189,21 @@ file 'transcript_sequence' do |t|
 end
 
 
-$biomart_variation_filter = ["snptype_filters", "COMPLEX_INDEL,COMPLEX_INDEL&NMD_TRANSCRIPT,COMPLEX_INDEL&SPLICE_SITE,ESSENTIAL_SPLICE_SITE&INTRONIC,ESSENTIAL_SPLICE_SITE&INTRONIC&NMD_TRANSCRIPT,FRAMESHIFT_CODING,FRAMESHIFT_CODING&NMD_TRANSCRIPT,FRAMESHIFT_CODING&SPLICE_SITE,FRAMESHIFT_CODING&SPLICE_SITE&NMD_TRANSCRIPT,NON_SYNONYMOUS_CODING,NON_SYNONYMOUS_CODING&NMD_TRANSCRIPT,NON_SYNONYMOUS_CODING&SPLICE_SITE,NON_SYNONYMOUS_CODING&SPLICE_SITE&NMD_TRANSCRIPT,REGULATORY_REGION,SPLICE_SITE&3PRIME_UTR,SPLICE_SITE&3PRIME_UTR&NMD_TRANSCRIPT,SPLICE_SITE&5PRIME_UTR,SPLICE_SITE&5PRIME_UTR&NMD_TRANSCRIPT,SPLICE_SITE&INTRONIC,SPLICE_SITE&INTRONIC&NMD_TRANSCRIPT,SPLICE_SITE&SYNONYMOUS_CODING,SPLICE_SITE&SYNONYMOUS_CODING&NMD_TRANSCRIPT,STOP_GAINED,STOP_GAINED&FRAMESHIFT_CODING,STOP_GAINED&FRAMESHIFT_CODING&NMD_TRANSCRIPT,STOP_GAINED&NMD_TRANSCRIPT,STOP_GAINED&SPLICE_SITE,STOP_GAINED&SPLICE_SITE&NMD_TRANSCRIPT,STOP_LOST,STOP_LOST&NMD_TRANSCRIPT,STOP_LOST&SPLICE_SITE,STOP_LOST&SPLICE_SITE&NMD_TRANSCRIPT,SYNONYMOUS_CODING,SYNONYMOUS_CODING&NMD_TRANSCRIPT"]
-#$biomart_variation_filter = ["snptype_filters", "COMPLEX_INDEL,SYNONYMOUS_CODING"]
-$biomart_variation_filter = ["snptype_filters", 'COMPLEX_INDEL&NMD_TRANSCRIPT']
+#{{{ Variations
+
+$biomart_variation_id = ["SNP ID", "refsnp_id"]
+$biomart_variation_position = [["Chromosome Name", "chr_name"], ["Chromosome Start", "chrom_start"]]
 
 file 'germline_variations' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variations, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
-end
-
-file 'germline_variation_positions' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_germline_variation_id, $biomart_germline_variation_positions, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
-  File.open(t.name, 'w') do |f| f.puts variations.to_s end
+  BioMart.tsv($biomart_db_germline_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
 end
 
 file 'somatic_variations' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variations, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
-  File.open(t.name, 'w') do |f| f.puts variations.to_s end
+  BioMart.tsv($biomart_db_somatic_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
 end
 
-file 'somatic_variation_positions' do |t|
-  variations = BioMart.tsv($biomart_db, $biomart_somatic_variation_id, $biomart_somatic_variation_positions, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
-  File.open(t.name, 'w') do |f| f.puts variations.to_s end
-end
+
+# {{{ Other info
 
 file 'gene_pmids' do |t|
   tsv =  Entrez.entrez2pubmed($taxs)

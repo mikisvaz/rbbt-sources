@@ -7,6 +7,8 @@ $taxs = [10116]
 $scientific_name = "Rattus norvegicus"
 
 $biomart_db = 'rnorvegicus_gene_ensembl'
+$biomart_db_germline_variation = 'rnorvegicus_snp'
+$biomart_db_somatic_variation = 'rnorvegicus_snp_som'
 
 $biomart_lexicon = [ 
   [ 'Associated Gene Name' , "external_gene_id"], 
