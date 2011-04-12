@@ -253,6 +253,54 @@ module Organism
     exons
   end
 
+  def self.identify_variations_at_chromosome_positions(org, chromosome, positions, variations)
+    chromosome = chromosome.to_s
+
+    chromosome_bed = Persistence.persist(variations, "Variation_positions[#{chromosome}]", :fwt, :chromosome => chromosome, :range => false) do |file, options|
+      rows = []
+      chromosome = options[:chromosome]
+      f = CMD.cmd("grep '[[:space:]]#{chromosome}[[:space:]]' #{ file }", :pipe => true)
+      while not f.eof?
+        line = f.gets.chomp
+        id, chr, pos = line.split "\t"
+        rows << [id, pos.to_i]
+      end
+
+      rows
+    end
+
+    if Array === positions
+      positions.collect{|position| 
+        chromosome_bed[position]; 
+      }
+    else
+      chromosome_bed[positions];  
+    end
+  end
+
+
+  def self.identify_variations_at_genomic_positions(org, positions, variations_file)
+    positions = [positions] unless Array === positions.first
+
+    variations = []
+    chromosomes = {}
+    indices     = {}
+    positions.each_with_index do |info,i|
+      chr, pos = info
+      chromosomes[chr] ||= []
+      indices[chr] ||= []
+      chromosomes[chr] << pos
+      indices[chr] << i
+    end
+
+    chromosomes.each do |chr, pos_list|
+      chr_variations = identify_variations_at_chromosome_positions(org, chr, pos_list, variations_file)
+      chr_variations.zip(indices[chr]).each do |variation, index| variations[index] = variation end
+    end
+
+    variations
+  end
+
   task_option :organism, "Organism", :string, "Hsa"
   task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
   task_dependencies nil
@@ -350,7 +398,11 @@ protein products of transcripts including those positions.
 
     step(:aminoacid, "Translate mutation to amino acid substitutions")
     offsets.each do |position, transcripts|
-      alleles = Misc.IUPAC_to_base(genomic_mutations[position * ":"]["Mutation"])
+      if genomic_mutations.type === :double
+        alleles = genomic_mutations[position * ":"]["Mutation"].collect{|mutation| Misc.IUPAC_to_base(mutation)}.flatten
+      else
+        alleles = Misc.IUPAC_to_base(genomic_mutations[position * ":"]["Mutation"])
+      end
 
       transcripts.each do |transcript, offset_info|
         offset, strand = offset_info
@@ -380,6 +432,84 @@ protein products of transcripts including those positions.
 
     results
   end
+
+
+  task_option :organism, "Organism", :string, "Hsa"
+  task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
+  task_dependencies nil
+  task :identify_germline_variations => :tsv do |org,genomic_mutations|
+    genomic_mutations = case
+                        when TSV === genomic_mutations
+                          genomic_mutations
+                        else
+                          TSV.new StringIO.new(genomic_mutations), :list
+                        end
+
+    genomic_mutations.key_field ||= "Position"
+    genomic_mutations.fields    ||= ["Mutation"]
+
+    positions = genomic_mutations.keys.collect{|l| l.split(":")}
+
+
+    step(:prepare, "Prepare Results")
+    results = TSV.new({})
+    results.key_field = "Position"
+    results.fields = ["SNP Id"]
+    results.type = :double
+    results.filename = path
+
+
+    step(:resources, "Load Resources")
+
+    snp_ids = Organism.identify_variations_at_genomic_positions(org, positions, Organism.germline_variations(org).produce).collect{|ids| ids * "|"}
+    snps_for_positions = Hash[*genomic_mutations.keys.zip(snp_ids).flatten]
+
+    genomic_mutations.add_field "Germline SNP Id" do |position, values|
+      snps_for_positions[position]
+    end
+
+    genomic_mutations
+  end
+
+
+  task_option :organism, "Organism", :string, "Hsa"
+  task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
+  task_dependencies nil
+  task :identify_somatic_variations => :tsv do |org,genomic_mutations|
+    genomic_mutations = case
+                        when TSV === genomic_mutations
+                          genomic_mutations
+                        else
+                          TSV.new StringIO.new(genomic_mutations), :list
+                        end
+
+    genomic_mutations.key_field ||= "Position"
+    genomic_mutations.fields    ||= ["Mutation"]
+
+    positions = genomic_mutations.keys.collect{|l| l.split(":")}
+
+
+    step(:prepare, "Prepare Results")
+    results = TSV.new({})
+    results.key_field = "Position"
+    results.fields = ["SNP Id"]
+    results.type = :double
+    results.filename = path
+
+
+    step(:resources, "Load Resources")
+
+    snp_ids = Organism.identify_variations_at_genomic_positions(org, positions, Organism.somatic_variations(org).produce).collect{|ids| ids * "|"}
+    snps_for_positions = Hash[*genomic_mutations.keys.zip(snp_ids).flatten]
+
+    genomic_mutations.add_field "Germline SNP Id" do |position, values|
+      snps_for_positions[position]
+    end
+
+    genomic_mutations
+  end
+
+
 end
 
 if __FILE__ == $0
