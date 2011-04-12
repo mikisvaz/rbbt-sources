@@ -22,7 +22,7 @@ module Organism
 
     index = identifiers(org).tsv options
 
-    tsv.attach index, [:key]
+    tsv.attach index, [:key], :persist_input => true
   end
 
   def self.normalize(org, list, target = nil, fields = nil, options = {})
