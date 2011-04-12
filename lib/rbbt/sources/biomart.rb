@@ -14,7 +14,7 @@ module BioMart
 
   BIOMART_URL = 'http://biomart.org/biomart/martservice?query='
 
-  MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.yaml
+  MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.exists? ? Rbbt.etc.biomart.missing_in_archive.yaml : {}
 
   private
 
