@@ -58,12 +58,17 @@ module Entrez
   private 
 
   def self.get_online(geneids)
-    geneids_list = ( geneids.is_a?(Array) ? geneids.join(',') : geneids.to_s )
-    url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&retmode=xml&id=#{geneids_list}" 
 
-    xml = Open.read(url, :wget_options => {:quiet => true}, :nocache => true)
+    genes_complete =  geneids.is_a?(Array) ? geneids : [geneids]
 
-    genes = xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
+    genes = []
+    Misc.divide(genes_complete, (genes_complete.length / 100) + 1).each do |geneids_list|
+      url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&retmode=xml&id=#{geneids_list * ","}" 
+
+      xml = Open.read(url, :wget_options => {:quiet => true}, :nocache => true)
+
+      genes += xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
+    end
 
     if geneids.is_a? Array
       list = {}

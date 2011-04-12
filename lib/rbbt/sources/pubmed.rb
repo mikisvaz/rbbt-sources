@@ -10,12 +10,16 @@ module PubMed
   @@pubmed_lag = 1
   def self.get_online(pmids)
 
-    pmid_list = ( pmids.is_a?(Array) ? pmids.join(',') : pmids.to_s )
-    url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=#{pmid_list}" 
+    pmids_complete =  pmids.is_a?(Array) ? pmids : [pmids]
 
-    xml = Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed")
+    articles = []
+    Misc.divide(pmids_complete, (pmids_complete.length / 100) + 1).each do |pmid_list|
+      url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=#{pmid_list * ","}" 
 
-    articles = xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
+      xml = Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed")
+
+      articles += xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
+    end
 
     if pmids.is_a? Array
       list = {}
