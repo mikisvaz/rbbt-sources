@@ -63,11 +63,17 @@ module Entrez
 
     genes = []
     Misc.divide(genes_complete, (genes_complete.length / 100) + 1).each do |geneids_list|
-      url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&retmode=xml&id=#{geneids_list * ","}" 
+      begin
+        Misc.try3times do
+          url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&retmode=xml&id=#{geneids_list * ","}" 
 
-      xml = Open.read(url, :wget_options => {:quiet => true}, :nocache => true)
+          xml = Open.read(url, :wget_options => {:quiet => true}, :nocache => true)
 
-      genes += xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
+          genes += xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
+        end
+      rescue
+        genes += geneids_list.collect{|g| nil}
+      end
     end
 
     if geneids.is_a? Array

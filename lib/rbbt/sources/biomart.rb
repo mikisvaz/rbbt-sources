@@ -125,7 +125,7 @@ module BioMart
       data = get(database, main, chunk, filters, data, open_options)
     }
 
-    open_options[:filename] ||= "BioMart: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}" 
+    open_options[:filename] ||= "BioMart[#{main}+#{attrs.length}"
     if filename.nil?
       results = TSV.new data, open_options
       results.key_field = main

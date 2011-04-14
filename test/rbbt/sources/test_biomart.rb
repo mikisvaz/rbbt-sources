@@ -1,4 +1,7 @@
-require File.dirname(__FILE__) + '/../../test_helper'
+require File.expand_path(File.dirname(__FILE__) + '/../../test_helper')
+
+require 'rbbt/sources/pubmed'
+require 'test/unit'
 require 'rbbt/sources/biomart'
 require 'rbbt/util/tmpfile'
 require 'test/unit'

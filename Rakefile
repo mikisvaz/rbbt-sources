@@ -17,6 +17,7 @@ begin
     gem.add_dependency('rbbt-text')
     gem.add_dependency('mechanize')
     gem.add_dependency('libxml-ruby')
+    gem.add_dependency('bio')
   end
   Jeweler::GemcutterTasks.new  
 rescue LoadError
