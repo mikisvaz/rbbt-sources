@@ -11,6 +11,7 @@ class TestEntrez < Test::Unit::TestCase
     select = proc{|line| line.match(/SGD:S0/)}
     lexicon = Entrez.entrez2native(tax, :fix => fix, :select => select)
 
+    ddd lexicon.value_peek
     assert(lexicon['855611'].include? 'S000005056') 
   end
 

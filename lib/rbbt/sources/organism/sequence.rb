@@ -384,7 +384,6 @@ protein products of transcripts including those positions.
     results.type = :double
     results.filename = path
 
-
     step(:resources, "Load Resources")
     transcript_sequence = Organism.transcript_sequence(org).tsv(:single, :persistence => true)
     transcript_5utr     = Organism.transcript_5utr(org).tsv(:single, :persistence => true, :cast => 'to_i')
@@ -392,6 +391,7 @@ protein products of transcripts including those positions.
     exon_start          = Organism.exons(org).tsv(:single, :persistence => true, :fields => ["Exon Chr Start"], :cast => :to_i)
     exon_end            = Organism.exons(org).tsv(:single, :persistence => true, :fields => ["Exon Chr End"], :cast => :to_i)
     exon_strand         = Organism.exons(org).tsv(:single, :persistence => true, :fields => ["Exon Strand"], :cast => :to_i)
+    transcript_to_protein = Organism.transcripts(org).tsv(:single, :fields => "Ensembl Protein ID", :persistence => true)
 
     step(:offsets, "Find transcripts and offsets for mutations")
     offsets = Organism.genomic_position_transcript_offsets(org, positions, exon_offsets, exon_start, exon_end, exon_strand)
@@ -399,9 +399,9 @@ protein products of transcripts including those positions.
     step(:aminoacid, "Translate mutation to amino acid substitutions")
     offsets.each do |position, transcripts|
       if genomic_mutations.type === :double
-        alleles = genomic_mutations[position * ":"]["Mutation"].collect{|mutation| Misc.IUPAC_to_base(mutation)}.flatten
+        alleles = genomic_mutations[position * ":"]["Mutation"].collect{|mutation| Misc.IUPAC_to_base(mutation)}.compact.flatten
       else
-        alleles = Misc.IUPAC_to_base(genomic_mutations[position * ":"]["Mutation"])
+        alleles = Misc.IUPAC_to_base(genomic_mutations[position * ":"]["Mutation"]) || []
       end
 
       transcripts.each do |transcript, offset_info|
@@ -429,6 +429,13 @@ protein products of transcripts including those positions.
       end
 
     end
+
+    step(:identify_proteins, "Identify Proteins for Transcripts")
+    transcript_field = results.identify_field "Ensembl Transcript ID"
+    results.add_field "#{org.sub(/\/.*/,'')}:Ensembl Protein ID" do |key,values|
+      values[transcript_field].collect do |transcript| transcript_to_protein[transcript] end
+    end
+
 
     results
   end
@@ -555,7 +562,6 @@ X	10085674	C	T
   puts job.messages
   puts job.read
 
-  exit
 #  # Build 36
 #  picmi_test = <<-EOF
 ##Chromosome	Name	Position	Reference	Tumor

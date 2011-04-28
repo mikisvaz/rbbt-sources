@@ -12,7 +12,7 @@ module Entrez
     options = Misc.add_defaults options, :key => 1, :fields => 5, :persistence => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
-    options.merge! :grep => taxs.collect{|t| "^#{ t }\t"}
+    options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
     
     tsv = Rbbt.share.databases.entrez.gene_info.tsv :flat, options
     tsv.key_field = "Entrez Gene ID"
@@ -24,8 +24,7 @@ module Entrez
     options = {:key => 1, :fields => 2, :persistence => true, :merge => true}
 
     taxs = [taxs] unless taxs.is_a?(Array)
-    taxs = taxs.collect{|t| t.to_s}
-    options.merge! :grep => taxs.collect{|t| "^#{ t }\t"}
+    options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
 
     Rbbt.share.databases.entrez.gene2pubmed.tsv :flat, options
   end
