@@ -17,6 +17,14 @@ $biomart_lexicon = [
   [ 'HGNC curated gene name ', "hgnc_curated_gene_name"  ],
 ]
 
+$biomart_protein_identifiers = [
+  [ 'Protein ID', "protein_id"  ],
+  [ 'RefSeq Protein ID', "refseq_peptide"  ],
+  [ 'Unigene ID', "unigene"  ],
+  [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
+  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
+]
+
 $biomart_identifiers = [ 
   [ 'Entrez Gene ID', "entrezgene"],
   [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
