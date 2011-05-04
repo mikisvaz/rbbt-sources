@@ -406,12 +406,12 @@ protein products of transcripts including those positions.
 
       transcripts.each do |transcript, offset_info|
         offset, strand = offset_info
-        begin
-          codon = Organism.codon_at_transcript_position(org, transcript, offset, transcript_sequence, transcript_5utr)
-        rescue
-          Log.medium $!.message
-          next
-        end
+        codon = begin
+                  Organism.codon_at_transcript_position(org, transcript, offset, transcript_sequence, transcript_5utr)
+                rescue
+                  Log.medium $!.message
+                  next
+                end
 
         if not codon.nil? and not codon.empty?
           alleles.each do |allele|
