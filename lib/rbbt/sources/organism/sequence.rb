@@ -174,7 +174,7 @@ module Organism
     exon_end     ||= Organism.exons(org).tsv(:single, :persistence => true, :fields => ["Exon Chr End"], :cast => :to_i)
     exon_strand  ||= Organism.exons(org).tsv(:single, :persistence => true, :fields => ["Exon Strand"], :cast => :to_i)
 
-    exons = exons_at_genomic_positions(org, positions)
+    exons          = exons_at_genomic_positions(org, positions)
     offsets        = Organism.exon_transcript_offsets(org, exons.flatten.uniq, exon_offsets, exon_info)
 
     position_exons = {}
