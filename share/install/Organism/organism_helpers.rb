@@ -256,6 +256,13 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   Open.write(t.name, string)
 end
 
+file 'gene_go' do |t|
+  goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts goterms end
+end
+
+
 rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
   t.name =~ /([a-z]{3}[0-9]{4})\/(.*)/i
   archive = $1

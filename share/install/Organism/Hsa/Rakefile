@@ -62,5 +62,11 @@ $biomart_identifiers = [
   [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
 ]
 
+$biomart_go= [
+  ["GO Biological Process ID", 'go_biological_process_id'],
+  ["GO Cellular Component ID", 'go_cellular_component_id'],
+  ["GO Molecular Function ID", 'go_molecular_function_id'],
+]
+
 $namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
 load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
