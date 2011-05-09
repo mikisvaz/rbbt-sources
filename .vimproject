@@ -2,6 +2,11 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  Rakefile
  bin=bin {
  }
+ etc=etc{
+  biomart=biomart{
+   missing_in_archive
+  }
+ }
  lib=lib {
   sources=rbbt/sources{
    biomart.rb
