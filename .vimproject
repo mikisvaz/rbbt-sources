@@ -24,6 +24,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    polysearch.rb
    CTCAE.rb
    COSTART.rb
+   wgEncodeBroadHmm.rb
   }
  }
  share=share{
@@ -43,6 +44,9 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
      Rakefile
     }
    }
+   EBChromatin=EBChromatin{
+    Rakefile
+    }
   }
  }
  test=test {
