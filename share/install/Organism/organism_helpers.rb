@@ -66,11 +66,18 @@ end
 
 file 'identifiers' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
+
   $biomart_identifiers.each do |name, key, prefix|
     if prefix
       identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
     end
   end
+
+  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key => 1, :fields => 4
+  entrez_synonyms.key_field = "Entrez Gene ID"
+  entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
+
+  identifiers.attach entrez_synonyms
 
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end

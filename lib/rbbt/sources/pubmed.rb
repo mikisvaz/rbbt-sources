@@ -1,5 +1,6 @@
 require 'rbbt-util'
 require 'libxml'
+require 'rbbt/sources/gscholar'
 
 # This module offers an interface with PubMed, to perform queries, and
 # retrieve simple information from articles. It uses the caching
