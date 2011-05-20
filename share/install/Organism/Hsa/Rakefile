@@ -63,9 +63,8 @@ $biomart_identifiers = [
 ]
 
 $biomart_go= [
-  ["GO Biological Process ID", 'go_biological_process_id'],
-  ["GO Cellular Component ID", 'go_cellular_component_id'],
-  ["GO Molecular Function ID", 'go_molecular_function_id'],
+  ["GO ID", 'go_id'],
+  ["GO Namespace", 'namespace_1003'],
 ]
 
 $namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
