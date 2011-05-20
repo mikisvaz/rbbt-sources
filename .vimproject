@@ -39,7 +39,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
     }
     Rno=Rno{
      Rakefile
-     }
+    }
     Sce=Sce{
      Rakefile
     }
