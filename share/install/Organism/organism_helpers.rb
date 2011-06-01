@@ -82,6 +82,11 @@ file 'identifiers' do |t|
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
+file 'lexicon' => 'identifiers' do |t|
+  Open.write(t.name, TSV.new(t.prerequisites.first).slice(["Associated Gene Name", "Entrez Gene Name Synonyms"]).to_s)
+end
+
+
 file 'protein_identifiers' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_identifiers, [], nil, :namespace => $namespace)
   $biomart_protein_identifiers.each do |name, key, prefix|
