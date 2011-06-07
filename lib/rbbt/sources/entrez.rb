@@ -76,10 +76,11 @@ module Entrez
     end
 
     if geneids.is_a? Array
-      list = {}
-      genes.each_with_index{|gene,i|
-        geneid = geneids[i]
-        list[geneid ] = gene
+      list = Hash[*genes_complete.zip([nil]).flatten]
+      genes.each{|gene|
+        geneid = gene.match(/<Gene-track_geneid>(\d+)/)[1]
+        geneid = geneid.to_i unless list.include? geneid
+        list[geneid] = gene
       }
       return list
     else
