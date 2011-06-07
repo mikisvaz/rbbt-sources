@@ -11,7 +11,12 @@ module Organism
     exon_transcripts ||= Organism.transcript_exons(org).tsv(:double, :key => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true, :persistence => true )
     transcript_info  ||= Organism.transcripts.tsv(org).tsv(:list, :persistence => true )
 
-    transcripts = exon_transcripts[exon].first
+   transcripts = begin
+                   exon_transcripts[exon].first
+                 rescue
+                   []
+                 end
+
     transcripts.select{|transcript| transcript_info[transcript]["Ensembl Protein ID"].any?}
   end
 
@@ -157,6 +162,7 @@ module Organism
     exons.each do |exon|
       transcript_offsets[exon] ||= {}
       offsets = nil
+      next unless exon_offsets.include? exon
       offsets = exon_offsets[exon].zip_fields
 
       offsets.collect do |transcript, offset|
