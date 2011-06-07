@@ -304,7 +304,7 @@ module Organism
   task_option :organism, "Organism", :string, "Hsa"
   task_option :genomic_mutations, "Position (chr:position)\tMutation", :tsv
   task_dependencies nil
-  task :genomic_mutations_in_exon_junctures => :tsv do |org,genomic_mutations|
+  task :genomic_mutations_in_exon_junctions => :tsv do |org,genomic_mutations|
     genomic_mutations = case
                         when TSV === genomic_mutations
                           genomic_mutations
@@ -323,7 +323,7 @@ module Organism
       exon_junctures[position] = exons 
     end
 
-    genomic_mutations.add_field "Exon Junctures" do |position, values|
+    genomic_mutations.add_field "Exon Junctions" do |position, values|
       exon_junctures[position] * "|"
     end
 
