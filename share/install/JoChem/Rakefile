@@ -1,0 +1,69 @@
+require 'rbbt/util/tsv'
+require 'rbbt/util/open'
+require 'rbbt/util/misc'
+
+
+def read_chunk(jochem)
+  chunk = ""
+  while (not jochem.eof? and not (line = jochem.gets).match(/^--/))
+    chunk << line
+  end
+  return nil if chunk.empty?
+  chunk
+end
+
+def first(list)
+  return nil if list.nil? or list.empty?
+  list.first
+end
+
+def process_jochem
+  jochem = Open.open("http://www.biosemantics.org/uploads/file/Jochem/JochemV1_2.zip")
+  identifiers = File.open('identifiers', 'w')
+
+  identifiers.puts("#: :namespace=JoChem")
+  identifiers.puts("#ID\tCompound Name\tPubChem:ID\tDrugBank:ID")
+
+  lexicon = File.open('lexicon', 'w')
+  lexicon.puts("#: :namespace=JoChem")
+  lexicon.puts("#ID\tSynonyms")
+
+  inchi = File.open('inchi', 'w')
+  inchi.puts("#: :namespace=JoChem")
+  inchi.puts("#ID\tInChi")
+
+  definitions = File.open('definitions', 'w')
+  definitions.puts("#: :namespace=JoChem#:type=:list")
+  definitions.puts("#ID\tDefinition")
+
+  while chunk = read_chunk(jochem) do
+    next if chunk.empty? or chunk =~ /^#/ or chunk =~ /^NS /
+      info = {}
+    chunk.split(/\n/).each do |line|
+      line.sub!(/\t@match.*/,'')
+      code, value = line.match(/([A-Z]*) (.*)/).values_at 1, 2
+      info[code] ||= []
+      info[code] << value
+    end
+    id = first(info["ID"])
+    na = first(info["NA"])
+    df = first(info["DF"])
+    tm = info["TM"] || []
+    db = info["DB"] || []
+
+    pubc = db.collect{|code| code.match(/PUBC_(.*)/) ? $1 : nil}.compact
+    drug = db.collect{|code| code.match(/DRUG_(.*)/) ? $1 : nil}.compact
+    inch = db.collect{|code| code.match(/INCH_InChI=(.*)/) ? $1 : nil}.compact
+
+    lexicon.puts [id, tm.unshift(na) * "|"] * "\t"
+    identifiers.puts [id, na, pubc * "|", drug * "|"] * "\t"
+    inchi.puts [id, inch * "|"] * "\t" if inch.any?
+    definitions.puts [id, df] * "\t" unless df.nil?
+  end
+end
+
+rule /identifiers|lexicon|inchi|definitions/ do |t|
+  Misc.in_dir(File.dirname(t.name)) do
+    process_jochem
+  end
+end
