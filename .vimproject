@@ -25,6 +25,17 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    CTCAE.rb
    COSTART.rb
    wgEncodeBroadHmm.rb
+   jochem.rb
+  }
+ }
+ workflows=workflows{
+  sequence=sequence{
+   workflow.rb
+   lib=lib{
+    organism.rb
+   }
+   test=test{
+   }
   }
  }
  share=share{

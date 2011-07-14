@@ -83,7 +83,14 @@ file 'identifiers' do |t|
 end
 
 file 'lexicon' => 'identifiers' do |t|
-  Open.write(t.name, TSV.new(t.prerequisites.first).slice(["Associated Gene Name", "Entrez Gene Name Synonyms"]).to_s)
+  tsv = TSV.new(t.prerequisites.first).slice(["Associated Gene Name", "Entrez Gene Name Synonyms"])
+
+  entrez_description = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key => 1, :fields => 8
+  entrez_description.key_field = "Entrez Gene ID"
+  entrez_description.fields = ["Entrez Gene Description"]
+
+  tsv.attach entrez_description
+  Open.write(t.name, tsv.to_s)
 end
 
 

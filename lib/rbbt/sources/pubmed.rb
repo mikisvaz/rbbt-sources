@@ -14,7 +14,7 @@ module PubMed
     pmids_complete =  pmids.is_a?(Array) ? pmids : [pmids]
 
     articles = []
-    Misc.divide(pmids_complete, (pmids_complete.length / 100) + 1).each do |pmid_list|
+    Misc.divide(pmids_complete, (pmids_complete.length / 500) + 1).each do |pmid_list|
       url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=#{pmid_list * ","}" 
 
       xml = Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed")

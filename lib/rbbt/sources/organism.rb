@@ -86,5 +86,3 @@ module Organism
   end
 
 end
-
-
