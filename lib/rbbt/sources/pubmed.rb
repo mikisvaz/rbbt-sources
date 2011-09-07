@@ -1,4 +1,4 @@
-require 'rbbt-util'
+require 'rbbt'
 require 'libxml'
 require 'rbbt/sources/gscholar'
 

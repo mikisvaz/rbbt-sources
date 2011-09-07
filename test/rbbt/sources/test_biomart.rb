@@ -14,11 +14,11 @@ class TestBioMart < Test::Unit::TestCase
     end
 
     data = BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],[], nil, :nocache => false, :merge => true, :wget_options => {:quiet => false})
-    tsv = TSV.new data, :double, :merge => true
+    tsv = TSV.open data, :double, :merge => true
     assert(tsv['852236'][0].include? 'CAA84864')
 
     data = BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['external_gene_id'],[], data, :nocache => false, :wget_options => { :quiet => false} )
-    tsv = TSV.new data, :double, :merge => true
+    tsv = TSV.open data, :double, :merge => true
     assert(tsv['852236'][1].include? 'YBL044W')
   end
 
@@ -28,7 +28,7 @@ class TestBioMart < Test::Unit::TestCase
 
     TmpFile.with_file do |f|
       filename = BioMart.query('scerevisiae_gene_ensembl','entrezgene', ['protein_id','refseq_peptide','external_gene_id','ensembl_gene_id'], [], nil, :nocache => false, :wget_options => { :quiet => false}, :filename => f)
-      data = TSV.new Open.open(filename)
+      data = TSV.open Open.open(filename)
       assert(data['852236']['external_gene_id'].include? 'YBL044W')
     end
   end
@@ -41,7 +41,7 @@ class TestBioMart < Test::Unit::TestCase
 
     TmpFile.with_file do |f|
       filename = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false}, :filename => f)
-      data = TSV.new Open.open(filename, :merge => true)
+      data = TSV.open Open.open(filename, :merge => true)
       assert(data['852236']['Protein ID'].include? 'CAA84864')
       assert_equal 'Entrez Gene', data.key_field
       assert_equal ['Protein ID', 'RefSeq Peptide'], data.fields

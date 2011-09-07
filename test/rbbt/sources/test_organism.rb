@@ -1,17 +1,21 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../test_helper')
 require 'rbbt/sources/organism'
-require 'rbbt/sources/organism/sequence'
 require 'test/unit'
 
 class TestEntrez < Test::Unit::TestCase
+  def test_location
+    assert_equal "share/organisms/Sce/identifiers", Organism.identifiers('Sce')
+  end
+
+
   def test_identifiers
-    assert Organism.identifiers('Sce').tsv['S000006120']["Ensembl Gene ID"].include?('YPL199C')
-    assert Organism::Sce.identifiers.tsv['S000006120']["Ensembl Gene ID"].include?('YPL199C')
-    assert Organism.identifiers('Hsa').tsv(:key => "Entrez Gene ID")['1020']["Associated Gene Name"].include?('CDK5')
+    assert Organism.identifiers('Hsa').tsv(:key_field => "Entrez Gene ID", :persist => true)['1020']["Associated Gene Name"].include?('CDK5')
+    assert Organism.identifiers('Sce').tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
+    assert Organism::Sce.identifiers.tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
   end
 
   def test_lexicon
-    assert TSV.new(Organism.lexicon('Sce'))['S000006120'].flatten.include?('YPL199C')
+    assert TSV.open(Organism.lexicon('Sce'))['S000006120'].flatten.include?('YPL199C')
   end
 
   def test_guess_id
@@ -27,7 +31,7 @@ class TestEntrez < Test::Unit::TestCase
   end
 
   def test_attach_translations
-    tsv = TSV.new({"1020" => []}, :list)
+    tsv = TSV.setup({"1020" => []}, :type => :list)
     tsv.key_field = "Entrez Gene ID"
     tsv.fields = []
     tsv.namespace = "Hsa"
@@ -38,20 +42,20 @@ class TestEntrez < Test::Unit::TestCase
     assert_equal "CDK5", tsv["1020"]["Associated Gene Name"]
   end
 
-  def test_genes_at_chromosome
-    pos = [12, 117799500]
-    assert_equal "ENSG00000089250", Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)
-  end
+  #def test_genes_at_chromosome
+  #  pos = [12, 117799500]
+  #  assert_equal "ENSG00000089250", Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)
+  #end
 
-  def test_genes_at_chromosome_array
-    pos = [12, [117799500, 106903900]]
-    assert_equal ["ENSG00000089250", "ENSG00000013503"], Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)
-  end
+  #def test_genes_at_chromosome_array
+  #  pos = [12, [117799500, 106903900]]
+  #  assert_equal ["ENSG00000089250", "ENSG00000013503"], Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)
+  #end
  
-  def test_genes_at_genomic_positions
-    pos = [[12, 117799500], [12, 106903900], [1, 115259500]]
-    assert_equal ["ENSG00000089250", "ENSG00000013503", "ENSG00000213281"], Organism::Hsa.genes_at_genomic_positions(pos)
-  end
+  #def test_genes_at_genomic_positions
+  #  pos = [[12, 117799500], [12, 106903900], [1, 115259500]]
+  #  assert_equal ["ENSG00000089250", "ENSG00000013503", "ENSG00000213281"], Organism::Hsa.genes_at_genomic_positions(pos)
+  #end
 
 end
 

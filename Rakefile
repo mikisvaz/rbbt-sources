@@ -13,7 +13,7 @@ begin
     gem.files = Dir['lib/**/*.rb', 'etc/**/*', 'share/**/*.rb', 'share/**/Rakefile', 'LICENSE']
     gem.test_files = Dir['test/**/test_*.rb']
 
-    gem.add_dependency('rbbt-util')
+    gem.add_dependency('rbbt-util', ">= 4.0.0")
     gem.add_dependency('rbbt-text')
     gem.add_dependency('mechanize')
     gem.add_dependency('libxml-ruby')

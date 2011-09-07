@@ -1,15 +1,16 @@
-require 'rbbt-util'
-require 'rbbt/util/tsv'
+require 'rbbt'
+require 'rbbt/tsv'
+require 'rbbt/resource'
 require 'rbbt/bow/bow'
 require 'set'
 
 module Entrez
 
-  Rbbt.share.databases.entrez.gene_info.define_as_url 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene_info.gz'
-  Rbbt.share.databases.entrez.gene2pubmed.define_as_url 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz'
+  Rbbt.claim Rbbt.share.databases.entrez.gene_info, :url, 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene_info.gz'
+  Rbbt.claim Rbbt.share.databases.entrez.gene2pubmed, :url, 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz'
 
   def self.entrez2native(taxs, options = {})
-    options = Misc.add_defaults options, :key => 1, :fields => 5, :persistence => true, :merge => true
+    options = Misc.add_defaults options, :key_field => 1, :fields => 5, :persist => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
@@ -20,8 +21,21 @@ module Entrez
     tsv
   end
 
+  def self.entrez2name(taxs, options = {})
+    options = Misc.add_defaults options, :key_field => 1, :fields => 2, :persist => true, :merge => true
+
+    taxs = [taxs] unless Array === taxs
+    options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
+    
+    tsv = Rbbt.share.databases.entrez.gene_info.tsv :flat, options
+    tsv.key_field = "Entrez Gene ID"
+    tsv.fields    = ["Associated Gene Name"]
+    tsv
+  end
+
+
   def self.entrez2pubmed(taxs)
-    options = {:key => 1, :fields => 2, :persistence => true, :merge => true}
+    options = {:key_field => 1, :fields => 2, :persist => true, :merge => true}
 
     taxs = [taxs] unless taxs.is_a?(Array)
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
@@ -71,6 +85,7 @@ module Entrez
           genes += xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
         end
       rescue
+        puts $!.message
         genes += geneids_list.collect{|g| nil}
       end
     end
@@ -109,6 +124,7 @@ module Entrez
           missing << p 
         end
       }
+
 
       return list unless missing.any?
       genes = get_online(missing)

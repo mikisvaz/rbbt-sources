@@ -1,22 +1,24 @@
-require 'rbbt-util'
+require 'rbbt'
+require 'rbbt/resource'
+require 'rbbt/persist/tsv'
 
 # This module holds helper methods to deal with the Gene Ontology files. Right
 # now all it does is provide a translation form id to the actual names.
 module GO
 
-  Rbbt.share.databases.GO.gene_ontology.define_as_url 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo'
-  Rbbt.share.databases.GO.gslim_generic.define_as_url 'http://www.geneontology.org/GO_slims/goslim_generic.obo'
+  Rbbt.claim Rbbt.share.databases.GO.gene_ontology, :url, 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo'
+  Rbbt.claim Rbbt.share.databases.GO.gslim_generic, :url, 'http://www.geneontology.org/GO_slims/goslim_generic.obo'
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
-  TSV_GENE_ONTOLOGY = File.join(Persistence.cachedir, 'gene_ontology')
+  TSV_GENE_ONTOLOGY = File.join(Persist.cachedir, 'gene_ontology')
 
   # This method needs to be called before any translations can be made, it is
   # called automatically the first time the id2name method is called. It loads
   # the gene_ontology.obo file and extracts all the fields, although right now,
   # only the name field is used.
   def self.init
-    init = Persistence.persist_tsv('gene_ontology', :Misc) do 
-      info = {}
+    Persist.persist_tsv(nil, 'gene_ontology', {}, :persist => true) do |info|
+      info.serializer = :marshal if info.respond_to? :serializer and info.serializer == :type
       Rbbt.share.databases.GO.gene_ontology.read.split(/\[Term\]/).each{|term| 
         term_info = {}
 
@@ -33,12 +35,13 @@ module GO
         next if term_info["id"].nil?
         info[term_info["id"]] = term_info
       }
+
       info
     end
   end
 
   def self.info
-    self.init
+    @info ||= self.init
   end
 
   def self.goterms

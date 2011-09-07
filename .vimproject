@@ -26,6 +26,9 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    COSTART.rb
    wgEncodeBroadHmm.rb
    jochem.rb
+   COSMIC.rb
+   InterPro.rb
+   NCI.rb
   }
  }
  workflows=workflows{
@@ -43,6 +46,9 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    lib=lib{
     helpers.rb
    }
+   JoChem=JoChem{
+    Rakefile
+   }
    Organism=Organism{
     organism_helpers.rb
     Hsa=Hsa{
@@ -57,7 +63,13 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    }
    EBChromatin=EBChromatin{
     Rakefile
-    }
+   }
+   InterPro=InterPro{
+    Rakefile
+   }
+   NCI=NCI{
+    Rakefile
+   }
   }
  }
  test=test {

@@ -1,7 +1,5 @@
-require 'rbbt/util/tsv'
 require 'rbbt/util/open'
 require 'rbbt/util/misc'
-
 
 def read_chunk(jochem)
   chunk = ""
@@ -39,7 +37,7 @@ def process_jochem
   while chunk = read_chunk(jochem) do
     next if chunk.empty? or chunk =~ /^#/ or chunk =~ /^NS /
       info = {}
-    chunk.split(/\n/).each do |line|
+      chunk.split(/\n/).each do |line|
       line.sub!(/\t@match.*/,'')
       code, value = line.match(/([A-Z]*) (.*)/).values_at 1, 2
       info[code] ||= []

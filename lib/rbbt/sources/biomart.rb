@@ -1,5 +1,6 @@
 require 'rbbt'
-require 'rbbt/util/tsv'
+require 'rbbt/tsv'
+require 'rbbt/tsv/attach'
 require 'rbbt/util/log'
 require 'cgi'
 
@@ -68,10 +69,10 @@ module BioMart
 
     new_datafile = TmpFile.tmp_file
     if data.nil?
-      TSV.merge_rows Open.open(result_file), new_datafile
+      TSV.merge_row_fields Open.open(result_file), new_datafile
       data = new_datafile
     else
-      TSV.paste_merge data, result_file, new_datafile
+      TSV.merge_different_fields data, result_file, new_datafile
       FileUtils.rm data
       data = new_datafile
     end
@@ -117,7 +118,6 @@ module BioMart
     }
 
     chunks << chunk if chunk.any?
-    
 
     Log.low "Chunks: #{chunks.length}"
     chunks.each_with_index{|chunk,i|
@@ -125,15 +125,15 @@ module BioMart
       data = get(database, main, chunk, filters, data, open_options)
     }
 
-    open_options[:filename] ||= "BioMart[#{main}+#{attrs.length}"
+    open_options[:filename] ||= "BioMart[#{main}+#{attrs.length}]"
     if filename.nil?
-      results = TSV.new data, open_options
+      results = TSV.open data, open_options
       results.key_field = main
       results.fields = attrs
       results
     else
       Open.write(filename) do |f|
-        f.puts "#: " << Misc.hash2string(TSV::EXTRA_ACCESSORS.collect{|key| [key, open_options[key]]})
+        f.puts "#: " << Misc.hash2string(TSV::ENTRIES.collect{|key| [key, open_options[key]]})
         if field_names.nil?
           f.puts "#" << [main, attrs].flatten * "\t"
         else

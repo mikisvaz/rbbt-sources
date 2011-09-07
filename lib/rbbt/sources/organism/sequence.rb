@@ -11,11 +11,11 @@ module Organism
     exon_transcripts ||= Organism.transcript_exons(org).tsv(:double, :key => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true, :persistence => true )
     transcript_info  ||= Organism.transcripts.tsv(org).tsv(:list, :persistence => true )
 
-   transcripts = begin
-                   exon_transcripts[exon].first
-                 rescue
-                   []
-                 end
+    transcripts = begin
+                    exon_transcripts[exon].first
+                  rescue
+                    []
+                  end
 
     transcripts.select{|transcript| transcript_info[transcript]["Ensembl Protein ID"].any?}
   end
@@ -421,7 +421,7 @@ protein products of transcripts including those positions.
 
         if not codon.nil? and not codon.empty?
           alleles.each do |allele|
-            allele = Misc::BASE2COMPLEMENT[allele] if strand == -1
+            allele = Misc::BASE2COMPLEMENT[allele] if strand == "-1"
             change = Organism.codon_change(allele, *codon.values_at(0,1))
             pos_code = position * ":"
             mutation = [change.first, codon.last + 1, change.last] * ""

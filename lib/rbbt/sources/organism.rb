@@ -1,33 +1,35 @@
-require 'rbbt-util'
-require 'rbbt/util/resource'
-require 'rbbt/util/tsv/misc'
-
+require 'rbbt'
+require 'rbbt/resource'
+require 'rbbt/resource/with_key'
 
 module Organism
   extend Resource
-  relative_to Rbbt, "share/organisms"
+  self.pkgdir = "rbbt"
+  self.subdir = "share/organisms"
+
+  ["Hsa", "Rno", "Sce"].each do |organism|
+    claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
+
+    module_eval "#{ organism } = with_key '#{organism}'"
+  end
 
   class OrganismNotProcessedError < StandardError; end
 
-  def self.datadir(org)
-    File.join(Rbbt.datadir, 'organisms', org)
-  end 
-
   def self.attach_translations(org, tsv, target = nil, fields = nil, options = {})
     Log.high "Attaching Translations for #{ org.inspect }, target #{target.inspect}, fields #{fields.inspect}"
-    options = Misc.add_defaults options, :persistence => true, :case_insensitive => false
+    options = Misc.add_defaults options, :persist => true, :case_insensitive => false
 
-    options.merge! :key    => target unless target.nil?
+    options.merge! :key_field    => target unless target.nil?
     options.merge! :fields => fields unless fields.nil?
 
     index = identifiers(org).tsv options
 
-    tsv.attach index, [:key], :persist_input => true
+    tsv.attach index, :fields => [:key], :persist_input => true
   end
 
   def self.normalize(org, list, target = nil, fields = nil, options = {})
     return [] if list.nil? or list.empty?
-    options = Misc.add_defaults options, :persistence => true, :case_insensitive => true, :double => false
+    options = Misc.add_defaults options, :persist => true, :case_insensitive => true, :double => false
     double = Misc.process_options options, :double
 
 
@@ -52,7 +54,7 @@ module Organism
   end
 
   def self.guess_id(org, values, identifiers = nil)
-    identifiers ||= TSV.new(Organism.identifiers(org), :persistence => true)
+    identifiers ||= TSV.setup(Organism.identifiers(org), :persist => true)
     field_matches = identifiers.field_matches(values)
     field_matches.sort_by{|field, matches| matches.uniq.length}.last
   end
@@ -64,7 +66,7 @@ module Organism
 
 
   def self.organisms
-    Dir.glob(File.join(Rbbt.share.organisms.find, '*')).collect{|f| File.basename(f)}
+    Dir.glob(File.join(Organism.root.find, '*')).collect{|f| File.basename(f)}
   end
 
   def self.name(organism)
@@ -75,14 +77,6 @@ module Organism
     organisms.select{|organism|
       organism == name or Organism.name(organism) =~ /#{ name }/i
     }.first
-  end
-
-  ["Hsa", "Rno", "Sce"].each do |organism|
-    rakefile = Rbbt["share/install/Organism/#{ organism }/Rakefile"]
-    rakefile.lib_dir = Resource.caller_lib_dir __FILE__
-    rakefile.pkgdir = 'phgx'
-    Organism[organism].define_as_rake rakefile
-    module_eval "#{ organism } = with_key '#{organism}'"
   end
 
 end

@@ -73,19 +73,42 @@ file 'identifiers' do |t|
     end
   end
 
-  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key => 1, :fields => 4
+  name_pos = identifiers.identify_field "Associated Gene Name"
+  entrez2name = Entrez.entrez2name($taxs)
+  identifiers.process "Entrez Gene ID" do |entrez, ensembl, values|
+    names = values[name_pos]
+
+    matches = entrez.select do |e|
+      entrez2name.include? e and (names & entrez2name[e]).any?
+    end
+
+    if matches.any?
+      matches
+    else
+      entrez
+    end
+  end
+
+  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key_field => 1, :fields => 4
   entrez_synonyms.key_field = "Entrez Gene ID"
   entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
   identifiers.attach entrez_synonyms
 
+  identifiers.each do |key, values|
+    values.each do |list|
+      list.reject!{|v| v.nil? or v.empty?}
+      list.uniq!
+    end
+  end
+
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
 file 'lexicon' => 'identifiers' do |t|
-  tsv = TSV.new(t.prerequisites.first).slice(["Associated Gene Name", "Entrez Gene Name Synonyms"])
+  tsv = TSV.open(t.prerequisites.first).slice(["Associated Gene Name", "Entrez Gene Name Synonyms"])
 
-  entrez_description = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key => 1, :fields => 8
+  entrez_description = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key_field => 1, :fields => 8
   entrez_description.key_field = "Entrez Gene ID"
   entrez_description.fields = ["Entrez Gene Description"]
 
@@ -114,7 +137,7 @@ end
 
 file 'transcripts' => 'gene_positions' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
-  transcripts.attach TSV.new('gene_positions'), "Chromosome Name"
+  transcripts.attach TSV.open('gene_positions'), "Chromosome Name"
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
@@ -191,7 +214,7 @@ end
 
 file 'exons' => 'gene_positions' do |t|
   exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => $namespace)
-  exons.attach TSV.new('gene_positions'), "Chromosome Name"
+  exons.attach TSV.open('gene_positions'), "Chromosome Name"
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
@@ -246,30 +269,69 @@ file 'gene_pmids' do |t|
   Open.write(t.name, text)
 end
 
+def coding_transcripts_for_exon(exon, exon_transcripts, transcript_info) 
+  transcripts = begin
+                  exon_transcripts[exon].first
+                rescue
+                  []
+                end
+
+  transcripts.select{|transcript| transcript_info[transcript].first.any?}
+end
+
+def exon_offset_in_transcript(exon, transcript, exons, transcript_exons)
+  sizes = [0]
+  rank = nil
+  start_pos = exons.identify_field "Exon Chr Start"
+  end_pos = exons.identify_field "Exon Chr End"
+
+  Misc.zip_fields(transcript_exons[transcript]).each do |_exon, _rank|
+    _rank = _rank.to_i
+    s, e = exons[_exon].values_at(start_pos, end_pos)
+    size = e.to_i - s.to_i + 1 
+    sizes[_rank] =  size
+    rank = _rank if _exon == exon
+  end
+
+  if not rank.nil?
+    sizes[0..rank - 1].inject(0){|e,acc| acc += e}
+  else
+    nil
+  end
+end
+
 file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts transcript_exons) do |t|
-  require 'rbbt/sources/organism/sequence'
-
-  exons = TSV.new('exons', :persistence => true)
-  exon_transcripts = TSV.new('transcript_exons', :double, :key => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true, :persistence => true )
-  gene_transcripts = TSV.new('gene_transcripts', :flat, :persistence => true )
-  transcript_info = TSV.new('transcripts', :list, :persistence => true )
-  transcript_exons = TSV.new('transcript_exons', :double, :fields => ["Ensembl Exon ID","Exon Rank in Transcript"], :persistence => true )
-
+  exons = TSV.open('exons')
+  exon_transcripts = nil
+  exon_transcripts = TSV.open('transcript_exons', :double, :key_field => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true)
+  gene_transcripts = TSV.open('gene_transcripts', :flat)
+  transcript_info  = TSV.open('transcripts', :list, :fields => ["Ensembl Protein ID"])
+  transcript_exons = TSV.open('transcript_exons', :double, :fields => ["Ensembl Exon ID","Exon Rank in Transcript"])
 
   string = "#: :namespace=#{$namespace}"
   string += "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
-  exons.each do |exon, info|
-    gene, start, finish, strand, chr = info
 
-    transcripts = Organism::Hsa.coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
+  exons.unnamed = true
+  exon_transcripts.unnamed = true
+  gene_transcripts.unnamed = true
+  transcript_info.unnamed = true
+  transcript_exons.unnamed = true
 
-    transcript_offsets = {}
-    transcripts.each do |transcript|
-      offset = Organism::Hsa.exon_offset_in_transcript(exon, transcript, exons, transcript_exons)
-      transcript_offsets[transcript] = offset unless offset.nil?
+  exons.monitor = true
+  Misc.profile do
+    exons.through do |exon, info|
+      gene, start, finish, strand, chr = info
+
+      transcripts = coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
+
+      transcript_offsets = {}
+      transcripts.each do |transcript|
+        offset = exon_offset_in_transcript( exon, transcript, exons, transcript_exons)
+        transcript_offsets[transcript] = offset unless offset.nil?
+      end
+
+      string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
     end
-    
-    string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
   end
 
   Open.write(t.name, string)
@@ -282,18 +344,20 @@ file 'gene_go' do |t|
 end
 
 
+file 'gene_pfam' do |t|
+  goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts goterms end
+end
+
+
 rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
   t.name =~ /([a-z]{3}[0-9]{4})\/(.*)/i
   archive = $1
   task    = $2
-  old_pwd = FileUtils.pwd
-  begin
-    FileUtils.mkdir archive unless File.exists? archive
-    FileUtils.cd File.join(archive)
+  Misc.in_dir(archive) do
     BioMart.set_archive archive
     Rake::Task[task].invoke
     BioMart.unset_archive 
-  ensure
-    FileUtils.cd old_pwd
   end
 end

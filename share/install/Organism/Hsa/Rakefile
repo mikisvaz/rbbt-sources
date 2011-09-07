@@ -52,7 +52,7 @@ $biomart_identifiers = [
   [ 'AFFY HG U95E', 'affy_hg_u95e' ],
   [ 'AFFY HG U95A', 'affy_hg_u95a' ],
   [ 'AFFY HUGENEFL', 'affy_hugenefl' ],
-  [ 'AFFY HuEx', 'affy_huex_1_0_st_v2' ],
+  [ 'AFFY HuEx', 'affy_huex_1_0_st_v2', "HuEx" ],
   [ 'AFFY HuGene', 'affy_hugene_1_0_st_v1' ],
   [ 'AFFY U133 X3P', 'affy_u133_x3p' ],
   [ 'Agilent WholeGenome',"agilent_wholegenome" ],
@@ -65,6 +65,10 @@ $biomart_identifiers = [
 $biomart_go= [
   ["GO ID", 'go_id'],
   ["GO Namespace", 'namespace_1003'],
+]
+
+$biomart_pfam= [
+  ["Pfam Domain", 'pfam'],
 ]
 
 $namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
