@@ -68,6 +68,7 @@ file 'identifiers' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
 
   $biomart_identifiers.each do |name, key, prefix|
+    next unless identifiers.all_fields.include? name
     if prefix
       identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
     end

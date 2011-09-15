@@ -13,3 +13,15 @@ dec2007:
     - agilent_cgh_44b
     - illumina_humanwg_6_v2
     - illumina_humanwg_6_v3
+aug2007:
+    - protein_id
+    - affy_hc_g110
+    - affy_hg_u133a_2
+    - affy_huex_1_0_st_v2
+    - affy_hugene_1_0_st_v1
+    - agilent_wholegenome
+    - agilent_cgh_44b
+    - illumina_humanwg_6_v2
+    - hgnc
+    - hgnc_id
+    - illumina_humanwg_6_v3
