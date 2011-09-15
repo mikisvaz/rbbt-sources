@@ -44,6 +44,7 @@ module BioMart
   end
 
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
+    open_options = Misc.add_defaults :wget_options => {"--read-timeout=" => 9000, "--tries=" => 1}
     repeats = true
     attrs   ||= []
     filters ||= ["with_#{main}"]
@@ -119,6 +120,8 @@ module BioMart
 
     chunks << chunk if chunk.any?
 
+    chunks << [] if chunks.empty?
+
     Log.low "Chunks: #{chunks.length}"
     chunks.each_with_index{|chunk,i|
       Log.low "Chunk #{ i + 1 } / #{chunks.length}: [#{chunk * ", "}]"
@@ -147,9 +150,12 @@ module BioMart
   end
 
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
+    attrs ||= []
+
     if @archive_url 
       attrs = attrs.reject{|attr| (MISSING_IN_ARCHIVE[@archive] || []).include? attr[1]}
     end
+
 
     codes = attrs.collect{|attr| attr[1]}
     if open_options[:filename].nil?
