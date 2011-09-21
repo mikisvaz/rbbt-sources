@@ -129,6 +129,16 @@ file 'protein_identifiers' do |t|
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
+file 'probe_transcripts' do |t|
+  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_probe_identifiers, [], nil, :namespace => $namespace)
+  $biomart_probe_identifiers.each do |name, key, prefix|
+    if prefix
+      identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
+    end
+  end
+
+  File.open(t.name, 'w') do |f| f.puts identifiers end
+end
 
 file 'gene_transcripts' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat, :namespace => $namespace)
