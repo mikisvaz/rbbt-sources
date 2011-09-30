@@ -32,6 +32,9 @@ module BioMart
   EOT
    
   def self.set_archive(date)
+    if defined? Rbbt and Rbbt.etc.allowed_biomart_archives.exists?
+      raise "Biomart archive #{ date } is not allowed in this installation" unless Rbbt.etc.allowed_biomart_archives.read.split("\n").include? date
+    end
     @archive = date
     @archive_url = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
     Log.debug "Using Archive URL #{ @archive_url }"
