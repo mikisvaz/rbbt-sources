@@ -51,6 +51,18 @@ module BioMart
     attrs   ||= []
     filters ||= ["with_#{main}"]
 
+    if chunk_filter = open_options.delete(:chunk_filter)
+      filter, values = chunk_filter
+      merged_file = TmpFile.tmp_file
+      f = File.open(merged_file, 'w')
+      values.each do |value|
+        data = get(database, main, attrs, filters + [[filter, value]], data, open_options)
+        f.write Open.read(data)
+      end
+      f.close
+      return merged_file
+    end
+
     query = @@biomart_query_xml.dup
     query.sub!(/<!--DATABASE-->/,database)
     query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{Array === v ? v * "," : v}\"/>" }.join("\n") )
@@ -63,9 +75,13 @@ module BioMart
       response = Open.read(BIOMART_URL + query.gsub(/\n/,' '), open_options)
     end
 
-    if response.empty? or response =~ /Query ERROR:/
+    if response.empty? or response =~ /Query ERROR:/ 
       raise BioMart::QueryError, response
     end
+
+    raise BioMart::QueryError, "Uncomplete result" if not response =~ /\[success\]$/sm
+
+    response.sub!(/\n\[success\]$/sm,'')
 
     result_file = TmpFile.tmp_file
     Open.write(result_file, response)
@@ -101,10 +117,10 @@ module BioMart
   # cause an error if the BioMart WS does not allow filtering with that
   # attribute.
   def self.query(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
-    open_options = Misc.add_defaults open_options, :nocache => false, :filename => nil, :field_names => nil
-    filename, field_names = Misc.process_options open_options, :filename, :field_names
+    open_options = Misc.add_defaults open_options, :nocache => false, :filename => nil, :field_names => nil, :by_chr => false
+    filename, field_names, by_chr = Misc.process_options open_options, :filename, :field_names, :by_chr
     attrs   ||= []
-      
+
     open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
 
     Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
@@ -123,10 +139,14 @@ module BioMart
     chunks << chunk if chunk.any?
 
     Log.low "Chunks: #{chunks.length}"
-    chunks.each_with_index{|chunk,i|
-      Log.low "Chunk #{ i + 1 } / #{chunks.length}: [#{chunk * ", "}]"
-      data = get(database, main, chunk, filters, data, open_options)
-    }
+    if chunks.any?
+      chunks.each_with_index{|chunk,i|
+        Log.low "Chunk #{ i + 1 } / #{chunks.length}: [#{chunk * ", "}]"
+        data = get(database, main, chunk, filters, data, open_options)
+      }
+    else
+      data = get(database, main, [], filters, data, open_options)
+    end
 
     open_options[:filename] ||= "BioMart[#{main}+#{attrs.length}]"
     if filename.nil?

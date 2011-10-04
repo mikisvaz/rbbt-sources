@@ -205,7 +205,9 @@ file 'gene_sequence' do |t|
   end
 end
 
-file 'protein_sequence' do |t|
+file 'protein_sequence' => 'chromosomes' do |t|
+  #chromosomes = TSV.open(t.prerequisites.first).keys
+  #sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace, :chunk_filter => ['chromosome_name', chromosomes])
   sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
@@ -373,6 +375,12 @@ end
 
 file 'gene_pfam' do |t|
   goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts goterms end
+end
+
+file 'chromosomes' do |t|
+  goterms = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| f.puts goterms end
 end
