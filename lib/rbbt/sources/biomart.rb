@@ -69,17 +69,19 @@ module BioMart
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
-    if @archive_url
-      response = Open.read(@archive_url + query.gsub(/\n/,' '), open_options)
-    else
-      response = Open.read(BIOMART_URL + query.gsub(/\n/,' '), open_options)
-    end
+    url = @archive_url ? @archive_url + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
+
+    response = Open.read(url, open_options.dup)
 
     if response.empty? or response =~ /Query ERROR:/ 
+      Open.remove_from_cache url, open_options
       raise BioMart::QueryError, response
     end
 
-    raise BioMart::QueryError, "Uncomplete result" if not response =~ /\[success\]$/sm
+    if not response =~ /\[success\]$/sm
+      Open.remove_from_cache url, open_options
+      raise BioMart::QueryError, "Uncomplete result"
+    end
 
     response.sub!(/\n\[success\]$/sm,'')
 
