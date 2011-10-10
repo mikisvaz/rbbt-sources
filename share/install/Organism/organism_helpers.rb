@@ -66,6 +66,7 @@ end
 
 file 'identifiers' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
+  identifiers.unnamed =  true
 
   $biomart_identifiers.each do |name, key, prefix|
     next unless identifiers.all_fields.include? name
@@ -95,11 +96,14 @@ file 'identifiers' do |t|
   entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
   identifiers.attach entrez_synonyms
+  
 
-  identifiers.each do |key, values|
-    values.each do |list|
-      list.reject!{|v| v.nil? or v.empty?}
-      list.uniq!
+  identifiers.with_unnamed do
+    identifiers.each do |key, values|
+      values.each do |list|
+        list.reject!{|v| v.nil? or v.empty?}
+        list.uniq!
+      end
     end
   end
 
@@ -148,7 +152,7 @@ end
 
 file 'transcripts' => 'gene_positions' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
-  transcripts.attach TSV.open('gene_positions'), "Chromosome Name"
+  transcripts.attach TSV.open('gene_positions'), fields => ["Chromosome Name"]
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
@@ -222,12 +226,11 @@ file 'protein_sequence' => 'chromosomes' do |t|
       end
     end
   end
-
 end
 
 file 'exons' => 'gene_positions' do |t|
   exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => $namespace)
-  exons.attach TSV.open('gene_positions'), "Chromosome Name"
+  exons.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
