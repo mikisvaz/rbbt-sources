@@ -152,7 +152,7 @@ end
 
 file 'transcripts' => 'gene_positions' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
-  transcripts.attach TSV.open('gene_positions'), fields => ["Chromosome Name"]
+  transcripts.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
@@ -334,20 +334,18 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   transcript_exons.unnamed = true
 
   exons.monitor = true
-  Misc.profile do
-    exons.through do |exon, info|
-      gene, start, finish, strand, chr = info
+  exons.through do |exon, info|
+    gene, start, finish, strand, chr = info
 
-      transcripts = coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
+    transcripts = coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
 
-      transcript_offsets = {}
-      transcripts.each do |transcript|
-        offset = exon_offset_in_transcript( exon, transcript, exons, transcript_exons)
-        transcript_offsets[transcript] = offset unless offset.nil?
-      end
-
-      string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
+    transcript_offsets = {}
+    transcripts.each do |transcript|
+      offset = exon_offset_in_transcript( exon, transcript, exons, transcript_exons)
+      transcript_offsets[transcript] = offset unless offset.nil?
     end
+
+    string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
   end
 
   Open.write(t.name, string)
