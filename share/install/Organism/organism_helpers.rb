@@ -51,6 +51,13 @@ $biomart_transcript_exons = [
   ['Exon Rank in Transcript','rank'],
 ]
 
+$biomart_exon_phase = [
+  $biomart_ensembl_transcript,
+  ['Phase','phase'],
+]
+
+
+
 $biomart_exons = [
   $biomart_ensembl_gene,
   ['Exon Strand','strand'],
@@ -171,7 +178,6 @@ file 'transcript_3utr' do |t|
   end
 end
 
-
 file 'transcript_5utr' do |t|
   utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :namespace => $namespace)
 
@@ -240,6 +246,55 @@ file 'transcript_exons' do |t|
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
+
+file 'exon_phase' do |t|
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exon_phase, [], nil, :keep_empty => true, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts exons end
+end
+
+
+#file 'transcript_phase' do |t|
+#  tsv = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["Phase"], :type => :single, :cast => :to_i)
+#
+#  transcript_cds_start = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, [['CDNA Start','cds_start']], [], nil, :type => :flat, :namespace => $namespace)
+#  transcript_cds_start.through do |transcript, values|
+#    phase = values.compact.reject{|p| p.empty?}.select{|p| p == "1" or p == "2"}.first
+#    tsv[transcript] = phase.to_i unless phase.nil?
+#  end
+#
+#  File.open(t.name, 'w') do |f| f.puts tsv end
+#end
+
+file 'transcript_phase' => ['exon_phase', 'transcript_exons'] do |t|
+  tsv = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["phase"], :type => :single, :cast => :to_i)
+
+  transcript_exons = TSV.open(t.prerequisites.last)
+  transcript_exons.unnamed = true
+
+  exon_is_first_for_transcripts = {}
+
+  transcript_exons.through do |transcript, value|
+    exon = Misc.zip_fields(value).select{|exon, rank| rank == "1" }.first[0]
+    exon_is_first_for_transcripts[exon] ||=  []
+    exon_is_first_for_transcripts[exon] << transcript
+  end
+
+  exon_phase = TSV.open(t.prerequisites.first)
+  exon_phase.unnamed = true
+  exon_phase.monitor = true
+
+  exon_phase.through do |exon, value|
+    Misc.zip_fields(value).each{|transcript, phase| 
+      next unless exon_is_first_for_transcripts.include? exon
+      next unless exon_is_first_for_transcripts[exon].include? transcript
+      tsv[transcript] = phase  
+    }
+  end
+
+  File.open(t.name, 'w') do |f| f.puts tsv end
+end
+
 
 file 'transcript_sequence' do |t|
   sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :namespace => $namespace)

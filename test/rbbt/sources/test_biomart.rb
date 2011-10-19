@@ -48,7 +48,7 @@ class TestBioMart < Test::Unit::TestCase
     end
   end
 
-  def test_chunk
+  def __test_chunk
     chrs = %w(I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI MT 2-micron)
     data = BioMart.query('scerevisiae_gene_ensembl','entrezgene', ['protein_id','refseq_peptide','external_gene_id','ensembl_gene_id'], [], nil, :chunk_filter => ['chromosome_name', chrs], :nocache => false, :wget_options => { :quiet => false})
     assert(data['852236']['external_gene_id'].include? 'YBL044W')
