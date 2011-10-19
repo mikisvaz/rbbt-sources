@@ -51,6 +51,13 @@ $biomart_transcript_exons = [
   ['Exon Rank in Transcript','rank'],
 ]
 
+$biomart_exon_phase = [
+  $biomart_ensembl_transcript,
+  ['Phase','phase'],
+]
+
+
+
 $biomart_exons = [
   $biomart_ensembl_gene,
   ['Exon Strand','strand'],
@@ -66,6 +73,7 @@ end
 
 file 'identifiers' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
+  identifiers.unnamed =  true
 
   $biomart_identifiers.each do |name, key, prefix|
     next unless identifiers.all_fields.include? name
@@ -95,11 +103,14 @@ file 'identifiers' do |t|
   entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
   identifiers.attach entrez_synonyms
+  
 
-  identifiers.each do |key, values|
-    values.each do |list|
-      list.reject!{|v| v.nil? or v.empty?}
-      list.uniq!
+  identifiers.with_unnamed do
+    identifiers.each do |key, values|
+      values.each do |list|
+        list.reject!{|v| v.nil? or v.empty?}
+        list.uniq!
+      end
     end
   end
 
@@ -129,6 +140,16 @@ file 'protein_identifiers' do |t|
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
+file 'probe_transcripts' do |t|
+  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_probe_identifiers, [], nil, :namespace => $namespace)
+  $biomart_probe_identifiers.each do |name, key, prefix|
+    if prefix
+      identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
+    end
+  end
+
+  File.open(t.name, 'w') do |f| f.puts identifiers end
+end
 
 file 'gene_transcripts' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat, :namespace => $namespace)
@@ -138,7 +159,7 @@ end
 
 file 'transcripts' => 'gene_positions' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
-  transcripts.attach TSV.open('gene_positions'), "Chromosome Name"
+  transcripts.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   File.open(t.name, 'w') do |f| f.puts transcripts end
 end
@@ -156,7 +177,6 @@ file 'transcript_3utr' do |t|
     end
   end
 end
-
 
 file 'transcript_5utr' do |t|
   utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :namespace => $namespace)
@@ -195,7 +215,9 @@ file 'gene_sequence' do |t|
   end
 end
 
-file 'protein_sequence' do |t|
+file 'protein_sequence' => 'chromosomes' do |t|
+  #chromosomes = TSV.open(t.prerequisites.first).keys
+  #sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace, :chunk_filter => ['chromosome_name', chromosomes])
   sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| 
@@ -210,12 +232,11 @@ file 'protein_sequence' do |t|
       end
     end
   end
-
 end
 
 file 'exons' => 'gene_positions' do |t|
   exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => $namespace)
-  exons.attach TSV.open('gene_positions'), "Chromosome Name"
+  exons.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
@@ -225,6 +246,55 @@ file 'transcript_exons' do |t|
 
   File.open(t.name, 'w') do |f| f.puts exons end
 end
+
+file 'exon_phase' do |t|
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exon_phase, [], nil, :keep_empty => true, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts exons end
+end
+
+
+#file 'transcript_phase' do |t|
+#  tsv = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["Phase"], :type => :single, :cast => :to_i)
+#
+#  transcript_cds_start = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, [['CDNA Start','cds_start']], [], nil, :type => :flat, :namespace => $namespace)
+#  transcript_cds_start.through do |transcript, values|
+#    phase = values.compact.reject{|p| p.empty?}.select{|p| p == "1" or p == "2"}.first
+#    tsv[transcript] = phase.to_i unless phase.nil?
+#  end
+#
+#  File.open(t.name, 'w') do |f| f.puts tsv end
+#end
+
+file 'transcript_phase' => ['exon_phase', 'transcript_exons'] do |t|
+  tsv = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["phase"], :type => :single, :cast => :to_i)
+
+  transcript_exons = TSV.open(t.prerequisites.last)
+  transcript_exons.unnamed = true
+
+  exon_is_first_for_transcripts = {}
+
+  transcript_exons.through do |transcript, value|
+    exon = Misc.zip_fields(value).select{|exon, rank| rank == "1" }.first[0]
+    exon_is_first_for_transcripts[exon] ||=  []
+    exon_is_first_for_transcripts[exon] << transcript
+  end
+
+  exon_phase = TSV.open(t.prerequisites.first)
+  exon_phase.unnamed = true
+  exon_phase.monitor = true
+
+  exon_phase.through do |exon, value|
+    Misc.zip_fields(value).each{|transcript, phase| 
+      next unless exon_is_first_for_transcripts.include? exon
+      next unless exon_is_first_for_transcripts[exon].include? transcript
+      tsv[transcript] = phase  
+    }
+  end
+
+  File.open(t.name, 'w') do |f| f.puts tsv end
+end
+
 
 file 'transcript_sequence' do |t|
   sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :namespace => $namespace)
@@ -319,20 +389,18 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   transcript_exons.unnamed = true
 
   exons.monitor = true
-  Misc.profile do
-    exons.through do |exon, info|
-      gene, start, finish, strand, chr = info
+  exons.through do |exon, info|
+    gene, start, finish, strand, chr = info
 
-      transcripts = coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
+    transcripts = coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
 
-      transcript_offsets = {}
-      transcripts.each do |transcript|
-        offset = exon_offset_in_transcript( exon, transcript, exons, transcript_exons)
-        transcript_offsets[transcript] = offset unless offset.nil?
-      end
-
-      string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
+    transcript_offsets = {}
+    transcripts.each do |transcript|
+      offset = exon_offset_in_transcript( exon, transcript, exons, transcript_exons)
+      transcript_offsets[transcript] = offset unless offset.nil?
     end
+
+    string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
   end
 
   Open.write(t.name, string)
@@ -363,6 +431,12 @@ end
 
 file 'gene_pfam' do |t|
   goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts goterms end
+end
+
+file 'chromosomes' do |t|
+  goterms = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => $namespace)
 
   File.open(t.name, 'w') do |f| f.puts goterms end
 end

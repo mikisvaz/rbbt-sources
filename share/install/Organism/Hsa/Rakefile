@@ -25,6 +25,30 @@ $biomart_protein_identifiers = [
   [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
 ]
 
+$biomart_probe_identifiers = [
+  [ 'AFFY HC G110', 'affy_hc_g110' ],
+  [ 'AFFY HG FOCUS', 'affy_hg_focus' ],
+  [ 'AFFY HG U133-PLUS-2', 'affy_hg_u133_plus_2' ],
+  [ 'AFFY HG U133A_2', 'affy_hg_u133a_2' ],
+  [ 'AFFY HG U133A', 'affy_hg_u133a' ],
+  [ 'AFFY HG U133B', 'affy_hg_u133b' ],
+  [ 'AFFY HG U95AV2', 'affy_hg_u95av2' ],
+  [ 'AFFY HG U95B', 'affy_hg_u95b' ],
+  [ 'AFFY HG U95C', 'affy_hg_u95c' ],
+  [ 'AFFY HG U95D', 'affy_hg_u95d' ],
+  [ 'AFFY HG U95E', 'affy_hg_u95e' ],
+  [ 'AFFY HG U95A', 'affy_hg_u95a' ],
+  [ 'AFFY HUGENEFL', 'affy_hugenefl' ],
+  [ 'AFFY HuEx', 'affy_huex_1_0_st_v2', "HuEx" ],
+  [ 'AFFY HuGene', 'affy_hugene_1_0_st_v1' ],
+  [ 'AFFY U133 X3P', 'affy_u133_x3p' ],
+  [ 'Agilent WholeGenome',"agilent_wholegenome" ],
+  [ 'Agilent CGH 44b', 'agilent_cgh_44b' ],
+  [ 'Codelink ID', 'codelink' ],
+  [ 'Illumina HumanWG 6 v2', 'illumina_humanwg_6_v2' ],
+  [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
+]
+
 $biomart_identifiers = [ 
   [ 'Entrez Gene ID', "entrezgene"],
   [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
@@ -38,7 +62,7 @@ $biomart_identifiers = [
   [ 'HGNC ID', "hgnc_id", 'HGNC'],
   [ 'EMBL (Genbank) ID' , "embl"] , 
 
-  # Affymetrix
+  # Probes
   [ 'AFFY HC G110', 'affy_hc_g110' ],
   [ 'AFFY HG FOCUS', 'affy_hg_focus' ],
   [ 'AFFY HG U133-PLUS-2', 'affy_hg_u133_plus_2' ],
