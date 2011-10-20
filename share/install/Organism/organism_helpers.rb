@@ -379,7 +379,7 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   transcript_info  = TSV.open('transcripts', :list, :fields => ["Ensembl Protein ID"])
   transcript_exons = TSV.open('transcript_exons', :double, :fields => ["Ensembl Exon ID","Exon Rank in Transcript"])
 
-  string = "#: :namespace=#{$namespace}"
+  string = "#: :namespace=#{$namespace}\n"
   string += "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
 
   exons.unnamed = true
