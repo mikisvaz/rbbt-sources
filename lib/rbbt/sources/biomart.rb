@@ -72,7 +72,12 @@ module BioMart
 
     url = @archive_url ? @archive_url + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
 
-    response = Open.read(url, open_options.dup)
+    begin
+      response = Open.read(url, open_options.dup)
+    rescue
+      Open.remove_from_cache url, open_options
+      raise $!
+    end
 
     if response.empty? or response =~ /Query ERROR:/ 
       Open.remove_from_cache url, open_options
