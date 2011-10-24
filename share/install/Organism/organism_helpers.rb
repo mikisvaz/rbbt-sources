@@ -140,7 +140,7 @@ file 'protein_identifiers' do |t|
   File.open(t.name, 'w') do |f| f.puts identifiers end
 end
 
-file 'probe_transcripts' do |t|
+file 'transcript_probes' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_probe_identifiers, [], nil, :namespace => $namespace)
   $biomart_probe_identifiers.each do |name, key, prefix|
     if prefix
@@ -211,7 +211,7 @@ file 'gene_sequence' do |t|
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
-    f.puts "#Ensembl Gene ID\tProtein Sequence"
+    f.puts "#Ensembl Gene ID\tGene Sequence"
     sequences.each do |seq, genes|
       genes.each do |gene|
         f.write gene 
@@ -309,7 +309,7 @@ file 'transcript_sequence' do |t|
 
   File.open(t.name, 'w') do |f| 
     f.puts "#: :type=:single"
-    f.puts "#Ensembl Transcript ID\tProtein Sequence"
+    f.puts "#Ensembl Transcript ID\tTranscript Sequence"
     sequences.each do |seq, genes|
       genes.each do |gene|
         f.write gene 
