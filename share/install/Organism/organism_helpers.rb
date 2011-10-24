@@ -172,7 +172,11 @@ file 'transcript_3utr' do |t|
     f.puts "#Ensembl Transcript ID\t3' UTR Length"
     utrs.each do |seq,trans|
       trans.each do |tran|
-        f.puts [tran, seq.length] * "\t"
+        if seq == "Sequence unavailable"
+          f.puts [tran, 0] * "\t"
+        else
+          f.puts [tran, seq.length] * "\t"
+        end
       end
     end
   end
@@ -186,7 +190,11 @@ file 'transcript_5utr' do |t|
     f.puts "#Ensembl Transcript ID\t5' UTR Length"
     utrs.each do |seq,trans|
       trans.each do |tran|
-        f.puts [tran, seq.length] * "\t"
+        if seq == "Sequence unavailable"
+          f.puts [tran, 0] * "\t"
+        else
+          f.puts [tran, seq.length] * "\t"
+        end
       end
     end
   end
