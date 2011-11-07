@@ -172,11 +172,7 @@ file 'transcript_3utr' do |t|
     f.puts "#Ensembl Transcript ID\t3' UTR Length"
     utrs.each do |seq,trans|
       trans.each do |tran|
-        if seq == "Sequence unavailable"
-          f.puts [tran, 0] * "\t"
-        else
-          f.puts [tran, seq.length] * "\t"
-        end
+        f.puts [tran, seq.length] * "\t" if seq =~ /^[ACTG]+$/
       end
     end
   end
@@ -190,11 +186,7 @@ file 'transcript_5utr' do |t|
     f.puts "#Ensembl Transcript ID\t5' UTR Length"
     utrs.each do |seq,trans|
       trans.each do |tran|
-        if seq == "Sequence unavailable"
-          f.puts [tran, 0] * "\t"
-        else
-          f.puts [tran, seq.length] * "\t"
-        end
+        f.puts [tran, seq.length] * "\t" if seq =~ /^[ACTG]+$/
       end
     end
   end
@@ -434,7 +426,6 @@ file 'gene_go_bp' => 'gene_go' do |t|
 
   File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
 end
-
 
 
 file 'gene_pfam' do |t|
