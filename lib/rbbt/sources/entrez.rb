@@ -35,7 +35,7 @@ module Entrez
 
 
   def self.entrez2pubmed(taxs)
-    options = {:key_field => 1, :fields => 2, :persist => true, :merge => true}
+    options = {:key_field => 1, :fields => [2], :persist => true, :merge => true}
 
     taxs = [taxs] unless taxs.is_a?(Array)
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}

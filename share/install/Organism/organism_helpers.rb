@@ -340,7 +340,7 @@ end
 
 file 'gene_pmids' do |t|
   tsv =  Entrez.entrez2pubmed($taxs)
-  text = "#: :namespace=#{$namespace}"
+  text = "#: :namespace=#{$namespace}\n"
   text += "#Entrez Gene ID\tPMID"
   tsv.each do |gene, pmids|
     text << "\n" << gene << "\t" << pmids * "|"
