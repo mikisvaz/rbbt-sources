@@ -407,9 +407,25 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
 end
 
 file 'gene_go' do |t|
-  goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => $namespace)
+  if File.basename(FileUtils.pwd) =~ /^[a-z]{3}([0-9]{4})$/i and $1.to_i <= 2009
+    goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go_2009, [], nil, :type => :double, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts goterms end
+    goterms.add_field "GO ID" do |key, values|
+      values.flatten.compact.reject{|go| go.empty?}
+    end
+
+    goterms.add_field "GO Namespace" do |key, values|
+      ["biological_process"] * values["GO BP ID"].reject{|go| go.empty?}.length +
+        ["cellular_component"] * values["GO CC ID"].reject{|go| go.empty?}.length +
+        ["molecular_function"] * values["GO MF ID"].reject{|go| go.empty?}.length 
+    end
+
+    File.open(t.name, 'w') do |f| f.puts goterms.slice(["GO ID", "GO Namespace"]) end
+  else
+    goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => $namespace)
+
+    File.open(t.name, 'w') do |f| f.puts goterms end
+  end
 end
 
 file 'gene_go_bp' => 'gene_go' do |t|

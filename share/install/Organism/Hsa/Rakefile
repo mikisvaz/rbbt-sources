@@ -91,6 +91,12 @@ $biomart_go= [
   ["GO Namespace", 'namespace_1003'],
 ]
 
+$biomart_go_2009= [
+  ["GO BP ID", 'go_biological_process_id'],
+  ["GO MF ID", 'go_molecular_function_id'],
+  ["GO CC ID", 'go_cellular_component_id'],
+]
+
 $biomart_pfam= [
   ["Pfam Domain", 'pfam'],
 ]
