@@ -17,6 +17,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    pubmed.rb
 
    barcode.rb
+   tfacts.rb
 
    organism.rb
    organism=organism{
