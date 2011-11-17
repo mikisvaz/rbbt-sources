@@ -51,7 +51,7 @@ file 'nature_pathways' do |t|
 
   pathways = NCI.get_pathways(xml)
 
-  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI Pathway ID", :fields => ["Pathway Name","UniProt/SwissProt Accession"]).to_s)
+  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI Nature Pathway ID", :fields => ["Pathway Name","UniProt/SwissProt Accession"]).to_s)
 end
 
 file 'biocarta_pathways' do |t|
@@ -62,7 +62,7 @@ file 'biocarta_pathways' do |t|
 
   pathways = NCI.get_pathways(xml, "LL")
 
-  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI Pathway ID", :fields => ["Pathway Name","Entrez Gene ID"]).to_s)
+  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name","Entrez Gene ID"]).to_s)
 end
 
 file 'reactome_pathways' do |t|
@@ -73,7 +73,7 @@ file 'reactome_pathways' do |t|
 
   pathways = NCI.get_pathways(xml, "UP")
 
-  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI Pathway ID", :fields => ["Pathway Name","UniProt/SwissProt Accession"]).to_s)
+  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name","UniProt/SwissProt Accession"]).to_s)
 end
 
 

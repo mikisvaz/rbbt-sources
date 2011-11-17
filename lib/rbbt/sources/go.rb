@@ -84,3 +84,33 @@ module GO
     end
   end
 end
+
+if defined? Entity 
+
+  module GOTerm
+    extend Entity
+    self.format = "GO ID"
+
+    property :name => :array2single do
+      @name ||= GO.id2name(self)
+    end
+
+    property :genes => :array2single do |organism|
+      @genes ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "GO ID", :fields => ["Ensembl Gene ID"], :type => :flat, :merge => true).values_at *self
+    end
+  end
+
+  if defined? Gene and Entity === Gene
+    module Gene
+      property :go_terms => :array2single do |organism|
+        @go_terms ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
+      end
+ 
+      property :go_bp_terms => :array2single do |organism|
+        @go_bp_terms ||= Organism.gene_go_bp(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
+      end
+    end
+  end
+end
+
+
