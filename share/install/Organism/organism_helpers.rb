@@ -1,3 +1,5 @@
+require 'net/ftp'
+
 $biomart_ensembl_gene = ['Ensembl Gene ID', 'ensembl_gene_id']
 $biomart_ensembl_protein = ['Ensembl Protein ID', 'ensembl_peptide_id']
 $biomart_ensembl_exon = ['Ensembl Exon ID', 'ensembl_exon_id']
@@ -456,6 +458,37 @@ file 'chromosomes' do |t|
   File.open(t.name, 'w') do |f| f.puts goterms end
 end
 
+rule /^chromosome_.*/ do |t|
+  chr = t.name.match(/chromosome_(.*)/)[1]
+
+  archive = File.basename(FileUtils.pwd) =~ /^([a-z]{3}[0-9]{4})$/i ? $1 : nil
+
+  release = case archive
+            when "may2009"
+              "release-54"
+            when "jun2011"
+              "release-64"
+            when nil
+              Open.read("http://www.ensembl.org/info/data/ftp/index.html", :nocache => true).match(/pub\/(\w+-\d+)\/fasta/)[1]
+            end
+
+
+  ftp = Net::FTP.new("ftp.ensembl.org")
+  ftp.login
+  ftp.chdir("pub/#{ release }/fasta/")
+  ftp.chdir($scientific_name.downcase.sub(" ",'_'))
+  ftp.chdir('dna')
+  file = ftp.nlst.select{|file| file =~ /chromosome\.#{ chr }\.fa/}.first
+
+  raise "Fasta file for chromosome not found: #{ chr } - #{ archive }, #{ release }" if file.nil?
+
+  Log.debug("Downloading chromosome sequence: #{ file }")
+  TmpFile.with_file do |tmpfile|
+    ftp.getbinaryfile(file, tmpfile)
+    Open.write(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
+    ftp.close
+  end
+end
 
 rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
   t.name =~ /([a-z]{3}[0-9]{4})\/(.*)/i

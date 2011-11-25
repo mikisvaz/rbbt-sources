@@ -13,7 +13,7 @@ if defined? Entity
     self.format = "NCI Nature Pathway ID"
 
     property :name => :array2single do
-      @name ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["Pathway Name"], :type => :flat, :merge => true).values_at *self
+      @name ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["Pathway Name"], :type => :single).values_at *self
     end
 
     property :genes => :array2single do
@@ -26,7 +26,7 @@ if defined? Entity
     self.format = "NCI Reactome Pathway ID"
 
     property :name => :array2single do
-      @name ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name"], :type => :flat, :merge => true).values_at *self
+      @name ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name"], :type => :single).values_at *self
     end
 
     property :genes => :array2single do
@@ -39,7 +39,7 @@ if defined? Entity
     self.format = "NCI BioCarta Pathway ID"
 
     property :name => :array2single do
-      @name ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name"], :type => :flat, :merge => true).values_at *self
+      @name ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name"], :type => :single).values_at *self
     end
 
     property :genes => :array2single do

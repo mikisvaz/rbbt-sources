@@ -102,11 +102,11 @@ if defined? Entity
 
   if defined? Gene and Entity === Gene
     module Gene
-      property :go_terms => :array2single do |organism|
+      property :go_terms => :array2single do 
         @go_terms ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
       end
  
-      property :go_bp_terms => :array2single do |organism|
+      property :go_bp_terms => :array2single do 
         @go_bp_terms ||= Organism.gene_go_bp(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
       end
     end
