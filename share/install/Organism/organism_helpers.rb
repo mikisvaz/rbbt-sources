@@ -58,7 +58,9 @@ $biomart_exon_phase = [
   ['Phase','phase'],
 ]
 
-
+$biomart_pfam= [
+  ["Pfam Domain", 'pfam'],
+]
 
 $biomart_exons = [
   $biomart_ensembl_gene,

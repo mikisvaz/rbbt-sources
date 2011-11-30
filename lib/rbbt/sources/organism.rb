@@ -7,7 +7,7 @@ module Organism
   self.pkgdir = "rbbt"
   self.subdir = "share/organisms"
 
-  ["Hsa", "Rno", "Sce"].each do |organism|
+  ["Hsa", "Mmu", "Rno", "Sce"].each do |organism|
     claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
 
     module_eval "#{ organism } = with_key '#{organism}'"
