@@ -32,6 +32,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    COSMIC.rb
    InterPro.rb
    NCI.rb
+   pfam.rb
   }
  }
  workflows=workflows{
@@ -55,6 +56,9 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    Organism=Organism{
     organism_helpers.rb
     Hsa=Hsa{
+     Rakefile
+    }
+    Mmu=Mmu{
      Rakefile
     }
     Rno=Rno{

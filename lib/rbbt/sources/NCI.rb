@@ -9,15 +9,25 @@ end
 if defined? Entity 
 
   module NCINaturePathways
+
+    def self.name_index
+      @name_index ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["Pathway Name"], :type => :single)
+    end
+
+    def self.gene_index
+      @gene_index ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true)
+    end
+
+
     extend Entity
     self.format = "NCI Nature Pathway ID"
 
     property :name => :array2single do
-      @name ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["Pathway Name"], :type => :single).values_at *self
+      @name ||= NCINaturePathways.name_index.values_at *self
     end
 
     property :genes => :array2single do
-      @genes ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true).values_at *self
+      @genes ||= NCINaturePathways.gene_index.values_at *self
     end
   end
 
@@ -25,12 +35,20 @@ if defined? Entity
     extend Entity
     self.format = "NCI Reactome Pathway ID"
 
+    def self.name_index
+      @name_index ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name"], :type => :single)
+    end
+
+    def self.gene_index
+      @gene_index ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true)
+    end
+
     property :name => :array2single do
-      @name ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name"], :type => :single).values_at *self
+      @name ||= NCIReactomePathways.name_index.values_at *self
     end
 
     property :genes => :array2single do
-      @genes ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true).values_at *self
+      @genes ||= NCIReactomePathways.gene_index.values_at *self
     end
   end
 
@@ -38,12 +56,20 @@ if defined? Entity
     extend Entity
     self.format = "NCI BioCarta Pathway ID"
 
+    def self.name_index
+      @name_index ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name"], :type => :single)
+    end
+
+    def self.gene_index
+      @gene_index ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Entrez Gene ID"], :type => :flat, :merge => true)
+    end
+
     property :name => :array2single do
-      @name ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name"], :type => :single).values_at *self
+      @name ||= NCIBioCartaPathways.name_index.values_at *self
     end
 
     property :genes => :array2single do
-      @genes ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Entrez Gene ID"], :type => :flat, :merge => true).values_at *self
+      @genes ||= NCIBioCartaPathways.gene_index.values_at *self
     end
   end
 
