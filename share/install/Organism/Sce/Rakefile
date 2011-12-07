@@ -8,6 +8,7 @@ $native = "SGD ID"
 $url = "ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"
 $biomart_db = 'scerevisiae_gene_ensembl'
 $biomart_main = ['Entrez Gene ID', 'entrezgene']
+$ortholog_key = "yeast_ensembl_gene"
 
 
 file 'scientific_name' do |t|

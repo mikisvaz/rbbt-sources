@@ -5,6 +5,7 @@ require File.join(File.dirname(__FILE__), '../../lib/helpers')
 
 $taxs = [9606]
 $scientific_name = "Homo sapiens"
+$ortholog_key = "human_ensembl_gene"
 
 $biomart_db = 'hsapiens_gene_ensembl'
 $biomart_db_germline_variation = 'hsapiens_snp'

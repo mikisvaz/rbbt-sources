@@ -9,6 +9,7 @@ $scientific_name = "Rattus norvegicus"
 $biomart_db = 'rnorvegicus_gene_ensembl'
 $biomart_db_germline_variation = 'rnorvegicus_snp'
 $biomart_db_somatic_variation = 'rnorvegicus_snp_som'
+$ortholog_key = "rat_ensembl_gene"
 
 $biomart_lexicon = [ 
   [ 'Associated Gene Name' , "external_gene_id"], 

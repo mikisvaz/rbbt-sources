@@ -75,6 +75,12 @@ file 'scientific_name' do |t|
   File.open(t.name, 'w') do |f| f.write $scientific_name end
 end
 
+file 'ortholog_key' do |t|
+  raise "Ortholog key not defined. Set up $ortholog_key in the organism specific Rakefile; example $ortholog_key = 'human_ensembl_gene'" unless defined? $ortholog_key and not $ortholog_key.nil?
+
+  File.open(t.name, 'w') do |f| f.write $ortholog_key end
+end
+
 file 'identifiers' do |t|
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
   identifiers.unnamed =  true
@@ -490,6 +496,18 @@ rule /^chromosome_.*/ do |t|
     Open.write(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
     ftp.close
   end
+end
+
+rule /^possible_ortholog_(.*)/ do |t|
+  other = t.name.match(/ortholog_(.*)/)[1]
+  other_key = Organism.ortholog_key(other).produce.read
+  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", "inter_paralog_" + other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => $namespace)
+end
+
+rule /^ortholog_(.*)/ do |t|
+  other = t.name.match(/ortholog_(.*)/)[1]
+  other_key = Organism.ortholog_key(other).produce.read
+  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => $namespace)
 end
 
 rule /[a-z]{3}[0-9]{4}\/.*/i do |t|

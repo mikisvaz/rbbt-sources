@@ -20,10 +20,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    tfacts.rb
 
    organism.rb
-   organism=organism{
-    sequence.rb
-   }
-
+   
    polysearch.rb
    CTCAE.rb
    COSTART.rb
