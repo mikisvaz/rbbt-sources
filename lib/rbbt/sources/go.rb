@@ -91,6 +91,8 @@ if defined? Entity
     extend Entity
     self.format = "GO ID"
 
+    self.annotation :organism
+
     property :name => :array2single do
       @name ||= GO.id2name(self)
     end
