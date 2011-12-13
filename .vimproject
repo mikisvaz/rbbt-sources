@@ -4,42 +4,28 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  }
  etc=etc{
   biomart=biomart{
-   missing_in_archive
   }
  }
  lib=lib {
   sources=rbbt/sources{
-   biomart.rb
+   COSMIC.rb
+   COSTART.rb
+   CTCAE.rb
+   InterPro.rb
+   NCI.rb
+   barcode.rb
    bibtex.rb
+   biomart.rb
    entrez.rb
    go.rb
    gscholar.rb
-   pubmed.rb
-
-   barcode.rb
-   tfacts.rb
-
-   organism.rb
-   
-   polysearch.rb
-   CTCAE.rb
-   COSTART.rb
-   wgEncodeBroadHmm.rb
    jochem.rb
-   COSMIC.rb
-   InterPro.rb
-   NCI.rb
+   organism.rb
    pfam.rb
-  }
- }
- workflows=workflows{
-  sequence=sequence{
-   workflow.rb
-   lib=lib{
-    organism.rb
-   }
-   test=test{
-   }
+   polysearch.rb
+   pubmed.rb
+   tfacts.rb
+   wgEncodeBroadHmm.rb
   }
  }
  share=share{
@@ -66,7 +52,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
     }
    }
    EBChromatin=EBChromatin{
-    Rakefile
    }
    InterPro=InterPro{
     Rakefile
@@ -79,11 +64,11 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  test=test {
   test_helper.rb
   sources=rbbt/sources{
-   test_pubmed.rb
-   test_go.rb
    test_biomart.rb
    test_entrez.rb
+   test_go.rb
    test_organism.rb
+   test_pubmed.rb
   }
  }
  data=data{

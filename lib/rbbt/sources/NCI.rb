@@ -18,6 +18,13 @@ if defined? Entity
       @gene_index ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true)
     end
 
+    def self.filter(query, field = nil, options = nil, entity = nil)
+      return true if query == entity
+
+      return true if self.setup(entity.dup, options.merge(:format => field)).name.index query
+
+      false
+    end
 
     extend Entity
     self.format = "NCI Nature Pathway ID"
@@ -43,6 +50,14 @@ if defined? Entity
       @gene_index ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true)
     end
 
+    def self.filter(query, field = nil, options = nil, entity = nil)
+      return true if query == entity
+
+      return true if self.setup(entity.dup, options.merge(:format => field)).name.index query
+
+      false
+    end
+
     property :name => :array2single do
       @name ||= NCIReactomePathways.name_index.values_at *self
     end
@@ -62,6 +77,14 @@ if defined? Entity
 
     def self.gene_index
       @gene_index ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Entrez Gene ID"], :type => :flat, :merge => true)
+    end
+
+    def self.filter(query, field = nil, options = nil, entity = nil)
+      return true if query == entity
+
+      return true if self.setup(entity.dup, options.merge(:format => field)).name.index query
+
+      false
     end
 
     property :name => :array2single do

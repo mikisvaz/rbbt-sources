@@ -98,6 +98,7 @@ if defined? Entity
     end
 
     property :genes => :array2single do |organism|
+      organism ||= self.organism
       @genes ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "GO ID", :fields => ["Ensembl Gene ID"], :type => :flat, :merge => true).values_at *self
     end
 
