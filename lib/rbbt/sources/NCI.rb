@@ -8,7 +8,11 @@ end
 
 if defined? Entity 
 
-  module NCINaturePathways
+  module NCINaturePathway
+    extend Entity
+    self.format = "NCI Nature Pathway ID"
+
+    self.annotation :organism
 
     def self.name_index
       @name_index ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "NCI Nature Pathway ID", :fields => ["Pathway Name"], :type => :single)
@@ -25,22 +29,20 @@ if defined? Entity
 
       false
     end
-
-    extend Entity
-    self.format = "NCI Nature Pathway ID"
-
     property :name => :array2single do
-      @name ||= NCINaturePathways.name_index.values_at *self
+      @name ||= NCINaturePathway.name_index.values_at *self
     end
 
     property :genes => :array2single do
-      @genes ||= NCINaturePathways.gene_index.values_at *self
+      @genes ||= NCINaturePathway.gene_index.values_at *self
     end
   end
 
-  module NCIReactomePathways
+  module NCIReactomePathway
     extend Entity
     self.format = "NCI Reactome Pathway ID"
+    
+    self.annotation :organism
 
     def self.name_index
       @name_index ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name"], :type => :single)
@@ -59,17 +61,19 @@ if defined? Entity
     end
 
     property :name => :array2single do
-      @name ||= NCIReactomePathways.name_index.values_at *self
+      @name ||= NCIReactomePathway.name_index.values_at *self
     end
 
     property :genes => :array2single do
-      @genes ||= NCIReactomePathways.gene_index.values_at *self
+      @genes ||= NCIReactomePathway.gene_index.values_at *self
     end
   end
 
-  module NCIBioCartaPathways
+  module NCIBioCartaPathway
     extend Entity
     self.format = "NCI BioCarta Pathway ID"
+
+    self.annotation :organism
 
     def self.name_index
       @name_index ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name"], :type => :single)
@@ -88,26 +92,30 @@ if defined? Entity
     end
 
     property :name => :array2single do
-      @name ||= NCIBioCartaPathways.name_index.values_at *self
+      @name ||= NCIBioCartaPathway.name_index.values_at *self
     end
 
     property :genes => :array2single do
-      @genes ||= NCIBioCartaPathways.gene_index.values_at *self
+      @genes ||= NCIBioCartaPathway.gene_index.values_at(*self).
+        each{|pth| pth.organism = organism if pth.respond_to? :organism }
     end
   end
 
   if defined? Gene and Entity === Gene
     module Gene
       property :nature_pathways => :array2single do
-        @nature_pathways ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Nature Pathway ID"], :type => :flat, :merge => true).values_at *self.to("UniProt/SwissProt Accession")
+        @nature_pathways ||= NCI.nature_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Nature Pathway ID"], :type => :flat, :merge => true).values_at(*self.to("UniProt/SwissProt Accession")).
+          each{|pth| pth.organism = organism if pth.respond_to? :organism }
       end
 
       property :reactome_pathways => :array2single do
-        @reactome_pathways ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Reactome Pathway ID"], :type => :flat, :merge => true).values_at *self.to("UniProt/SwissProt Accession")
+        @reactome_pathways ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Reactome Pathway ID"], :type => :flat, :merge => true).values_at (*self.to("UniProt/SwissProt Accession")).
+          each{|pth| pth.organism = organism if pth.respond_to? :organism }
       end
  
       property :biocarta_pathways => :array2single do
-        @biocarta_pathways ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "Entrez Gene ID", :fields => ["NCI BioCarta Pathway ID"], :type => :flat, :merge => true).values_at *self.entrez
+        @biocarta_pathways ||= NCI.biocarta_pathways.tsv(:persist => true, :key_field => "Entrez Gene ID", :fields => ["NCI BioCarta Pathway ID"], :type => :flat, :merge => true).values_at(*self.entrez).
+          each{|pth| pth.organism = organism if pth.respond_to? :organism }
       end
     end
   end
