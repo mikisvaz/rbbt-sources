@@ -25,6 +25,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    polysearch.rb
    pubmed.rb
    tfacts.rb
+   uniprot.rb
    wgEncodeBroadHmm.rb
   }
  }

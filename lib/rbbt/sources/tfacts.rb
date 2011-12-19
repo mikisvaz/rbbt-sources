@@ -45,7 +45,6 @@ module TFacts
   end
 end
 
-
 if defined? Entity and defined? Gene and Entity === Gene
 
   module Gene
