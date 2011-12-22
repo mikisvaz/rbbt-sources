@@ -109,7 +109,7 @@ if defined? Entity
       end
 
       property :reactome_pathways => :array2single do
-        @reactome_pathways ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Reactome Pathway ID"], :type => :flat, :merge => true).values_at (*self.to("UniProt/SwissProt Accession")).
+        @reactome_pathways ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Reactome Pathway ID"], :type => :flat, :merge => true).values_at(*self.to("UniProt/SwissProt Accession")).
           each{|pth| pth.organism = organism if pth.respond_to? :organism }
       end
  

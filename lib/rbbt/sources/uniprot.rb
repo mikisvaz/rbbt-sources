@@ -1,10 +1,40 @@
 require 'rbbt/util/open'
+require 'rbbt/resource'
 require 'rbbt/sources/cath'
 require 'rbbt/sources/uniprot'
 
 module Uniprot
-  UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
+  extend Resource
+  self.subdir = "share/databases/Uniprot"
 
+  Uniprot.claim Uniprot.annotated_variants, :proc do
+    url = "http://www.uniprot.org/docs/humsavar.txt"
+    tsv = TSV.open(CMD.cmd('tail -n +31 | head -n -4|grep "[[:alpha:]]"', :in => Open.open(url), :pipe => true), 
+                   :fix => Proc.new{|line| parts = line.split(/\s+/); (parts[0..5] + [(parts[6..-1] || []) * " "]) * "\t"}, :type => :list,:key_field => "Associated Gene Name", 
+                   :fields => ["Uniprot/SwissProt Accession", "Uniprot Variant ID", "Amino Acid Mutation", "Type of Variant", "SNP ID", "Disease"])
+
+    tsv.unnamed = true
+    tsv.process "Amino Acid Mutation" do |mutation|
+      if mutation.match(/p\.(\w{3})(\d+)(\w{3})/)
+        wt = Misc::THREE_TO_ONE_AA_CODE[$1.downcase]
+        mut = Misc::THREE_TO_ONE_AA_CODE[$3.downcase]
+        [wt, $2, mut] * ""
+      else
+        mutation
+      end
+    end
+
+    uniprot_pos = tsv.identify_field "Uniprot/SwissProt Accession"
+    mutation_pos = tsv.identify_field "Amino Acid Mutation"
+    tsv.add_field "Mutated Isoform" do |key, values|
+      [values[uniprot_pos], values[mutation_pos]] * ":"
+    end
+
+    tsv.reorder("Mutated Isoform").to_s
+  end
+
+
+  UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
   def self.pdbs(protein)
     url = UNIPROT_TEXT.sub "[PROTEIN]", protein
     text = Open.read(url)
