@@ -16,6 +16,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    barcode.rb
    bibtex.rb
    biomart.rb
+   cath.rb
    entrez.rb
    go.rb
    gscholar.rb
@@ -26,7 +27,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    pubmed.rb
    tfacts.rb
    uniprot.rb
-   cath.rb
    wgEncodeBroadHmm.rb
   }
  }
