@@ -13,11 +13,13 @@ module PubMed
 
     pmids_complete =  pmids.is_a?(Array) ? pmids : [pmids]
 
+    url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
     articles = []
-    Misc.divide(pmids_complete, (pmids_complete.length / 500) + 1).each do |pmid_list|
-      url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&retmode=xml&id=#{pmid_list * ","}" 
-
-      xml = Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed")
+    Misc.divide(pmids.sort, (pmids.length / 1000) + 1) do |pmid_list|
+      postdata = "db=pubmed&retmode=xml&id=#{pmid_list* ","}"
+      xml = TmpFile.with_file(postdata) do |postfile|
+        Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--post-file=" => postfile)
+      end
 
       articles += xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
     end
@@ -202,14 +204,8 @@ module PubMed
       }
 
       return list unless missing.any?
-      chunk_size = [100, missing.length].min
-      chunks = (missing.length.to_f / chunk_size).ceil
 
-      articles = {}
-      chunks.times do |chunk|
-        pmids = missing[(chunk * chunk_size)..((chunk + 1) *chunk_size)]
-        articles.merge!(get_online(pmids))
-      end
+      articles = get_online(missing)
 
       articles.each{|p, xml|
         filename = p + '.xml'
