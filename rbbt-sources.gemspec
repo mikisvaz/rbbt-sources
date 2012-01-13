@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{rbbt-sources}
-  s.version = "1.1.0"
+  s.version = "1.2.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Miguel Vazquez"]
-  s.date = %q{2011-11-17}
+  s.date = %q{2012-01-13}
   s.description = %q{Data sources like PubMed, Entrez Gene, or Gene Ontology}
   s.email = %q{miguel.vazquez@fdi.ucm.es}
   s.files = [
@@ -22,20 +22,23 @@ Gem::Specification.new do |s|
     "lib/rbbt/sources/barcode.rb",
     "lib/rbbt/sources/bibtex.rb",
     "lib/rbbt/sources/biomart.rb",
+    "lib/rbbt/sources/cath.rb",
     "lib/rbbt/sources/entrez.rb",
     "lib/rbbt/sources/go.rb",
     "lib/rbbt/sources/gscholar.rb",
     "lib/rbbt/sources/jochem.rb",
     "lib/rbbt/sources/organism.rb",
-    "lib/rbbt/sources/organism/sequence.rb",
+    "lib/rbbt/sources/pfam.rb",
     "lib/rbbt/sources/polysearch.rb",
     "lib/rbbt/sources/pubmed.rb",
     "lib/rbbt/sources/tfacts.rb",
+    "lib/rbbt/sources/uniprot.rb",
     "lib/rbbt/sources/wgEncodeBroadHmm.rb",
     "share/install/InterPro/Rakefile",
     "share/install/JoChem/Rakefile",
     "share/install/NCI/Rakefile",
     "share/install/Organism/Hsa/Rakefile",
+    "share/install/Organism/Mmu/Rakefile",
     "share/install/Organism/Rno/Rakefile",
     "share/install/Organism/Sce/Rakefile",
     "share/install/Organism/organism_helpers.rb",
