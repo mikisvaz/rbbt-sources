@@ -3,34 +3,32 @@ require 'rbbt/resource'
 require 'rbbt/sources/cath'
 require 'rbbt/sources/uniprot'
 
-module Uniprot
+module UniProt
   extend Resource
-  self.subdir = "share/databases/Uniprot"
+  self.subdir = "share/databases/UniProt"
 
-  Uniprot.claim Uniprot.annotated_variants, :proc do
+  UniProt.claim UniProt.annotated_variants, :proc do
     url = "http://www.uniprot.org/docs/humsavar.txt"
     tsv = TSV.open(CMD.cmd('tail -n +31 | head -n -4|grep "[[:alpha:]]"', :in => Open.open(url), :pipe => true), 
-                   :fix => Proc.new{|line| parts = line.split(/\s+/); (parts[0..5] + [(parts[6..-1] || []) * " "]) * "\t"}, :type => :list,:key_field => "Associated Gene Name", 
-                   :fields => ["Uniprot/SwissProt Accession", "Uniprot Variant ID", "Amino Acid Mutation", "Type of Variant", "SNP ID", "Disease"])
+                   :fix => Proc.new{|line| parts = line.split(/\s+/); (parts[1..5] + [(parts[6..-1] || []) * " "]) * "\t"}, 
+                   :type => :double,
+                   :merge => true,
+                   :key_field => "UniProt/SwissProt Accession",
+                   :fields => ["UniProt Variant ID", "Amino Acid Mutation", "Type of Variant", "SNP ID", "Disease"])
 
     tsv.unnamed = true
-    tsv.process "Amino Acid Mutation" do |mutation|
-      if mutation.match(/p\.(\w{3})(\d+)(\w{3})/)
-        wt = Misc::THREE_TO_ONE_AA_CODE[$1.downcase]
-        mut = Misc::THREE_TO_ONE_AA_CODE[$3.downcase]
-        [wt, $2, mut] * ""
-      else
-        mutation
+    tsv.process "Amino Acid Mutation" do |mutations|
+      mutations.collect do |mutation|
+        if mutation.match(/p\.(\w{3})(\d+)(\w{3})/)
+          wt = Misc::THREE_TO_ONE_AA_CODE[$1.downcase]
+          mut = Misc::THREE_TO_ONE_AA_CODE[$3.downcase]
+          [wt, $2, mut] * ""
+        else
+          mutation
+        end
       end
     end
-
-    uniprot_pos = tsv.identify_field "Uniprot/SwissProt Accession"
-    mutation_pos = tsv.identify_field "Amino Acid Mutation"
-    tsv.add_field "Mutated Isoform" do |key, values|
-      [values[uniprot_pos], values[mutation_pos]] * ":"
-    end
-
-    tsv.reorder("Mutated Isoform").to_s
+    tsv.to_s
   end
 
 
@@ -118,7 +116,7 @@ module Uniprot
   end
 
   def self.pdbs_covering_aa_position(protein, aa_position)
-    Uniprot.pdbs(protein).select do |pdb, info|
+    UniProt.pdbs(protein).select do |pdb, info|
       info[:region].include? aa_position
     end
   end
