@@ -15,7 +15,8 @@ module PubMed
 
     url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
     articles = []
-    Misc.divide(pmids.sort, (pmids.length / 1000) + 1) do |pmid_list|
+
+    Misc.divide(pmids.sort, (pmids.length / 1000) + 1).each do |pmid_list|
       postdata = "db=pubmed&retmode=xml&id=#{pmid_list* ","}"
       xml = TmpFile.with_file(postdata) do |postfile|
         Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--post-file=" => postfile)

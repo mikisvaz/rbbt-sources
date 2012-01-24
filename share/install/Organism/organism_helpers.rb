@@ -71,6 +71,10 @@ $biomart_exons = [
 
 #{{{ Rules
 
+file 'entrez_taxids' do |t|
+  File.open(t.name, 'w') do |f| f.write $taxs * "\n" end
+end
+
 file 'scientific_name' do |t|
   File.open(t.name, 'w') do |f| f.write $scientific_name end
 end

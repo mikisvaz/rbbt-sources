@@ -49,16 +49,14 @@ if defined? Entity and defined? Gene and Entity === Gene
 
   module Gene
     property :is_transcription_factor? => :array2single do
-      @is_trasncription_factor ||= begin
-                                     tfs = TFacts.targets.keys
-                                     self.name.collect{|gene| tfs.include? gene}
-                                   end
+      tfs = TFacts.targets.keys
+      self.name.collect{|gene| tfs.include? gene}
     end
+    persist :is_transcription_factor?
 
-   property :transcription_targets => :array2single do
-     @transcription_targets ||= begin
-                                  Gene.setup(TFacts.targets.tsv(:persist => true).values_at(*self.name), "Associated Gene Name", self.organism)
-                                end
-   end
+    property :transcription_targets => :array2single do
+      Gene.setup(TFacts.targets.tsv(:persist => true).values_at(*self.name), "Associated Gene Name", self.organism)
+    end
+    persist :transcription_targets
   end
 end
