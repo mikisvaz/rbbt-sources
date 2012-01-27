@@ -459,9 +459,9 @@ end
 
 
 file 'gene_pfam' do |t|
-  goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
+  pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts goterms end
+  File.open(t.name, 'w') do |f| f.puts pfam end
 end
 
 file 'chromosomes' do |t|
@@ -495,10 +495,13 @@ rule /^chromosome_.*/ do |t|
   raise "Fasta file for chromosome not found: #{ chr } - #{ archive }, #{ release }" if file.nil?
 
   Log.debug("Downloading chromosome sequence: #{ file }")
-  TmpFile.with_file do |tmpfile|
-    ftp.getbinaryfile(file, tmpfile)
-    Open.write(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
-    ftp.close
+
+  Misc.lock t.name + '.rake' do
+    TmpFile.with_file do |tmpfile|
+      ftp.getbinaryfile(file, tmpfile)
+      Open.write(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
+      ftp.close
+    end
   end
 end
 
