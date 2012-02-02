@@ -62,6 +62,10 @@ $biomart_pfam= [
   ["Pfam Domain", 'pfam'],
 ]
 
+$biomart_gene_biotype= [
+  ["Biotype", 'gene_biotype'],
+]
+
 $biomart_exons = [
   $biomart_ensembl_gene,
   ['Exon Strand','strand'],
@@ -489,6 +493,11 @@ end
 
 
 
+file 'gene_biotype' do |t|
+  biotype = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_biotype, [], nil, :type => :single, :namespace => $namespace)
+
+  File.open(t.name, 'w') do |f| f.puts biotype end
+end
 
 file 'gene_pfam' do |t|
   pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
