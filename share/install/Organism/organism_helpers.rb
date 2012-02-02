@@ -457,6 +457,38 @@ file 'gene_go_bp' => 'gene_go' do |t|
   File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
 end
 
+file 'gene_go_cc' => 'gene_go' do |t|
+  gene_go = TSV.open(t.prerequisites.first)
+   
+  gene_go.monitor = true
+  gene_go.process "GO ID" do |key, go_id, values|
+    clean = values.zip_fields.select do |id, type|
+      type == "cellular_component"
+    end
+    clean.collect{|id, type| id}
+  end
+
+
+  File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
+end
+
+file 'gene_go_mf' => 'gene_go' do |t|
+  gene_go = TSV.open(t.prerequisites.first)
+   
+  gene_go.monitor = true
+  gene_go.process "GO ID" do |key, go_id, values|
+    clean = values.zip_fields.select do |id, type|
+      type == "molecular_function"
+    end
+    clean.collect{|id, type| id}
+  end
+
+
+  File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
+end
+
+
+
 
 file 'gene_pfam' do |t|
   pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
