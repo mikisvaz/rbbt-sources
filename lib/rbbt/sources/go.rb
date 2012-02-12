@@ -99,7 +99,9 @@ if defined? Entity
 
     property :genes => :array2single do |organism|
       organism ||= self.organism
-      @genes ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "GO ID", :fields => ["Ensembl Gene ID"], :type => :flat, :merge => true).values_at *self
+      res = Organism.gene_go(organism).tsv(:persist => true, :key_field => "GO ID", :fields => ["Ensembl Gene ID"], :type => :flat, :merge => true).values_at *self
+      res.collect{|r| r.organism = organism if r and r.respond_to? :organism}
+      res
     end
 
     property :description => :single2array do
