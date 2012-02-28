@@ -27,9 +27,24 @@ if defined? Entity
   module PfamDomain
     extend Entity
     self.format = "Pfam Domain"
+
+    self.annotation :organism
     
     property :name => :array2single do
       self.collect{|id| Pfam.name(id)}
+    end
+
+    property :genes => :array2single do
+      @genes ||= Organism.gene_pfam(organism).tsv(:key_field => "Pfam Domain", :fields => ["Ensembl Gene ID"], :persist => true, :type => :flat).values_at *self
+    end
+  end
+  if defined? Gene and Entity === Gene
+    module Gene
+
+      property :pfam_domains => :array2single do
+        @pfam_domains ||= Organism.gene_pfam(organism).tsv(:persist => true, :type => :flat, :fields => ["Pfam Domain"], :key_field => "Ensembl Gene ID").values_at *self
+      end
+ 
     end
   end
 end

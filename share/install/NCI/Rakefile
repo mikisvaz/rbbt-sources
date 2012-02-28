@@ -1,7 +1,8 @@
 require 'nokogiri'
+require 'rbbt-util'
 
 module NCI
-  def self.get_pathways(xml, format = "UP")
+  def self.get_pathways2(xml, format = "UP")
     doc = Nokogiri::XML(xml)
     pathways = {}
 
@@ -41,6 +42,66 @@ module NCI
     end
     pathways
   end
+
+  def self.get_pathways(xml, format = "UP")
+    doc = Nokogiri::XML(xml)
+    pathways = {}
+
+    molecules = {}
+    doc.xpath("//Molecule").each do |molecule|
+      id = molecule.attribute('id').value
+      type = molecule.attribute('molecule_type').value
+      names = molecule.xpath("Name[@name_type='#{format}']").collect{|name| name.attribute("value").value}
+      molecules[id] = {:xml => molecule, :proteins => names}
+    end
+
+
+    interactions = {}
+    doc.xpath("//Interaction").each do |interaction|
+      id = interaction.attribute('id').value
+      type = interaction.attribute('interaction_type').value
+      molecule_ids = interaction.xpath('InteractionComponentList/InteractionComponent').collect{|c| c.attribute('molecule_idref').value}.flatten.compact
+      pathway_ids = interaction.xpath('Abstraction').collect{|c| c.attribute('pathway_idref').value}.flatten.compact
+
+      interactions[id] = {:xml => interaction, :molecule_ids => molecule_ids, :pathway_ids => pathway_ids}
+    end
+
+    doc.xpath("//Pathway").each do |pathway|
+      id = pathway.attribute('id').value
+      subnet = pathway.attribute('subnet').value
+      name = pathway.xpath('LongName').first.content
+
+      interaction_ids = pathway.xpath("PathwayComponentList/PathwayComponent").collect{|component| component.attribute("interaction_idref").value}
+
+      pathway_interactions = interaction_ids.collect{|i| interactions[i]}
+      pathway_molecule_ids = pathway_interactions.collect{|info| info[:molecule_ids]}.compact.flatten
+
+      pathway_uniprot_ids = pathway_molecule_ids.collect do |i| 
+        next unless molecules.include? i
+        molecules[i][:proteins]
+      end
+      pathways[id] = [[name], [pathway_uniprot_ids.flatten.compact.uniq]]
+    end
+    
+    doc.xpath("//Pathway").each do |pathway|
+      id = pathway.attribute('id').value
+      subnet = pathway.attribute('subnet').value
+      name = pathway.xpath('LongName').first.content
+
+      interaction_ids = pathway.xpath("PathwayComponentList/PathwayComponent").collect{|component| component.attribute("interaction_idref").value}
+
+      pathway_interactions = interaction_ids.collect{|i| interactions[i]}
+      pathway_subnet_ids = pathway_interactions.collect{|info| info[:pathway_ids]}.compact.flatten
+
+      pathway_subnet_ids.collect do |nid| 
+        next unless pathways.include? nid
+        new_genes = pathways[id].last
+        pathways[nid][1] = (pathways[nid][1] + new_genes).uniq
+      end
+    end
+
+    pathways
+  end
 end
 
 file 'nature_pathways' do |t|
@@ -75,5 +136,4 @@ file 'reactome_pathways' do |t|
 
   Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI Reactome Pathway ID", :fields => ["Pathway Name","UniProt/SwissProt Accession"]).to_s)
 end
-
 

@@ -97,7 +97,8 @@ if defined? Entity
       @name ||= GO.id2name(self)
     end
 
-    property :genes => :array2single do |organism|
+    property :genes => :array2single do |*args|
+      organism = args.first
       organism ||= self.organism
       res = Organism.gene_go(organism).tsv(:persist => true, :key_field => "GO ID", :fields => ["Ensembl Gene ID"], :type => :flat, :merge => true).values_at *self
       res.collect{|r| r.organism = organism if r and r.respond_to? :organism}
@@ -122,6 +123,15 @@ if defined? Entity
       property :go_bp_terms => :array2single do 
         @go_bp_terms ||= Organism.gene_go_bp(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
       end
+
+      property :go_cc_terms => :array2single do 
+        @go_cc_terms ||= Organism.gene_go_cc(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
+      end
+
+      property :go_mf_terms => :array2single do 
+        @go_mf_terms ||= Organism.gene_go_mf(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true).values_at *self.ensembl
+      end
+ 
     end
   end
 end
