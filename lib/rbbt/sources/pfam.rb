@@ -35,7 +35,7 @@ if defined? Entity
     end
 
     property :genes => :array2single do
-      @genes ||= Organism.gene_pfam(organism).tsv(:key_field => "Pfam Domain", :fields => ["Ensembl Gene ID"], :persist => true, :type => :flat).values_at *self
+      @genes ||= Organism.gene_pfam(organism).tsv(:key_field => "Pfam Domain", :fields => ["Ensembl Gene ID"], :persist => true, :merge => true, :type => :flat).values_at *self
     end
   end
   if defined? Gene and Entity === Gene
