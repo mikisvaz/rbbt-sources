@@ -40,9 +40,11 @@ if defined? Entity
   end
   if defined? Gene and Entity === Gene
     module Gene
+      INDEX_CACHE = {}
 
       property :pfam_domains => :array2single do
-        @pfam_domains ||= Organism.gene_pfam(organism).tsv(:persist => true, :type => :flat, :fields => ["Pfam Domain"], :key_field => "Ensembl Gene ID").values_at *self
+        index = INDEX_CACHE[organism] ||= Organism.gene_pfam(organism).tsv(:persist => true, :type => :flat, :fields => ["Pfam Domain"], :key_field => "Ensembl Gene ID")
+        @pfam_domains ||= index.values_at *self
       end
  
     end
