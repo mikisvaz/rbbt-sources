@@ -19,7 +19,7 @@ module Pfam
   end
 
   def self.name(id)
-    name_index[id]
+    name_index[id] || id
   end
 end
 
