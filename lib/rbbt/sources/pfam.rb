@@ -35,7 +35,7 @@ if defined? Entity
     end
 
     property :genes => :array2single do
-      @genes ||= Organism.gene_pfam(organism).tsv(:key_field => "Pfam Domain", :fields => ["Ensembl Gene ID"], :persist => true, :merge => true, :type => :flat).values_at *self
+      @genes ||= Organism.gene_pfam(organism).tsv(:key_field => "Pfam Domain", :fields => ["Ensembl Gene ID"], :persist => true, :merge => true, :type => :flat, :namespace => organism).values_at *self
     end
   end
   if defined? Gene and Entity === Gene
@@ -43,7 +43,7 @@ if defined? Entity
       INDEX_CACHE = {}
 
       property :pfam_domains => :array2single do
-        index = INDEX_CACHE[organism] ||= Organism.gene_pfam(organism).tsv(:persist => true, :type => :flat, :fields => ["Pfam Domain"], :key_field => "Ensembl Gene ID")
+        index = INDEX_CACHE[organism] ||= Organism.gene_pfam(organism).tsv(:persist => true, :type => :flat, :fields => ["Pfam Domain"], :key_field => "Ensembl Gene ID", :namespace => organism)
         @pfam_domains ||= index.values_at *self
       end
  
