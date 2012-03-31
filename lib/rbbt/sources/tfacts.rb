@@ -32,12 +32,16 @@ module TFacts
 
   TFacts.claim TFacts.targets, :proc do
     tsv = Misc.process_to_hash(TFacts.known_transcription_factors_unsigned){|list| list.collect{|tf| TFacts.targets_for_gene_unsigned(tf)}}
-    TSV.setup tsv, :key_field => "Associated Gene Name", :fields => ["Target Associated Gene Name"], :type => :flat
+    TSV.setup tsv, :key_field => "Associated Gene Name", :fields => ["Target Associated Gene Name"], :type => :flat, :unnamed => true
     tsv.to_s
   end
 
+  TFacts.claim TFacts.regulators, :proc do
+    TFacts.targets.tsv.reorder("Target Associated Gene Name").to_s
+  end
+
   TFacts.claim TFacts.targets_signed, :proc do
-    tsv = TSV.setup({}, :key_field => "Associated Gene Name", :fields => ["Target Associated Gene Name", "Target Sign"], :type => :double)
+    tsv = TSV.setup({}, :key_field => "Associated Gene Name", :fields => ["Target Associated Gene Name", "Target Sign"], :type => :double, :unnamed => true)
     Misc.process_to_hash(TFacts.known_transcription_factors_signed){|list| list.collect{|tf| TFacts.targets_for_gene_signed(tf)}}.each do |tf, targets|
       tsv[tf] = [targets.keys, targets.values]
     end
@@ -52,11 +56,16 @@ if defined? Entity and defined? Gene and Entity === Gene
       tfs = TFacts.targets.keys
       self.name.collect{|gene| tfs.include? gene}
     end
-    persist :is_transcription_factor?
+    persist :_ary_is_transcription_factor?
+
+    property :transcription_regulators => :array2single do
+      Gene.setup(TFacts.regulators.tsv(:persist => true).values_at(*self.name), "Associated Gene Name", self.organism)
+    end
+    persist :_ary_transcription_regulators
 
     property :transcription_targets => :array2single do
       Gene.setup(TFacts.targets.tsv(:persist => true).values_at(*self.name), "Associated Gene Name", self.organism)
     end
-    persist :transcription_targets
+    persist :_ary_transcription_targets
   end
 end
