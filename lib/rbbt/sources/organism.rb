@@ -53,12 +53,6 @@ module Organism
     end
   end
 
-  def self.guess_id(org, values, identifiers = nil)
-    identifiers ||= TSV.setup(Organism.identifiers(org), :persist => true)
-    field_matches = identifiers.field_matches(values)
-    field_matches.sort_by{|field, matches| matches.uniq.length}.last
-  end
-
   def self.guess_id(org, values)
     field_matches = TSV.field_match_counts(Organism.identifiers(org).find, values)
     field_matches.sort_by{|field, count| count.to_i}.last
@@ -77,6 +71,10 @@ module Organism
     organisms.select{|organism|
       organism == name or Organism.name(organism) =~ /#{ name }/i
     }.first
+  end
+
+  def self.known_ids(name)
+    TSV::Parser.new(Organism.identifiers(name).open).all_fields
   end
 
 end

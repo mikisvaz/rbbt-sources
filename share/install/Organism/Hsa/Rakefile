@@ -43,7 +43,7 @@ $biomart_probe_identifiers = [
   [ 'AFFY HuEx', 'affy_huex_1_0_st_v2', "HuEx" ],
   [ 'AFFY HuGene', 'affy_hugene_1_0_st_v1' ],
   [ 'AFFY U133 X3P', 'affy_u133_x3p' ],
-  [ 'Agilent WholeGenome',"agilent_wholegenome" ],
+  #[ 'Agilent WholeGenome',"agilent_wholegenome" ],
   [ 'Agilent CGH 44b', 'agilent_cgh_44b' ],
   [ 'Codelink ID', 'codelink' ],
   [ 'Illumina HumanWG 6 v2', 'illumina_humanwg_6_v2' ],
@@ -62,6 +62,7 @@ $biomart_identifiers = [
   [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
   [ 'HGNC ID', "hgnc_id", 'HGNC'],
   [ 'EMBL (Genbank) ID' , "embl"] , 
+  [ 'RefSeq mRNA' , "refseq_mrna"] , 
 
   # Probes
   [ 'AFFY HC G110', 'affy_hc_g110' ],
@@ -80,7 +81,7 @@ $biomart_identifiers = [
   [ 'AFFY HuEx', 'affy_huex_1_0_st_v2', "HuEx" ],
   [ 'AFFY HuGene', 'affy_hugene_1_0_st_v1' ],
   [ 'AFFY U133 X3P', 'affy_u133_x3p' ],
-  [ 'Agilent WholeGenome',"agilent_wholegenome" ],
+  #[ 'Agilent WholeGenome',"agilent_wholegenome" ],
   [ 'Agilent CGH 44b', 'agilent_cgh_44b' ],
   [ 'Codelink ID', 'codelink' ],
   [ 'Illumina HumanWG 6 v2', 'illumina_humanwg_6_v2' ],

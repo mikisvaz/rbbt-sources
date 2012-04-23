@@ -2,8 +2,9 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  Rakefile
  bin=bin {
  }
- etc=etc{
+ etc=etc filter="*"{
   biomart=biomart{
+   missing_in_archive
   }
  }
  lib=lib {
@@ -52,8 +53,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
     Sce=Sce{
      Rakefile
     }
-   }
-   EBChromatin=EBChromatin{
    }
    InterPro=InterPro{
     Rakefile

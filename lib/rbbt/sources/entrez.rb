@@ -10,7 +10,7 @@ module Entrez
   Rbbt.claim Rbbt.share.databases.entrez.gene2pubmed, :url, 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz'
 
   def self.entrez2native(taxs, options = {})
-    options = Misc.add_defaults options, :key_field => 1, :fields => 5, :persist => true, :merge => true
+    options = Misc.add_defaults options, :key_field => 1, :fields => [5], :persist => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
@@ -22,7 +22,7 @@ module Entrez
   end
 
   def self.entrez2name(taxs, options = {})
-    options = Misc.add_defaults options, :key_field => 1, :fields => 2, :persist => true, :merge => true
+    options = Misc.add_defaults options, :key_field => 1, :fields => [2], :persist => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}

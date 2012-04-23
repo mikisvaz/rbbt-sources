@@ -1,9 +1,13 @@
+jun2011:
+    - refseq_mrna
 may2009:
+    - refseq_mrna
     - agilent_wholegenome
     - agilent_cgh_44b
     - illumina_humanwg_6_v2
     - illumina_humanwg_6_v3
 dec2007:
+    - refseq_mrna
     - protein_id
     - affy_hc_g110
     - affy_hg_u133a_2
@@ -14,6 +18,7 @@ dec2007:
     - illumina_humanwg_6_v2
     - illumina_humanwg_6_v3
 aug2007:
+    - refseq_mrna
     - protein_id
     - affy_hc_g110
     - affy_hg_u133a_2

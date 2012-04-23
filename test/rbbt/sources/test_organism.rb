@@ -3,10 +3,14 @@ require 'rbbt/sources/organism'
 require 'test/unit'
 
 class TestEntrez < Test::Unit::TestCase
+
+  def test_known_ids
+    assert Organism.known_ids("Hsa").include?("Associated Gene Name")
+  end
+
   def test_location
     assert_equal "share/organisms/Sce/identifiers", Organism.identifiers('Sce')
   end
-
 
   def test_identifiers
     assert Organism.identifiers('Hsa').tsv(:key_field => "Entrez Gene ID", :persist => true)['1020']["Associated Gene Name"].include?('CDK5')
