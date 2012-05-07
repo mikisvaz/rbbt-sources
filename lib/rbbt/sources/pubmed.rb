@@ -141,7 +141,7 @@ module PubMed
       TmpFile.with_file do |pdf|
 
         # Change user-agent, oh well...
-        `wget --user-agent=firefox #{ pdf_url } -O #{ pdf }`
+        `wget --user-agent=firefox #{ pdf_url } -O #{ pdf } -t 3`
         TmpFile.with_file do |txt|
           `pdftotext #{ pdf } #{ txt }`
           text = Open.read(txt) if File.exists? txt

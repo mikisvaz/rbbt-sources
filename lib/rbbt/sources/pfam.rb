@@ -44,7 +44,7 @@ if defined? Entity
 
       property :pfam_domains => :array2single do
         index = INDEX_CACHE[organism] ||= Organism.gene_pfam(organism).tsv(:persist => true, :type => :flat, :fields => ["Pfam Domain"], :key_field => "Ensembl Gene ID", :namespace => organism)
-        @pfam_domains ||= index.values_at *self
+        @pfam_domains ||= index.values_at *self.ensembl
       end
  
     end
