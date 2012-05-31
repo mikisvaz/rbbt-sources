@@ -428,6 +428,10 @@ file 'gene_go' do |t|
   if File.basename(FileUtils.pwd) =~ /^[a-z]{3}([0-9]{4})$/i and $1.to_i <= 2009
     goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go_2009, [], nil, :type => :double, :namespace => $namespace)
 
+    goterms.each do |key, values|
+      values.each do |list| list.uniq! end
+    end
+
     goterms.add_field "GO ID" do |key, values|
       values.flatten.compact.reject{|go| go.empty?}
     end
