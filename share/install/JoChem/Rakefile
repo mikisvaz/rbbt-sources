@@ -20,7 +20,7 @@ def process_jochem
   identifiers = File.open('identifiers', 'w')
 
   identifiers.puts("#: :namespace=JoChem")
-  identifiers.puts("#ID\tCompound Name\tPubChem:ID\tDrugBank:ID")
+  identifiers.puts("#ID\tCompound Name\tPubChem:Substance ID\tPubChem:Coumpound ID\tDrugBank:ID\tChemIDplus:ID\tCAS:ID\tMeSH:Term\tChEBI:ID\tHMDB:ID\tKEGG:Coumpound ID\tKEGG:Drug ID")
 
   lexicon = File.open('lexicon', 'w')
   lexicon.puts("#: :namespace=JoChem")
@@ -49,12 +49,20 @@ def process_jochem
     tm = info["TM"] || []
     db = info["DB"] || []
 
+    cheb = db.collect{|code| code.match(/CHEB_(.*)/) ? $1 : nil}.compact
+    chid = db.collect{|code| code.match(/CHID_(.*)/) ? $1 : nil}.compact
     pubc = db.collect{|code| code.match(/PUBC_(.*)/) ? $1 : nil}.compact
+    pubs = db.collect{|code| code.match(/PUBS_(.*)/) ? $1 : nil}.compact
     drug = db.collect{|code| code.match(/DRUG_(.*)/) ? $1 : nil}.compact
+    cas  = db.collect{|code| code.match(/CAS_(.*)/) ? $1 : nil}.compact
+    mesh = db.collect{|code| code.match(/MESH_(.*)/) ? $1 : nil}.compact
+    hmdb = db.collect{|code| code.match(/HMDB_(.*)/) ? $1 : nil}.compact
+    kegg = db.collect{|code| code.match(/KEGG_(.*)/) ? $1 : nil}.compact
+    kegd = db.collect{|code| code.match(/KEGD_(.*)/) ? $1 : nil}.compact
     inch = db.collect{|code| code.match(/INCH_InChI=(.*)/) ? $1 : nil}.compact
 
     lexicon.puts [id, tm.unshift(na) * "|"] * "\t"
-    identifiers.puts [id, na, pubc * "|", drug * "|"] * "\t"
+    identifiers.puts [id, na, pubs * "|", pubc * "|", drug * "|", chid * "|", cas * "|", mesh * "|", cheb * "|", hmdb * "|", kegg * "|", kegd * "|" ] * "\t"
     inchi.puts [id, inch * "|"] * "\t" if inch.any?
     definitions.puts [id, df] * "\t" unless df.nil?
   end

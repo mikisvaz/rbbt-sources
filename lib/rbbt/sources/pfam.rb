@@ -27,6 +27,7 @@ if defined? Entity
   module PfamDomain
     extend Entity
     self.format = "Pfam Domain"
+    self.format = "Pfam Domain ID"
 
     self.annotation :organism
     
