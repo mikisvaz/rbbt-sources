@@ -131,7 +131,13 @@ module PubMed
 
     def pdf_url
       return pmc_pdf if pmc_pdf
-      @gscholar_pdf ||= GoogleScholar::full_text_url title
+      @gscholar_pdf ||= begin
+                          GoogleScholar::full_text_url title
+                        rescue
+                          Log.medium "GoogleScholar#full_text failed: #{title}"
+                          sleep 0.1
+                          nil
+                        end
     end
 
     def full_text
