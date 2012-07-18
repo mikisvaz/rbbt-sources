@@ -30,6 +30,11 @@ class TestPubMed < Test::Unit::TestCase
     assert(PubMed.query('chagoyen[All Fields] AND ("loattrfull text"[sb] AND hasabstract[text])').include? '16438716')
   end
 
+  def test_year
+    pmid = '16438716'
+    assert_equal "2006", PubMed.get_article(pmid).year
+  end
+
   def test_bibentry
     assert("vazquez2008sent", PubMed::Article.make_bibentry('vazquez', 2008, "SENT: Semantic features in text"))
     assert("vazquez2008aes", PubMed::Article.make_bibentry('vazquez', 2008, "An Example System"))

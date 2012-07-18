@@ -21,12 +21,12 @@ module BioMart
 
   @@biomart_query_xml = <<-EOT
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE Query>        
+<!DOCTYPE Query>
 <Query completionStamp="1" virtualSchemaName = "default" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >
 <Dataset name = "<!--DATABASE-->" interface = "default" >
 <!--FILTERS-->
-<!--MAIN-->           
-<!--ATTRIBUTES-->     
+<!--MAIN-->
+<!--ATTRIBUTES-->
 </Dataset>
 </Query>
   EOT

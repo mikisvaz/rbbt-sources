@@ -18,6 +18,7 @@ begin
     #gem.add_dependency('mechanize')
     gem.add_dependency('libxml-ruby')
     gem.add_dependency('bio')
+    gem.add_dependency('mechanize')
   end
   Jeweler::GemcutterTasks.new  
 rescue LoadError
