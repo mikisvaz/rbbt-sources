@@ -63,7 +63,7 @@ module Organism
     Dir.glob(File.join(Organism.root.find, '*')).collect{|f| File.basename(f)}
   end
 
-  def self.name(organism)
+  def self.scientific_name(organism)
     Organism.scientific_name(organism).read.strip
   end
 
