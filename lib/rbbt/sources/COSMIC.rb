@@ -5,7 +5,7 @@ module COSMIC
   self.subdir = "share/databases/COSMIC"
 
   COSMIC.claim COSMIC.gene_info, :proc do 
-    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v57_180112.tsv"
+    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v60_190712.tsv.gz"
 
     tsv = TSV.open(Open.open(url), :merge => true)
     tsv.key_field = "Associated Gene Name"
