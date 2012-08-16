@@ -3,7 +3,7 @@ require 'rbbt/util/misc'
 
 def read_chunk(jochem)
   chunk = ""
-  while (not jochem.eof? and not (line = jochem.gets).match(/^--/))
+  while (not jochem.eof? and not (line = Misc.fixutf8(jochem.gets)).match(/^--/))
     chunk << line
   end
   return nil if chunk.empty?
