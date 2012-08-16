@@ -365,7 +365,7 @@ def coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
                   []
                 end
 
-  transcripts.select{|transcript| transcript_info[transcript].first.any?}
+  transcripts.reject{|transcript| transcript_info[transcript].first.empty?}
 end
 
 def exon_offset_in_transcript(exon, transcript, exons, transcript_exons)
