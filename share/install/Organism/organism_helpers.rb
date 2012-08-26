@@ -525,6 +525,8 @@ rule /^chromosome_.*/ do |t|
               "release-54"
             when "jun2011"
               "release-64"
+            when "may2012"
+              "release-67"
             when nil
               Open.read("http://www.ensembl.org/info/data/ftp/index.html", :nocache => true).match(/pub\/(\w+-\d+)\/fasta/)[1]
             end
