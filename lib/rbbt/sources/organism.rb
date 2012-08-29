@@ -64,12 +64,12 @@ module Organism
   end
 
   def self.scientific_name(organism)
-    Organism.scientific_name(organism).read.strip
+    Organism[organism]["scientific_name"].read.strip
   end
 
   def self.organism(name)
     organisms.select{|organism|
-      organism == name or Organism.name(organism) =~ /#{ name }/i
+      organism == name or Organism.scientific_name(organism) =~ /#{ name }/i
     }.first
   end
 
