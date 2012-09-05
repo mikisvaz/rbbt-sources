@@ -34,7 +34,8 @@ if defined? Entity
     end
 
     property :genes => :array2single do
-      @genes ||= NCINaturePathway.gene_index.values_at *self
+      @genes ||= NCINaturePathway.gene_index.values_at(*self).
+        each{|gene| gene.organism = organism if gene.respond_to? :organism }
     end
   end
 
@@ -65,7 +66,8 @@ if defined? Entity
     end
 
     property :genes => :array2single do
-      @genes ||= NCIReactomePathway.gene_index.values_at *self
+      @genes ||= NCIReactomePathway.gene_index.values_at(*self).
+        each{|gene| gene.organism = organism if gene.respond_to? :organism }
     end
   end
 
@@ -97,7 +99,7 @@ if defined? Entity
 
     property :genes => :array2single do
       @genes ||= NCIBioCartaPathway.gene_index.values_at(*self).
-        each{|pth| pth.organism = organism if pth.respond_to? :organism }
+        each{|gene| gene.organism = organism if gene.respond_to? :organism }
     end
   end
 
