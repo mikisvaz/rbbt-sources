@@ -32,7 +32,8 @@ if defined? Entity
     self.format = "PSI-MI Term"
 
     property :name => :array2single do
-      PSI_MI.identifiers.tsv(:persist => true, :fields => ["Name"], :type => :single).values_at(*self)
+      @@index ||= PSI_MI.identifiers.tsv(:persist => true, :fields => ["Name"], :type => :single)
+      @@index.values_at(*self)
     end
     
   end
