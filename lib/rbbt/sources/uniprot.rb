@@ -94,7 +94,6 @@ module UniProt
     variants
   end
 
-
   def self.cath(protein)
     url = UNIPROT_TEXT.sub "[PROTEIN]", protein
     text = Open.read(url)
