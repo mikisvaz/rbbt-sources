@@ -111,8 +111,8 @@ if defined? Entity
           each{|pth| pth.organism = organism if pth.respond_to? :organism }.tap{|o| NCINaturePathway.setup(o, organism)}
       end
 
-      property :reactome_pathways => :array2single do
-        @reactome_pathways ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Reactome Pathway ID"], :type => :flat, :merge => true).values_at(*self.to("UniProt/SwissProt Accession")).
+      property :nci_reactome_pathways => :array2single do
+        @nci_reactome_pathways ||= NCI.reactome_pathways.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["NCI Reactome Pathway ID"], :type => :flat, :merge => true).values_at(*self.to("UniProt/SwissProt Accession")).
           each{|pth| pth.organism = organism if pth.respond_to? :organism }.tap{|o| NCIReactomePathway.setup(o, organism)}
       end
  
