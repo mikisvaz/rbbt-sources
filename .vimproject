@@ -32,6 +32,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    uniprot.rb
    wgEncodeBroadHmm.rb
    PSI_MI.rb
+   reactome.rb
   }
  }
  share=share{
@@ -56,9 +57,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
     Sce=Sce{
      Rakefile
     }
-   }
-   InterPro=InterPro{
-    Rakefile
    }
    NCI=NCI{
     Rakefile
