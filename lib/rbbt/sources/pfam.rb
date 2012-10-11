@@ -1,6 +1,8 @@
 require 'rbbt'
 require 'rbbt/tsv'
 require 'rbbt/resource'
+require 'rbbt/entity'
+require 'rbbt/sources/InterPro'
 
 module Pfam
   extend Resource
@@ -12,7 +14,7 @@ module Pfam
     tsv.to_s
   end
 
-  NAMES_FILE = Rbbt.share.databases.InterPro.pfam_names.find
+  NAMES_FILE = InterPro.pfam_names.find
 
   def self.name_index
     @name_index ||= TSV.open NAMES_FILE, :single
