@@ -107,7 +107,7 @@ if defined? Entity
     module Protein
       property :interpro_domains => :array2single do
         self.collect do |protein|
-          uniprot = InterPro.ens2uniprot(protein.organism)[protein].flatten
+          uniprot = (InterPro.ens2uniprot(protein.organism)[protein] || []).flatten
           InterPro.domain_index.values_at(*uniprot).compact.flatten.
             each{|pth| pth.organism = organism if pth.respond_to? :organism }.uniq.tap{|o| InterProDomain.setup(o, organism)}
         end
