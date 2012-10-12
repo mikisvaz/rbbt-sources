@@ -108,15 +108,19 @@ if defined? Entity
       property :interpro_domains => :array2single do
         self.collect do |protein|
           uniprot = InterPro.ens2uniprot(protein.organism)[protein].flatten
-          InterPro.domain_index.values_at(*uniprot).flatten.
+          InterPro.domain_index.values_at(*uniprot).compact.flatten.
             each{|pth| pth.organism = organism if pth.respond_to? :organism }.uniq.tap{|o| InterProDomain.setup(o, organism)}
         end
       end
 
       property :interpro_domain_positions => :array2single do
         self.collect do |protein|
-          uniprot = InterPro.ens2uniprot(protein.organism)[protein].flatten
-          InterPro.domain_position_index.values_at(*uniprot).flatten(1)
+          if protein.nil?
+            []
+          else
+            uniprot = InterPro.ens2uniprot(protein.organism)[protein].flatten
+            InterPro.domain_position_index.values_at(*uniprot).compact.flatten(1)
+          end
         end
       end
     end
