@@ -99,7 +99,7 @@ if defined? Entity
 
     property :genes => :array2single do
       InterPro.gene_index.values_at(*self).
-        collect{|gene|gene = gene.uniq!;  gene.organism = organism if gene.respond_to? :organism; gene }
+        collect{|genes| genes = genes.uniq;  genes.organism = organism if genes.respond_to? :organism; genes }
     end
   end
 
@@ -126,4 +126,3 @@ if defined? Entity
     end
   end
 end
-
