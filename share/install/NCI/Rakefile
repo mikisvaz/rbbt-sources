@@ -2,48 +2,7 @@ require 'nokogiri'
 require 'rbbt-util'
 
 module NCI
-  def self.get_pathways2(xml, format = "UP")
-    doc = Nokogiri::XML(xml)
-    pathways = {}
-
-    molecules = {}
-    doc.xpath("//Molecule").each do |molecule|
-      id = molecule.attribute('id').value
-      type = molecule.attribute('molecule_type').value
-      next unless type == "protein"
-      names = molecule.xpath("Name[@name_type='#{format}']").collect{|name| name.attribute("value").value}
-      next if names.empty?
-      molecules[id] = {:xml => molecule, :uniprot => names.first}
-    end
-
-    interactions = {}
-    doc.xpath("//Interaction").each do |interaction|
-      id = interaction.attribute('id').value
-      molecule_ids = interaction.xpath('*/InteractionComponent').collect{|c| c.attribute('molecule_idref').value}
-
-      interactions[id] = {:xml => interaction, :molecule_ids => molecule_ids}
-    end
-
-    doc.xpath("//Pathway").each do |pathway|
-      id = pathway.attribute('id').value
-      subnet = pathway.attribute('subnet').value
-      name = pathway.xpath('LongName').first.content
-
-      interaction_ids = pathway.xpath("*/PathwayComponent").collect{|component| component.attribute("interaction_idref").value}
-
-      pathway_interactions = interaction_ids.collect{|id| interactions[id]}
-      pathway_molecule_ids = pathway_interactions.collect{|info| info[:molecule_ids]}.flatten
-
-      pathway_uniprot_ids = pathway_molecule_ids.collect do |id| 
-        next unless molecules.include? id
-        molecules[id][:uniprot]
-      end
-      pathways[id] = [[name], [pathway_uniprot_ids.compact.uniq]]
-    end
-    pathways
-  end
-
-  def self.get_pathways(xml, format = "UP")
+  def self.get_pathways(xml, format = "UP", get_short_name = false)
     doc = Nokogiri::XML(xml)
     pathways = {}
 
@@ -70,6 +29,7 @@ module NCI
       id = pathway.attribute('id').value
       subnet = pathway.attribute('subnet').value
       name = pathway.xpath('LongName').first.content
+      short_name = pathway.xpath('ShortName').first.content if get_short_name
 
       interaction_ids = pathway.xpath("PathwayComponentList/PathwayComponent").collect{|component| component.attribute("interaction_idref").value}
 
@@ -80,7 +40,11 @@ module NCI
         next unless molecules.include? i
         molecules[i][:proteins]
       end
-      pathways[id] = [[name], [pathway_uniprot_ids.flatten.compact.uniq]]
+      if get_short_name
+        pathways[id] = [[name], [pathway_uniprot_ids.flatten.compact.uniq], [short_name]]
+      else
+        pathways[id] = [[name], [pathway_uniprot_ids.flatten.compact.uniq]]
+      end
     end
     
     doc.xpath("//Pathway").each do |pathway|
@@ -121,10 +85,24 @@ file 'biocarta_pathways' do |t|
 
   xml = Open.read(url)
 
-  pathways = NCI.get_pathways(xml, "LL")
+  pathways = NCI.get_pathways(xml, "LL", true)
 
-  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name","Entrez Gene ID"]).to_s)
+  Open.write(t.name, TSV.setup(pathways, :type => :double, :key_field => "NCI BioCarta Pathway ID", :fields => ["Pathway Name", "Entrez Gene ID", "Pathway Short Name"]).to_s)
 end
+
+file 'biocarta_pathways_fixed_ids' => 'biocarta_pathways' do |t|
+  orig = TSV.open(Open.open(t.prerequisites.first))
+  tsv = TSV.setup({}, :type => :double, :key_field => "BioCarta Pathway ID", :fields => ["Pathway Name", "Entrez Gene ID"])
+
+  orig.through do |key, values|
+    name, genes, short = values
+    code = "h_" + short.first
+    tsv[code] = [name, genes]
+  end
+
+  Open.write(t.name, tsv.to_s)
+end
+
 
 file 'reactome_pathways' do |t|
 
