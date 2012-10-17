@@ -14,14 +14,20 @@ module InterPro
     uniprot_colum = TSV::Parser.new(Organism.protein_identifiers(organism).open).all_fields.index("UniProt/SwissProt Accession")
     uniprots = CMD.cmd("grep -v  '^#'|cut -f #{uniprot_colum+1}", :in => Organism.protein_identifiers(organism).open).read.split("\n").collect{|l| l.split("|")}.flatten.uniq.reject{|l| l.empty?}
    
-    tsv = InterPro.source.protein2ipr.tsv :fields => [1,4,5], :grep => uniprots, :merge => true
+    tsv = nil
+    TmpFile.with_file(uniprots * "\n") do |tmpfile|
+        tsv = TSV.open(CMD.cmd("cut -f 1,2,5,6 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro.source.protein2ipr.open, :pipe => true), :merge => true, :type => :double)
+    end
+ 
     tsv.key_field = "UniProt/SwissProt Accession"
     tsv.fields = ["InterPro ID", "Domain Start AA", "Domain End AA"]
     tsv.to_s
   end
 
   InterPro.claim InterPro.domain_names.find, :proc do
-    tsv = InterPro.source.protein2ipr.tsv :key_field => 1, :fields => [2], :type => :single
+    #tsv = InterPro.source.protein2ipr.tsv :key_field => 1, :fields => [2], :type => :single
+    tsv = TSV.open(CMD.cmd("cut -f 2,3 | sort -u", :in => InterPro.source.protein2ipr.open, :pipe => true), :merge => true, :type => :double)
+ 
     tsv.key_field = "InterPro ID"
     tsv.fields = ["Domain Name"]
     tsv.to_s

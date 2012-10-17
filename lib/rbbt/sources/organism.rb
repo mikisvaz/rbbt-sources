@@ -7,7 +7,11 @@ module Organism
   self.pkgdir = "rbbt"
   self.subdir = "share/organisms"
 
-  ["Hsa", "Mmu", "Rno", "Sce"].each do |organism|
+  def self.instalable_organisms
+    Rbbt.share.install.Organism.find(:lib).glob('???').collect{|f| File.basename(f)}
+  end
+
+  Organism.instalable_organisms.each do |organism|
     claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
 
     module_eval "#{ organism } = with_key '#{organism}'"
