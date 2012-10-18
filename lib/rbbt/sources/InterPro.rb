@@ -33,34 +33,6 @@ module InterPro
     tsv.to_s
   end
 
-  if defined? Pfam
-    InterPro.claim InterPro.pfam_names.find, :proc do
-      pfam_domains = Pfam.domains.read.split("\n").collect{|l| l.split("\t").first}.compact.flatten
-      tsv = nil
-      TmpFile.with_file(pfam_domains * "\n") do |tmpfile|
-        tsv = TSV.open(CMD.cmd("cut -f 4,3 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro.source.protein2ipr.open, :pipe => true), :key_field => 1, :fields => [0], :type => :single)
-      end
-      tsv.key_field = "InterPro ID"
-      tsv.fields = ["Domain Name"]
-      tsv.to_s
-    end
-
-    InterPro.claim InterPro.pfam_equivalences.find, :proc do
-      pfam_domains = Pfam.domains.read.split("\n").collect{|l| l.split("\t").first}.compact.flatten
-      tsv = nil
-      TmpFile.with_file(pfam_domains * "\n") do |tmpfile|
-        tsv = TSV.open(CMD.cmd("cut -f 2,4 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro.source.protein2ipr.open, :pipe => true), :key_field => 0, :fields => [1], :type => :single)
-      end
-      tsv.key_field = "InterPro ID"
-      tsv.fields = ["Pfam Domain"]
-      tsv.to_s
-    end
-  end
-
-  def self.pfam_index
-    @@pfam_index ||= InterPro.pfam_equivalences.tsv(:persist => true, :key_field => "InterPro ID", :fields => ["Pfam Domain"])
-  end
-
   def self.name_index
     @@name_index ||= InterPro.domain_names.tsv(:persist => true)
   end
@@ -96,11 +68,6 @@ if defined? Entity
 
     property :name => :array2single do
       InterPro.name_index.values_at *self
-    end
-
-    property :pfam => :array2single do
-      InterPro.pfam_index.values_at(*self).
-        each{|domain| domain.organism = organism if domain.respond_to? :organism }
     end
 
     property :genes => :array2single do
