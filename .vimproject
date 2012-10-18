@@ -34,6 +34,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    wgEncodeBroadHmm.rb
    PSI_MI.rb
    reactome.rb
+   HPRD.rb
   }
  }
  share=share{
