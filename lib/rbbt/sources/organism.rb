@@ -1,17 +1,16 @@
 require 'rbbt'
 require 'rbbt/resource'
-require 'rbbt/resource/with_key'
 
 module Organism
   extend Resource
   self.pkgdir = "rbbt"
   self.subdir = "share/organisms"
 
-  def self.instalable_organisms
+  def self.installable_organisms
     Rbbt.share.install.Organism.find(:lib).glob('???').collect{|f| File.basename(f)}
   end
 
-  Organism.instalable_organisms.each do |organism|
+  Organism.installable_organisms.each do |organism|
     claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
 
     module_eval "#{ organism } = with_key '#{organism}'"
@@ -62,7 +61,6 @@ module Organism
     field_matches.sort_by{|field, count| count.to_i}.last
   end
 
-
   def self.organisms
     Dir.glob(File.join(Organism.root.find, '*')).collect{|f| File.basename(f)}
   end
@@ -79,6 +77,16 @@ module Organism
 
   def self.known_ids(name)
     TSV::Parser.new(Organism.identifiers(name).open).all_fields
+  end
+  
+  def self.entrez_taxid_organism(taxid)
+    all_organisms = Organism.installable_organisms
+
+    all_organisms.each do |organism|
+      return organism if Organism.entrez_taxids(organism).read.split("\n").include? taxid.to_s
+    end
+
+    raise "No organism identified for taxid #{taxid}. Supported organism are: #{all_organisms * ", "}"
   end
 
 end

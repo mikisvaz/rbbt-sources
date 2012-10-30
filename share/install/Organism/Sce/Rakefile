@@ -4,50 +4,48 @@ require 'rbbt/sources/entrez'
 require File.join(File.dirname(__FILE__), '../../lib/helpers')
 
 $taxs = [559292,4932]
-$native = "SGD ID"
-$url = "ftp://genome-ftp.stanford.edu/pub/yeast/data_download/chromosomal_feature/SGD_features.tab"
+$scientific_name = "Saccharomyces cerevisiae"
+#$ortholog_key = "yeast_ensembl_gene"
+
 $biomart_db = 'scerevisiae_gene_ensembl'
-$biomart_main = ['Entrez Gene ID', 'entrezgene']
-$ortholog_key = "yeast_ensembl_gene"
 
+$biomart_lexicon = [ 
+  [ 'Associated Gene Name' , "external_gene_id"], 
+]
 
-file 'scientific_name' do |t|
-  File.open(t.name, 'w') do |f| f.puts "Saccharomyces cerevisiae" end
-end
+$biomart_protein_identifiers = [
+  [ 'Protein ID', "protein_id"  ],
+  [ 'RefSeq Protein ID', "refseq_peptide"  ],
+  [ 'Unigene ID', "unigene"  ],
+  [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
+  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
+]
 
-file 'lexicon' do |t|
-  lexicon = tsv_file($url, [$native, 0], [3, 4, 5], :keep_empty => true)
+$biomart_probe_identifiers = [
+]
 
-  lexicon = merge_entrez(lexicon, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tSGD:S0/)})
+$biomart_identifiers = [ 
+  [ 'Entrez Gene ID', "entrezgene"],
+  [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
+  [ 'Associated Gene Name', "external_gene_id"  ],
+  [ 'Protein ID', "protein_id"  ],
+  [ 'RefSeq Protein ID', "refseq_peptide"  ],
+  [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
+  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
+  [ 'EMBL (Genbank) ID' , "embl"] , 
+  [ 'RefSeq mRNA' , "refseq_mrna"] , 
+]
 
-  lexicon = merge_biomart(lexicon, $biomart_db, $biomart_main, [['Interpro Description' , "interpro_description"]])
+$biomart_go= [
+  ["GO ID", 'go_id'],
+  ["GO Namespace", 'namespace_1003'],
+]
 
-  lexicon = lexicon.slice(lexicon.fields - ["Entrez Gene ID"])
+$biomart_go_2009= [
+  ["GO BP ID", 'go_biological_process_id'],
+  ["GO MF ID", 'go_molecular_function_id'],
+  ["GO CC ID", 'go_cellular_component_id'],
+]
 
-  File.open(t.name, 'w') do |f| f.puts lexicon end
-end
-
-file 'identifiers' do |t|
-  identifiers = tsv_file($url, [$native, 0], [["Ensembl Gene ID", 3], ["Associated Gene Name",4], ["Associated Gene Name Alias", 5]], :keep_empty => true)
-
-  identifiers = merge_entrez(identifiers, $taxs, $native, proc{|code| code.sub(/SGD:S0/,'S0') }, proc{|code| code.match(/\tSGD:S0/)})
-
-  identifiers = merge_biomart(identifiers, $biomart_db, $biomart_main,
-                [['Associated Gene Name' , "external_gene_id"], 
-                  ['Ensembl Gene ID', "ensembl_gene_id"  ],
-                  ['Ensembl Protein ID', "ensembl_peptide_id"  ],
-                  ['RefSeq Protein ID' , "refseq_peptide"] , 
-                  ['UniProt/SwissProt ID' , "uniprot_swissprot"] , 
-                  ['UniProt/SwissProt Accession' , "uniprot_swissprot_accession"] , 
-                  ['Protein ID' , "protein_id"] , 
-                  ['EMBL (Genbank) ID' , "embl"] , 
-                  # Affymetrix
-                  ['Affy yeast 2',"affy_yeast_2"],
-                  ['Affy yg s98', "affy_yg_s98"]])
-
-  File.open(t.name, 'w') do |f| f.puts identifiers end
-end
-
-
-task :default => ['name', 'lexicon', 'identifiers']
-
+$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
+load File.join(File.dirname(__FILE__), '../organism_helpers.rb')

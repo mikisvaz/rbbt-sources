@@ -19,12 +19,12 @@ $biomart_lexicon = [
 ]
 
 $biomart_identifiers = [ 
+  ['Entrez Gene ID', "entrezgene"],
   ['Associated Gene Name' , "external_gene_id"], 
   ['Protein ID' , "protein_id"] , 
   ['UniProt/SwissProt ID' , "uniprot_swissprot"] , 
   ['UniProt/SwissProt Accession' , "uniprot_swissprot_accession"] , 
   ['RefSeq Protein ID' , "refseq_peptide"] , 
-  ['RefSeq DNA ID' , "refseq_dna"] , 
   ['EMBL (Genbank) ID' , "embl"] , 
   ['RGD ID' , "rgd"] , 
   ['RGD Symbol' , "rgd_symbol"] , 
@@ -39,7 +39,6 @@ $biomart_identifiers = [
   ['Affy rg u34c', "affy_rg_u34c"],
   ['Affy rn u34', "affy_rn_u34"],
   ['Affy rt u34', "affy_rt_u34"],
-  ['Agilent WholeGenome',"agilent_wholegenome" ],
   ['Codelink ID ', "codelink"],
 ]
 

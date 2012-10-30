@@ -46,6 +46,10 @@ class TestEntrez < Test::Unit::TestCase
     assert_equal "CDK5", tsv["1020"]["Associated Gene Name"]
   end
 
+  def test_entrez_taxids
+    assert_equal "Hsa", Organism.entrez_taxid_organism('9606')
+  end
+
   #def test_genes_at_chromosome
   #  pos = [12, 117799500]
   #  assert_equal "ENSG00000089250", Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)

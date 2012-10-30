@@ -118,7 +118,7 @@ file 'identifiers' do |t|
     end
   end
 
-  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key_field => 1, :fields => [4]
+  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.find.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key_field => 1, :fields => [4]
   entrez_synonyms.key_field = "Entrez Gene ID"
   entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
