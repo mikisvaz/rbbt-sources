@@ -65,5 +65,3 @@ module COSMIC
     tsv.to_s.gsub(/^(\d)/m,'COSM\1').gsub(/(\d)-(\d)/,'\1:\2')
   end
 end
-
-COSMIC.Mutations.produce
