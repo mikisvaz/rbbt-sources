@@ -10,7 +10,7 @@ begin
     gem.email = "miguel.vazquez@fdi.ucm.es"
     gem.homepage = "http://github.com/mikisvaz/rbbt-sources"
     gem.authors = ["Miguel Vazquez"]
-    gem.files = Dir['lib/**/*.rb', 'etc/**/*', 'share/**/*.rb', 'share/**/Rakefile', 'LICENSE']
+    gem.files = Dir['lib/**/*.rb', 'etc/**/*', 'share/**/*.rb', 'share/**/Rakefile', 'share/Ensembl/*', 'LICENSE']
     gem.test_files = Dir['test/**/test_*.rb']
 
     gem.add_dependency('rbbt-util', ">= 4.0.0")
