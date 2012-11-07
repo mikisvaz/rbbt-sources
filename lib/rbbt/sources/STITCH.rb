@@ -11,7 +11,7 @@ module STITCH
   STITCH.claim STITCH.source.aliases.find, :url, "http://stitch.embl.de/download/chemical.aliases.v3.1.tsv.gz"
   STITCH.claim STITCH.source.sources.find, :url, "http://stitch.embl.de/download/chemical.sources.v3.1.tsv.gz"
 
-  Organism.instalable_organisms.each do |organism|
+  Organism.installable_organisms.each do |organism|
     STITCH.claim STITCH.chemical_protein(organism), :proc do
       taxids = Organism.entrez_taxids(organism).read.split("\n")
       tsv = TSV.open(CMD.cmd("grep '\t\\(#{ taxids * '\|' }\\)\\.' | sed 's/\\(#{taxids * "|"}\\)\\.//'", :in =>  STITCH.source.protein_chemical.open, :pipe => true), :type => :double, :merge => true)
@@ -31,5 +31,5 @@ if __FILE__ ==      $0
   STITCH.source.actions.produce
   STITCH.source.aliases.produce
   STITCH.source.sources.produce
-  STITCH.chemical_chemical("Hsa").produce
+  STITCH.chemical_protein("Hsa").produce
 end

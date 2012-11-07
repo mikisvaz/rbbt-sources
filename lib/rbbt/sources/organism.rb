@@ -66,7 +66,7 @@ module Organism
   end
 
   def self.scientific_name(organism)
-    Organism[organism]["scientific_name"].read.strip
+    Organism[organism]["scientific_name"].produce.read.strip
   end
 
   def self.organism(name)
@@ -88,5 +88,4 @@ module Organism
 
     raise "No organism identified for taxid #{taxid}. Supported organism are: #{all_organisms * ", "}"
   end
-
 end

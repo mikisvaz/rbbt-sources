@@ -4,18 +4,8 @@ module COSMIC
   extend Resource
   self.subdir = "share/databases/COSMIC"
 
-  COSMIC.claim COSMIC.gene_info, :proc do 
-    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v60_190712.tsv.gz"
-
-    tsv = TSV.open(Open.open(url), :merge => true)
-    tsv.key_field = "Associated Gene Name"
-    tsv.namespace = "Hsa/jun2011"
-
-    tsv.to_s
-  end
-
   COSMIC.claim COSMIC.Mutations, :proc do 
-    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v60_190712.tsv.gz"
+    url = "ftp://ftp.sanger.ac.uk/pub/CGP/wgs/data_export/CosmicWGS_MutantExport_v61_260912.tsv.gz"
 
     tsv = TSV.open(Open.open(url), :type => :list, :header_hash => "", :key_field => "Mutation ID", :namespace => "Hsa/jun2011")
     tsv.fields = tsv.fields.collect{|f| f == "Gene name" ? "Associated Gene Name" : f}
