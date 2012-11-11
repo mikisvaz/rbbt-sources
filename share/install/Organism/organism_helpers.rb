@@ -539,7 +539,9 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
     begin
       p = Organism.root
       p.replace File.expand_path("./chromosome_#{chr}")
-      chr_str = p.read
+      p.sub!(/.*\/.rbbt\//,'')
+      p = Path.setup(p, 'rbbt', Organism)
+      chr_str = p.produce.read
     rescue
       Log.debug("Chr #{ chr } failed: #{$!.message}")
       next
