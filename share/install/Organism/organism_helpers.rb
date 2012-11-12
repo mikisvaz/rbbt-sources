@@ -508,12 +508,12 @@ end
 require 'bio'
 
 file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
-  exon_info = TSV.open('exons', :persist => true, :type => :list, :fields => ["Exon Strand", "Exon Chr Start", "Exon Chr End", "Chromosome Name"], :unnamed => true)
+  exon_info = TSV.open('exons', :type => :list, :fields => ["Exon Strand", "Exon Chr Start", "Exon Chr End", "Chromosome Name"], :unnamed => true)
 
   chr_transcript_ranges ||= {}
   transcript_strand = {}
 
-  TSV.open('transcript_exons', :persist => true, :unnamed => true).through do |transcript, values|
+  TSV.open('transcript_exons', :unnamed => true).through do |transcript, values|
     transcript_ranges = []
 
     exons = Misc.zip_fields(values).sort_by{|exon,rank| rank.to_i}.collect{|exon,rank| exon}
@@ -542,8 +542,8 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
       p.sub!(/.*\/.rbbt\//,'')
       p = Path.setup(p, 'rbbt', Organism)
       chr_str = p.produce.read
-    rescue
-      Log.debug("Chr #{ chr } failed: #{$!.message}")
+    rescue Exception
+      Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered): #{$!.message}")
       next
     end
 
@@ -553,6 +553,7 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
 
       sequence = ranges.inject(""){|acc, range|
         start, eend = range
+        raise "Chromosome #{ chr } is too short (#{eend - chr_str.length } bases) for transcript #{ transcript } ([#{ start }, #{ eend }])." if chr_str.length < eend
         acc << chr_str[start-1..eend-1]
       }
 
@@ -591,9 +592,9 @@ file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
     transcript2ensembl = Ensembl::FTP.ensembl_tsv(organism, 'transcript', 'transcript_id', ['stable_id'], :type => :single, :unnamed => true) 
   end
 
-  transcript_protein = TSV.open("./transcripts", :key_field => "Ensembl Transcript ID", :fields => ["Ensembl Protein ID"], :type => :single, :persist => true, :unmamed => true)
-  transcript_exons   = TSV.open("./transcript_exons", :persist => true, :unmamed => true)
-  exon_ranges        = TSV.open("./exons",:fields => ["Exon Chr Start", "Exon Chr End"], :cast => :to_i, :persist => true, :unmamed => true)
+  transcript_protein = TSV.open("./transcripts", :key_field => "Ensembl Transcript ID", :fields => ["Ensembl Protein ID"], :type => :single,  :unmamed => true)
+  transcript_exons   = TSV.open("./transcript_exons", :unmamed => true)
+  exon_ranges        = TSV.open("./exons",:fields => ["Exon Chr Start", "Exon Chr End"], :cast => :to_i, :unmamed => true)
 
   transcript_utr5 = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["5' UTR Length"], :cast => :to_i, :type => :single)
   transcript_utr3 = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["3' UTR Length"], :cast => :to_i, :type => :single)
@@ -636,7 +637,7 @@ end
 file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr", "transcript_sequence"] do |t|
   transcript_5utr     = TSV.open(File.expand_path('./transcript_5utr'), :unnamed => true)
   transcript_3utr     = TSV.open(File.expand_path('./transcript_3utr'), :unnamed => true)
-  transcript_sequence = TSV.open(File.expand_path('./transcript_sequence'), :persist => true, :unnamed => true)
+  transcript_sequence = TSV.open(File.expand_path('./transcript_sequence'), :unnamed => true)
   transcript_protein  = TSV.open(File.expand_path('./transcripts'), :fields => ["Ensembl Protein ID"], :type => :single, :unnamed => true)
 
 
