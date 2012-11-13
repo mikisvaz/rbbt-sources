@@ -26,7 +26,7 @@ module InterPro
 
   InterPro.claim InterPro.domain_names.find, :proc do
     #tsv = InterPro.source.protein2ipr.tsv :key_field => 1, :fields => [2], :type => :single
-    tsv = TSV.open(CMD.cmd("cut -f 2,3 | sort -u", :in => InterPro.source.protein2ipr.open, :pipe => true), :merge => true, :type => :double)
+    tsv = TSV.open(CMD.cmd("cut -f 2,3 | sort -u", :in => InterPro.source.protein2ipr.open, :pipe => true), :merge => true, :type => :single)
  
     tsv.key_field = "InterPro ID"
     tsv.fields = ["Domain Name"]
