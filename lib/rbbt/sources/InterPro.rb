@@ -38,7 +38,7 @@ module InterPro
   end
 
   def self.gene_index
-    @@gene_index ||= InterPro.protein_domains.tsv(:persist => true, :key_field => "InterPro ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true)
+    @@gene_index ||= InterPro.protein_domains.tsv(:persist => true, :key_field => "InterPro ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true, :unnamed => true)
   end
 
   def self.domain_index
