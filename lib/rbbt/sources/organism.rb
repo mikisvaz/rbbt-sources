@@ -7,7 +7,7 @@ module Organism
   self.subdir = "share/organisms"
 
   def self.installable_organisms
-    Rbbt.share.install.Organism.find(:lib).glob('???').collect{|f| File.basename(f)}
+    Rbbt.share.install.Organism.find.glob('???').collect{|f| File.basename(f)}
   end
 
   Organism.installable_organisms.each do |organism|

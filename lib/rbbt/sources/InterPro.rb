@@ -34,7 +34,7 @@ module InterPro
   end
 
   def self.name_index
-    @@name_index ||= InterPro.domain_names.tsv(:persist => true)
+    @@name_index ||= InterPro.domain_names.tsv(:persist => true, :unnamed => true)
   end
 
   def self.gene_index
@@ -42,16 +42,16 @@ module InterPro
   end
 
   def self.domain_index
-    @@domain_index ||= InterPro.protein_domains.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["InterPro ID"], :merge => true)
+    @@domain_index ||= InterPro.protein_domains.tsv(:persist => true, :unnamed => true, :key_field => "UniProt/SwissProt Accession", :fields => ["InterPro ID"], :merge => true)
   end
 
   def self.domain_position_index
-    @@domain_position_index ||= InterPro.protein_domains.tsv(:persist => true, :key_field => "UniProt/SwissProt Accession", :fields => ["InterPro ID", "Domain Start AA", "Domain End AA"], :type => :double, :merge => true)
+    @@domain_position_index ||= InterPro.protein_domains.tsv(:persist => true, :unnamed => true, :key_field => "UniProt/SwissProt Accession", :fields => ["InterPro ID", "Domain Start AA", "Domain End AA"], :type => :double, :merge => true)
   end
 
   def self.ens2uniprot(organism)
     @@ens2uniprot_index ||= {}
-    @@ens2uniprot_index[organism] ||= Organism.protein_identifiers(organism).tsv(:persist => true, :fields => ["UniProt/SwissProt Accession"], :key_field => "Ensembl Protein ID", :type => :double, :merge => true)
+    @@ens2uniprot_index[organism] ||= Organism.protein_identifiers(organism).tsv(:persist => true, :unnamed => true, :fields => ["UniProt/SwissProt Accession"], :key_field => "Ensembl Protein ID", :type => :double, :merge => true)
   end
 
 end
@@ -70,9 +70,14 @@ if defined? Entity
       InterPro.name_index.values_at *self
     end
 
+    property :proteins => :array2single do
+      InterPro.gene_index.values_at(*self).
+        collect{|genes| genes = genes.uniq;  genes.organism = organism if genes.respond_to? :organism; genes }.tap{|o| Protein.setup(o, "UniProt/SwissProt Accession", organism)}
+    end
+
     property :genes => :array2single do
       InterPro.gene_index.values_at(*self).
-        collect{|genes| genes = genes.uniq;  genes.organism = organism if genes.respond_to? :organism; genes }
+        collect{|genes| genes = genes.uniq;  genes.organism = organism if genes.respond_to? :organism; genes }.tap{|o| Gene.setup(o, "UniProt/SwissProt Accession", organism)}
     end
   end
 
@@ -89,11 +94,11 @@ if defined? Entity
       property :interpro_domain_positions => :array2single do
         self.collect do |protein|
           if protein.nil?
-            []
+            [].tap{|o| InterProDomain.setup(o, organism)}
           else
             uniprot = (InterPro.ens2uniprot(protein.organism)[protein] || []).flatten
             uniprot.empty? ? nil : 
-              InterPro.domain_position_index.values_at(*uniprot).compact.flatten(1)
+              InterPro.domain_position_index.values_at(*uniprot).compact.flatten(1).tap{|o| InterProDomain.setup(o, organism)}
           end
         end
       end
