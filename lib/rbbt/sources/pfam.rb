@@ -17,7 +17,7 @@ module Pfam
   NAMES_FILE = InterPro.pfam_names.find
 
   def self.name_index
-    @name_index ||= TSV.open NAMES_FILE, :single
+    @name_index ||= TSV.open NAMES_FILE, :single, :unnamed => true
   end
 
   def self.name(id)
