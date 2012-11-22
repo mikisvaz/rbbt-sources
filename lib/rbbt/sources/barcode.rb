@@ -18,6 +18,3 @@ module Barcode
   end
 
 end
-
-
-Barcode.transcriptome.produce

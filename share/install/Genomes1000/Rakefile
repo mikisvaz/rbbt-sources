@@ -1,0 +1,15 @@
+
+
+rule /(.+)/ do |t|
+  require 'net/ftp'
+  chromosome = File.basename(t.name)
+
+  ftp = Genomes1000::URL
+  ftp = Net::FTP.new(Genomes1000::FTP_SERVER)
+  ftp.login
+  ftp.chdir(Genomes1000::FTP_PATH)
+  file = ftp.list("*.chr" + chromosome + ".*").collect{|l| l.split(" ").last}.last
+  ddd file
+  exit
+ 
+end

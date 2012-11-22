@@ -464,7 +464,7 @@ rule /^chromosome_.*/ do |t|
   ftp.chdir('dna')
   file = ftp.nlst.select{|file| file =~ /chromosome\.#{ chr }\.fa/}.first
 
-  raise "Fasta file for chromosome not found: #{ chr } - #{ archive }, #{ release }" if file.nil?
+  raise "Fasta file for chromosome not found: '#{ chr }' - #{ archive }, #{ release }" if file.nil?
 
   Log.debug("Downloading chromosome sequence: #{ file }")
 

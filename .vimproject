@@ -35,6 +35,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    tfacts.rb
    uniprot.rb
    wgEncodeBroadHmm.rb
+   genomes1000.rb
   }
  }
  share=share{
@@ -66,7 +67,10 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    STITCH=STITCH{
     Rakefile
     }
+   Genomes1000=Genomes1000{
+    Rakefile
    }
+  }
   Ensembl=Ensembl{
    release_dates
   }

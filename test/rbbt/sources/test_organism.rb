@@ -1,8 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/../../test_helper')
 require 'rbbt/sources/organism'
 require 'test/unit'
+require 'rbbt/sources/ensembl_ftp'
 
-class TestEntrez < Test::Unit::TestCase
+class TestOrganism < Test::Unit::TestCase
 
   def test_known_ids
     assert Organism.known_ids("Hsa").include?("Associated Gene Name")
@@ -15,7 +16,7 @@ class TestEntrez < Test::Unit::TestCase
   def test_identifiers
     assert Organism.identifiers('Hsa').tsv(:key_field => "Entrez Gene ID", :persist => true)['1020']["Associated Gene Name"].include?('CDK5')
     assert Organism.identifiers('Sce').tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
-    assert Organism::Sce.identifiers.tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
+    assert Organism.identifiers("Sce").tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
   end
 
   def test_lexicon
@@ -25,8 +26,8 @@ class TestEntrez < Test::Unit::TestCase
   def test_guess_id
     ensembl = %w(YOL044W YDR289C YAL034C YGR246C ARS519 tH(GUG)E2 YDR218C YLR002C YGL224C)
     gene_name = %w(SNR64 MIP1 MRPS18 TFB2 JEN1 IVY1 TRS33 GAS3)
-    assert_equal "Associated Gene Name", Organism::Sce.guess_id(gene_name).first
-    assert_equal "Ensembl Gene ID", Organism::Sce.guess_id(ensembl).first
+    assert_equal "Associated Gene Name", Organism.guess_id("Sce", gene_name).first
+    assert_equal "Ensembl Gene ID", Organism.guess_id("Sce", ensembl).first
   end
 
   def test_organisms
@@ -40,14 +41,24 @@ class TestEntrez < Test::Unit::TestCase
     tsv.fields = []
     tsv.namespace = "Hsa"
     
-    Organism::Hsa.attach_translations tsv, "Associated Gene Name"
-    Organism::Hsa.attach_translations tsv, "Ensembl Gene ID"
+    Organism.attach_translations "Hsa", tsv, "Associated Gene Name"
+    Organism.attach_translations "Hsa", tsv, "Ensembl Gene ID"
 
     assert_equal "CDK5", tsv["1020"]["Associated Gene Name"]
   end
 
   def test_entrez_taxids
     assert_equal "Hsa", Organism.entrez_taxid_organism('9606')
+  end
+
+  def test_lift_over
+    mutation_19 = "19:21131664:T"
+    mutation_18 = "19:20923504:T"
+    source_build = "Hsa/jun2011"
+    target_build = "Hsa/may2009"
+
+    assert_equal mutation_18, Organism.liftOver([mutation_19], source_build, target_build).first
+    assert_equal mutation_19, Organism.liftOver([mutation_18], target_build, source_build).first
   end
 
   #def test_genes_at_chromosome
