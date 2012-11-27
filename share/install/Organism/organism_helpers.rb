@@ -445,16 +445,18 @@ rule /^chromosome_.*/ do |t|
 
   archive = File.basename(FileUtils.pwd) =~ /^([a-z]{3}[0-9]{4})$/i ? $1 : nil
 
-  release = case archive
-            when "may2009"
-              "release-54"
-            when "jun2011"
-              "release-64"
-            when "may2012"
-              "release-67"
-            when nil
-              Open.read("http://www.ensembl.org/info/data/ftp/index.html", :nocache => true).match(/pub\/(\w+-\d+)\/fasta/)[1]
-            end
+  #release = case archive
+  #          when "may2009"
+  #            "release-54"
+  #          when "jun2011"
+  #            "release-64"
+  #          when "may2012"
+  #            "release-67"
+  #          when nil
+  #            Open.read("http://www.ensembl.org/info/data/ftp/index.html", :nocache => true).match(/pub\/(\w+-\d+)\/fasta/)[1]
+  #          end
+
+  release = Ensembl.releases[archive]
 
 
   ftp = Net::FTP.new("ftp.ensembl.org")
