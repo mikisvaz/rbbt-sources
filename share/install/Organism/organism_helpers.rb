@@ -260,7 +260,7 @@ end
 #{{{ Variations
 
 $biomart_variation_id = ["SNP ID", "refsnp_id"]
-$biomart_variation_position = [["Chromosome Name", "chr_name"], ["Chromosome Start", "chrom_start"]]
+$biomart_variation_position = [["Chromosome Name", "chr_name"], ["Chromosome Start", "chrom_start"], ["Variant Alleles", "allele"]]
 
 file 'germline_variations' do |t|
   BioMart.tsv($biomart_db_germline_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)

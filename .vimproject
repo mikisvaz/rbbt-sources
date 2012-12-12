@@ -36,6 +36,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    uniprot.rb
    wgEncodeBroadHmm.rb
    genomes1000.rb
+   dbSNP.rb
   }
  }
  share=share{
