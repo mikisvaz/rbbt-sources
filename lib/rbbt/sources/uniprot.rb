@@ -42,7 +42,12 @@ module UniProt
     text.split(/\n/).each{|l| 
       next unless l =~ /^DR\s+PDB; (.*)\./
       id, method, resolution, region = $1.split(";").collect{|v| v.strip}
-      chains, start, eend = region.match(/(\w+)=(\d+)-(\d+)/).values_at(1,2,3)
+      begin
+        chains, start, eend = region.match(/(\w+)=(\d+)-(\d+)/).values_at(1,2,3)
+      rescue
+        Log.warn("Error process Uniprot PDB line: #{line}")
+        next
+      end
       pdb[id.downcase] = {:method => method, :resolution => resolution, :region => (start.to_i..eend.to_i), :chains => chains}
     }
     pdb
