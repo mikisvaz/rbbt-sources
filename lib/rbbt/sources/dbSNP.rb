@@ -1,6 +1,7 @@
 require 'rbbt'
 require 'rbbt/util/open'
 require 'rbbt/resource'
+require 'net/ftp'
 
 module DbSNP
   extend Resource
@@ -27,6 +28,58 @@ module DbSNP
     tsv.to_s
   end
 
+  DbSNP.claim DbSNP.mutations_gatk, :proc do
+    ftp = Net::FTP.new('ftp.broadinstitute.org')
+    ftp.login('gsapubftp-anonymous', 'devnull@nomail.org')
+    ftp.chdir('/bundle/2.3/hg19')
+
+    tmpfile = TmpFile.tmp_file + '.gz'
+    ftp.getbinaryfile('dbsnp_137.hg19.vcf.gz', tmpfile, 1024)
+
+    tsv = TSV.setup({}, :key_field => "RS ID", :fields => ["Genomic Mutation", "GMAF", "G5", "G5A", "dbSNP Build ID"], :type => :list)
+    file = Open.open(tmpfile, :nocache => true) 
+    while line = file.gets do
+      next if line[0] == "#"[0]
+
+      chr, position, id, ref, mut, qual, filter, info = line.split "\t"
+
+      chr.sub!('chr', '')
+
+      mut = mut.split(",").first
+      case
+      when ref == '-'
+        mut = "+" << mut
+      when mut == '-'
+        mut = "-" * ref.length
+      when (mut.length > 1 and ref.length > 1)
+        mut = '-' * ref.length << mut
+      when (mut.length > 1 and ref.length == 1 and mut.index(ref) == 0)
+        mut = '+' << mut[1..-1]
+      when (mut.length == 1 and ref.length > 1 and ref.index(mut) == 0)
+        mut = '-' * (ref.length - 1)
+      else
+        mut = mut
+      end
+
+      g5 = g5a = dbsnp_build_id = gmaf = nil
+     
+      gmaf = $1 if info =~ /GMAF=([0-9.]+)/
+      g5 = true if info =~ /\bG5\b/
+      g5a = true if info =~ /\bG5A\b/
+      dbsnp_build_id = $1 if info =~ /dbSNPBuildID=(\d+)/
+
+      mutation = [chr, position, mut] * ":"
+
+      tsv.namespace = "Hsa/may2012"
+
+      tsv[id] = [mutation, gmaf, g5, g5a, dbsnp_build_id]
+    end
+
+    FileUtils.rm tmpfile
+
+    tsv.to_s
+  end
+
   DbSNP.claim DbSNP.mutations_hg18, :proc do
     require 'rbbt/sources/organism'
 
@@ -45,4 +98,3 @@ module DbSNP
     tsv.to_s
   end
 end
-
