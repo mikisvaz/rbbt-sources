@@ -4,26 +4,32 @@
 # -*- encoding: utf-8 -*-
 
 Gem::Specification.new do |s|
-  s.name = %q{rbbt-sources}
-  s.version = "1.2.0"
+  s.name = "rbbt-sources"
+  s.version = "2.0.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Miguel Vazquez"]
-  s.date = %q{2012-01-13}
-  s.description = %q{Data sources like PubMed, Entrez Gene, or Gene Ontology}
-  s.email = %q{miguel.vazquez@fdi.ucm.es}
+  s.date = "2012-12-21"
+  s.description = "Data sources like PubMed, Entrez Gene, or Gene Ontology"
+  s.email = "miguel.vazquez@fdi.ucm.es"
   s.files = [
     "etc/biomart/missing_in_archive",
     "lib/rbbt/sources/COSMIC.rb",
     "lib/rbbt/sources/COSTART.rb",
     "lib/rbbt/sources/CTCAE.rb",
+    "lib/rbbt/sources/HPRD.rb",
     "lib/rbbt/sources/InterPro.rb",
     "lib/rbbt/sources/NCI.rb",
+    "lib/rbbt/sources/PSI_MI.rb",
+    "lib/rbbt/sources/STITCH.rb",
     "lib/rbbt/sources/barcode.rb",
     "lib/rbbt/sources/bibtex.rb",
     "lib/rbbt/sources/biomart.rb",
     "lib/rbbt/sources/cath.rb",
+    "lib/rbbt/sources/dbSNP.rb",
+    "lib/rbbt/sources/ensembl_ftp.rb",
     "lib/rbbt/sources/entrez.rb",
+    "lib/rbbt/sources/genomes1000.rb",
     "lib/rbbt/sources/go.rb",
     "lib/rbbt/sources/gscholar.rb",
     "lib/rbbt/sources/jochem.rb",
@@ -31,10 +37,12 @@ Gem::Specification.new do |s|
     "lib/rbbt/sources/pfam.rb",
     "lib/rbbt/sources/polysearch.rb",
     "lib/rbbt/sources/pubmed.rb",
+    "lib/rbbt/sources/reactome.rb",
     "lib/rbbt/sources/tfacts.rb",
     "lib/rbbt/sources/uniprot.rb",
     "lib/rbbt/sources/wgEncodeBroadHmm.rb",
-    "share/install/InterPro/Rakefile",
+    "share/Ensembl/release_dates",
+    "share/install/Genomes1000/Rakefile",
     "share/install/JoChem/Rakefile",
     "share/install/NCI/Rakefile",
     "share/install/Organism/Hsa/Rakefile",
@@ -42,12 +50,13 @@ Gem::Specification.new do |s|
     "share/install/Organism/Rno/Rakefile",
     "share/install/Organism/Sce/Rakefile",
     "share/install/Organism/organism_helpers.rb",
+    "share/install/STITCH/Rakefile",
     "share/install/lib/helpers.rb"
   ]
-  s.homepage = %q{http://github.com/mikisvaz/rbbt-sources}
+  s.homepage = "http://github.com/mikisvaz/rbbt-sources"
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.6.2}
-  s.summary = %q{Data sources for the Ruby Bioinformatics Toolkit (rbbt)}
+  s.rubygems_version = "1.8.24"
+  s.summary = "Data sources for the Ruby Bioinformatics Toolkit (rbbt)"
   s.test_files = ["test/test_helper.rb", "test/rbbt/sources/test_entrez.rb", "test/rbbt/sources/test_pubmed.rb", "test/rbbt/sources/test_go.rb", "test/rbbt/sources/test_biomart.rb", "test/rbbt/sources/test_organism.rb"]
 
   if s.respond_to? :specification_version then
@@ -56,22 +65,22 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
       s.add_runtime_dependency(%q<rbbt-util>, [">= 4.0.0"])
       s.add_runtime_dependency(%q<rbbt-text>, [">= 0"])
-      s.add_runtime_dependency(%q<mechanize>, [">= 0"])
       s.add_runtime_dependency(%q<libxml-ruby>, [">= 0"])
       s.add_runtime_dependency(%q<bio>, [">= 0"])
+      s.add_runtime_dependency(%q<mechanize>, [">= 0"])
     else
       s.add_dependency(%q<rbbt-util>, [">= 4.0.0"])
       s.add_dependency(%q<rbbt-text>, [">= 0"])
-      s.add_dependency(%q<mechanize>, [">= 0"])
       s.add_dependency(%q<libxml-ruby>, [">= 0"])
       s.add_dependency(%q<bio>, [">= 0"])
+      s.add_dependency(%q<mechanize>, [">= 0"])
     end
   else
     s.add_dependency(%q<rbbt-util>, [">= 4.0.0"])
     s.add_dependency(%q<rbbt-text>, [">= 0"])
-    s.add_dependency(%q<mechanize>, [">= 0"])
     s.add_dependency(%q<libxml-ruby>, [">= 0"])
     s.add_dependency(%q<bio>, [">= 0"])
+    s.add_dependency(%q<mechanize>, [">= 0"])
   end
 end
 
