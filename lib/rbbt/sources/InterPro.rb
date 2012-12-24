@@ -77,7 +77,7 @@ if defined? Entity
 
     property :genes => :array2single do
       InterPro.gene_index.values_at(*self).
-        collect{|genes| genes = genes.uniq;  genes.organism = organism if genes.respond_to? :organism; genes }.tap{|o| Gene.setup(o, "UniProt/SwissProt Accession", organism)}
+        collect{|genes| genes = []; genes = genes.uniq;  genes.organism = organism if genes.respond_to? :organism; genes }.tap{|o| Gene.setup(o, "UniProt/SwissProt Accession", organism)}
     end
   end
 
