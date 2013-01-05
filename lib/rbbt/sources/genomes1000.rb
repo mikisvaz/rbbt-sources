@@ -8,21 +8,28 @@ module Genomes1000
 
   RELEASE_URL = "ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20110521/ALL.wgs.phase1_release_v3.20101123.snps_indels_sv.sites.vcf.gz"
 
-  Genomes1000.claim Genomes1000.mutations, :proc do
+  Genomes1000.claim Genomes1000.mutations, :proc do |filename|
 
-    tsv = TSV.setup({}, :key_field => "Variant ID", :fields => ["Genomic Mutation"], :type => :single)
-    Open.read(RELEASE_URL) do |line|
-      next if line[0] == "#"[0]
+    begin
+      Open.write(filename) do |file|
+        file.puts "#: :type=:single#:namespace=Hsa"
+        file.puts "#Variant ID\tGenomic Mutation"
 
-      chromosome, position, id, references, alternative, quality, filter, info = line.split("\t")
+        Open.read(RELEASE_URL) do |line|
+          next if line[0] == "#"[0]
 
-      tsv[id] = [chromosome, position, alternative] * ":"
+          chromosome, position, id, references, alternative, quality, filter, info = line.split("\t")
+
+          file.puts [id, [chromosome, position, alternative] * ":"] * "\t"
+        end
+      end
+    rescue
+      FileUtils.rm filename if File.exists? filename
+      raise $!
     end
-
-    tsv.namespace = "Hsa"
-
-    tsv.to_s
+    nil
   end
+
 
   Genomes1000.claim Genomes1000.mutations_hg18, :proc do
     require 'rbbt/sources/organism'
@@ -43,3 +50,5 @@ module Genomes1000
   end
 
 end
+
+Genomes1000.mutations_alt.produce
