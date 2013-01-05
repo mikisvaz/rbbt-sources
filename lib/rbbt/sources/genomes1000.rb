@@ -50,5 +50,3 @@ module Genomes1000
   end
 
 end
-
-Genomes1000.mutations_alt.produce
