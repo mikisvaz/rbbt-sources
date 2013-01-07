@@ -31,7 +31,7 @@ module InterPro
   end
 end
 
-InterPro.claim InterPro.pfam_names.find, :proc do
+InterPro.claim InterPro.pfam_names, :proc do
   pfam_domains = Pfam.domains.read.split("\n").collect{|l| l.split("\t").first}.compact.flatten
   tsv = nil
   TmpFile.with_file(pfam_domains * "\n") do |tmpfile|
@@ -42,7 +42,7 @@ InterPro.claim InterPro.pfam_names.find, :proc do
   tsv.to_s
 end
 
-InterPro.claim InterPro.pfam_equivalences.find, :proc do
+InterPro.claim InterPro.pfam_equivalences, :proc do
   pfam_domains = Pfam.domains.read.split("\n").collect{|l| l.split("\t").first}.compact.flatten
   tsv = nil
   TmpFile.with_file(pfam_domains * "\n") do |tmpfile|
