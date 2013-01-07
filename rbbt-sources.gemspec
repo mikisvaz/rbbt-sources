@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "rbbt-sources"
-  s.version = "2.0.0"
+  s.version = "2.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Miguel Vazquez"]
-  s.date = "2012-12-21"
+  s.date = "2013-01-07"
   s.description = "Data sources like PubMed, Entrez Gene, or Gene Ontology"
   s.email = "miguel.vazquez@fdi.ucm.es"
   s.files = [
@@ -57,7 +57,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubygems_version = "1.8.24"
   s.summary = "Data sources for the Ruby Bioinformatics Toolkit (rbbt)"
-  s.test_files = ["test/test_helper.rb", "test/rbbt/sources/test_entrez.rb", "test/rbbt/sources/test_pubmed.rb", "test/rbbt/sources/test_go.rb", "test/rbbt/sources/test_biomart.rb", "test/rbbt/sources/test_organism.rb"]
+  s.test_files = ["test/rbbt/sources/test_go.rb", "test/rbbt/sources/test_entrez.rb", "test/rbbt/sources/test_biomart.rb", "test/rbbt/sources/test_organism.rb", "test/rbbt/sources/test_pubmed.rb", "test/test_helper.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 3
