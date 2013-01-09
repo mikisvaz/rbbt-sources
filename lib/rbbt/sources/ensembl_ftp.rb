@@ -23,6 +23,7 @@ module Ensembl
         release = Ensembl.releases[build]
         name = Organism.scientific_name(organism)
         ftp = Net::FTP.new(Ensembl::FTP::SERVER)
+        ftp.passive = true
         ftp.login
         ftp.chdir(File.join('pub', release, 'mysql'))
         file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last

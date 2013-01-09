@@ -448,6 +448,7 @@ rule /^chromosome_.*/ do |t|
   release = Ensembl.releases[archive]
 
   ftp = Net::FTP.new("ftp.ensembl.org")
+  ftp.passive = true
   ftp.login
   ftp.chdir("pub/#{ release }/fasta/")
   ftp.chdir($scientific_name.downcase.sub(" ",'_'))

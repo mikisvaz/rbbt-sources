@@ -9,7 +9,7 @@ module DbSNP
 
   URL = "ftp://ftp.ncbi.nlm.nih.gov/snp/organisms/human_9606/VCF/common_all.vcf.gz"
 
-  DbSNP.claim DbSNP.mutations, :proc do
+  DbSNP.claim DbSNP.mutations_ncbi, :proc do
     tsv = TSV.setup({}, :key_field => "RS ID", :fields => ["Genomic Mutation"], :type => :single)
     file = Open.open(URL, :nocache => true) 
     while line = file.gets do
@@ -28,8 +28,9 @@ module DbSNP
     tsv.to_s
   end
 
-  DbSNP.claim DbSNP.mutations_gatk, :proc do
+  DbSNP.claim DbSNP.mutations, :proc do
     ftp = Net::FTP.new('ftp.broadinstitute.org')
+    ftp.passive = true
     ftp.login('gsapubftp-anonymous', 'devnull@nomail.org')
     ftp.chdir('/bundle/2.3/hg19')
 
