@@ -5,11 +5,11 @@ module STITCH
   extend Resource
   self.subdir = "share/databases/STITCH"
 
-  STITCH.claim STITCH.source.chemical_chemical.find, :url, "http://stitch.embl.de/download/chemical_chemical.links.detailed.v3.1.tsv.gz"
-  STITCH.claim STITCH.source.protein_chemical.find, :url, "http://stitch.embl.de/download/protein_chemical.links.detailed.v3.1.tsv.gz"
-  STITCH.claim STITCH.source.actions.find, :url, "http://stitch.embl.de/download/actions.v3.1.tsv.gz"
-  STITCH.claim STITCH.source.aliases.find, :url, "http://stitch.embl.de/download/chemical.aliases.v3.1.tsv.gz"
-  STITCH.claim STITCH.source.sources.find, :url, "http://stitch.embl.de/download/chemical.sources.v3.1.tsv.gz"
+  STITCH.claim STITCH.source.chemical_chemical, :url, "http://stitch.embl.de/download/chemical_chemical.links.detailed.v3.1.tsv.gz"
+  STITCH.claim STITCH.source.protein_chemical, :url, "http://stitch.embl.de/download/protein_chemical.links.detailed.v3.1.tsv.gz"
+  STITCH.claim STITCH.source.actions, :url, "http://stitch.embl.de/download/actions.v3.1.tsv.gz"
+  STITCH.claim STITCH.source.aliases, :url, "http://stitch.embl.de/download/chemical.aliases.v3.1.tsv.gz"
+  STITCH.claim STITCH.source.sources, :url, "http://stitch.embl.de/download/chemical.sources.v3.1.tsv.gz"
 
   Organism.installable_organisms.each do |organism|
     STITCH.claim STITCH.chemical_protein(organism), :proc do

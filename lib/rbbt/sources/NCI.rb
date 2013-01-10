@@ -3,7 +3,7 @@ module NCI
   extend Resource
   self.subdir = "share/databases/NCI"
 
-  NCI.claim NCI.root.find, :rake, Rbbt.share.install.NCI.Rakefile.find(:lib)
+  NCI.claim NCI.root, :rake, Rbbt.share.install.NCI.Rakefile.find(:lib)
 end
 
 if defined? Entity 
