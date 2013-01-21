@@ -5,7 +5,7 @@ module COSMIC
   self.subdir = "share/databases/COSMIC"
 
   COSMIC.claim COSMIC.Mutations, :proc do 
-    url = "ftp://ftp.sanger.ac.uk/pub/CGP/wgs/data_export/CosmicWGS_MutantExport_v61_260912.tsv.gz"
+    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v62_291112.tsv.gz"
 
     tsv = TSV.open(Open.open(url), :type => :list, :header_hash => "", :key_field => "Mutation ID", :namespace => "Hsa/jun2011")
     tsv.fields = tsv.fields.collect{|f| f == "Gene name" ? "Associated Gene Name" : f}
