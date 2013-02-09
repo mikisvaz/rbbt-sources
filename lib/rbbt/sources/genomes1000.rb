@@ -1,6 +1,7 @@
 require 'rbbt'
 require 'rbbt/util/open'
 require 'rbbt/resource'
+require 'rbbt/entity/gene'
 
 module Genomes1000
   extend Resource
@@ -49,4 +50,50 @@ module Genomes1000
     tsv.to_s
   end
 
+  def self.rsid_index(organism, chromosome = nil)
+    build = Organism.hg_build(organism)
+
+    tag = [build, chromosome] * ":"
+    Persist.persist("StaticPosIndex for Genomes1000 [#{ tag }]", :fwt, :persist => true) do
+      value_size = 0
+      file = Genomes1000[build == "hg19" ? "mutations" : "mutations_hg18"]
+      chr_positions = []
+      Open.read(CMD.cmd("grep '\t#{chromosome}:'", :in => file.open, :pipe => true)) do |line|
+        next if line[0] == "#"[0]
+        rsid, mutation = line.split("\t")
+        next if mutation.nil? or mutation.empty?
+        chr, pos = mutation.split(":")
+        next if chr != chromosome or pos.nil? or pos.empty?
+        chr_positions << [rsid, pos.to_i]
+        value_size = rsid.length if rsid.length > value_size
+      end
+      fwt = FixWidthTable.new :memory, value_size
+      fwt.add_point(chr_positions)
+      fwt
+    end
+  end
+
+  def self.mutation_index(organism)
+    build = Organism.hg_build(organism)
+    file = Genomes1000[build == "hg19" ? "mutations" : "mutations_hg18"]
+    @mutation_index ||= {}
+    @mutation_index[build] ||= file.tsv :persist => true, :fields => ["Genomic Mutation"], :type => :single, :persist => true
+  end
+
+
+end
+
+if defined? Entity
+  if defined? Gene and Entity === Gene
+    module Gene
+      property :genomes_1000_rsids => :single2array do
+        Genomes1000.rsid_index(organism, chromosome)[self.chr_range]
+      end
+
+      property :genomes_1000_mutations => :single2array do
+        GenomicMutation.setup(Genomes1000.mutation_index(organism).values_at(*self.genomes_1000_rsids).uniq, "1000 Genomes mutations over #{self.name || self}", organism, true)
+      end
+ 
+    end
+  end
 end

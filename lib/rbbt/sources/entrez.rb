@@ -139,10 +139,12 @@ module Entrez
     else
       filename = gene_filename geneid    
 
+
       if FileCache.found(filename)
         return Gene.new(Open.read(FileCache.path(filename)))
       else
         xml = get_online(geneid)
+
         FileCache.add(filename, xml) unless FileCache.found(filename)
 
         return Gene.new(xml)
@@ -150,30 +152,30 @@ module Entrez
     end
   end
 
-  # Counts the words in common between a chunk of text and the text
-  # found in Entrez Gene for that particular gene. The +gene+ may be a
-  # gene identifier or a Gene class instance.
-  def self.gene_text_similarity(gene, text)
+# Counts the words in common between a chunk of text and the text
+# found in Entrez Gene for that particular gene. The +gene+ may be a
+# gene identifier or a Gene class instance.
+def self.gene_text_similarity(gene, text)
 
-    case
-    when Entrez::Gene === gene
-      gene_text = gene.text
-    when String === gene || Fixnum === gene
-      begin
-        gene_text =  get_gene(gene).text
-      rescue CMD::CMDError
-        return 0
-      end
-    else
+  case
+  when Entrez::Gene === gene
+    gene_text = gene.text
+  when String === gene || Fixnum === gene
+    begin
+      gene_text =  get_gene(gene).text
+    rescue CMD::CMDError
       return 0
     end
-
-    gene_words = gene_text.words.to_set
-    text_words = text.words.to_set
-
-    return 0 if gene_words.empty? || text_words.empty?
-
-    common = gene_words.intersection(text_words)
-    common.length / (gene_words.length + text_words.length).to_f
+  else
+    return 0
   end
+
+  gene_words = gene_text.words.to_set
+  text_words = text.words.to_set
+
+  return 0 if gene_words.empty? || text_words.empty?
+
+  common = gene_words.intersection(text_words)
+  common.length / (gene_words.length + text_words.length).to_f
+end
 end
