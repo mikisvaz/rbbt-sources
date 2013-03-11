@@ -5,7 +5,7 @@ module COSMIC
   extend Resource
   self.subdir = "share/databases/COSMIC"
 
-  COSMIC.claim COSMIC.Mutations, :proc do 
+  COSMIC.claim COSMIC.mutations, :proc do 
     url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v63_300113.tsv.gz"
 
     tsv = TSV.open(Open.open(url), :type => :list, :header_hash => "", :key_field => "Mutation ID", :namespace => "Hsa/jun2011")
@@ -13,10 +13,18 @@ module COSMIC
     tsv.add_field "Genomic Mutation" do |mid, values|
       position = values["Mutation GRCh37 genome position"]
       cds = values["Mutation CDS"]
+
       if position.nil? or position.empty?
         nil
       else
         position = position.split("-").first
+
+        chr, pos = position.split(":")
+        chr = "X" if chr == "23"
+        chr = "Y" if chr == "24"
+        chr = "M" if chr == "25"
+        position = [chr, pos ] * ":"
+
         if cds.nil?
           position
         else
@@ -62,7 +70,7 @@ module COSMIC
     tag = [build, chromosome] * ":"
     Persist.persist("StaticPosIndex for COSMIC [#{ tag }]", :fwt, :persist => true) do
       value_size = 0
-      file = COSMIC[build == "hg19" ? "Mutations" : "mutations_hg18"]
+      file = COSMIC[build == "hg19" ? "mutations" : "mutations_hg18"]
       chr_positions = []
       Open.read(CMD.cmd("grep '\t#{chromosome}:'", :in => file.open, :pipe => true)) do |line|
         next if line[0] == "#"[0]
@@ -81,7 +89,7 @@ module COSMIC
 
   def self.mutation_index(organism)
     build = Organism.hg_build(organism)
-    file = COSMIC[build == "hg19" ? "Mutations" : "mutations_hg18"]
+    file = COSMIC[build == "hg19" ? "mutations" : "mutations_hg18"]
     @mutation_index ||= {}
     @mutation_index[build] ||= file.tsv :persist => true, :fields => ["Genomic Mutation"], :type => :single, :persist => true
   end
@@ -102,3 +110,4 @@ if defined? Entity
     end
   end
 end
+
