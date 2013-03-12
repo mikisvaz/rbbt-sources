@@ -37,11 +37,11 @@ module DbSNP
     tmpfile = TmpFile.tmp_file + '.gz'
     ftp.getbinaryfile('dbsnp_137.hg19.vcf.gz', tmpfile, 1024)
 
+    file = Open.open(tmpfile, :nocache => true) 
     begin
       File.open(filename, 'w') do |f|
         f.puts "#: :type=:list#:namespace=Hsa/may2012"
         f.puts "#" + ["RS ID", "Genomic Mutation", "GMAF", "G5", "G5A", "dbSNP Build ID"] * "\t"
-        file = Open.open(tmpfile, :nocache => true) 
         while line = file.gets do
           next if line[0] == "#"[0]
 
