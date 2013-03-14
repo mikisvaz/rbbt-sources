@@ -46,7 +46,11 @@ module Organism
       return positions
     end
 
-    positions_bed = positions.collect{|position| chr, pos = position.split(":").values_at(0,1); ["chr" << chr, pos.to_i-1, pos, position] * "\t"} * "\n" + "\n"
+    positions_bed = positions.collect{|position| 
+      chr, pos = position.split(":").values_at(0,1)
+      ["chr" << chr, pos.to_i-1, pos, position] * "\t"
+    } * "\n" + "\n"
+
     new_positions = {}
 
     TmpFile.with_file(positions_bed) do |source_bed|

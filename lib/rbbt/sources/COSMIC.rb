@@ -64,6 +64,41 @@ module COSMIC
     tsv.to_s.gsub(/^(\d)/m,'COSM\1').gsub(/(\d)-(\d)/,'\1:\2')
   end
 
+  COSMIC.claim COSMIC.mutations_hg18, :proc do |filename|
+    require 'rbbt/sources/organism'
+    begin
+      file = Open.open(COSMIC.mutations.find, :nocache => true) 
+
+      while (line = file.gets) !~ /Genomic Mutation/; end
+      fields = line[1..-2].split("\t")
+      mutation_pos = fields.index "Genomic Mutation"
+
+      mutations = CMD.cmd("grep -v '^#'|cut -f #{mutation_pos + 1}|sort -u", :in => COSMIC.mutations.open).read.split("\n").select{|m| m.include? ":" }
+
+      translations = Misc.process_to_hash(mutations){|mutations| Organism.liftOver(mutations, "Hsa/jun2011", "Hsa/may2009")}
+
+      File.open(filename, 'w') do |f|
+        f.puts "#: :type=:list#:namespace=Hsa/may2009"
+        f.puts "#" + fields * "\t"
+        while line = file.gets do
+          next if line[0] == "#"[0]
+          line.strip!
+          parts = line.split("\t")
+          parts[mutation_pos] = translations[parts[mutation_pos]]
+          f.puts parts * "\t"
+        end
+      end
+    rescue Exception
+      FileUtils.rm filename if File.exists? filename
+      raise $!
+    ensure
+      file.close
+    end
+
+    nil
+  end
+
+
   def self.rsid_index(organism, chromosome = nil)
     build = Organism.hg_build(organism)
 
@@ -111,3 +146,4 @@ if defined? Entity
   end
 end
 
+COSMIC.mutations_hg18.produce
