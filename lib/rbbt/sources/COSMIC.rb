@@ -61,6 +61,7 @@ module COSMIC
         end
       end
     end
+
     tsv.to_s.gsub(/^(\d)/m,'COSM\1').gsub(/(\d)-(\d)/,'\1:\2')
   end
 

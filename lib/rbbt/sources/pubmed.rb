@@ -154,7 +154,7 @@ module PubMed
         end
       end
 
-      text
+      Misc.fixutf8(text)
     end
 
     def bibtex
@@ -187,7 +187,9 @@ module PubMed
 
     # Join the text from title and abstract
     def text
-      [title, abstract].join("\n")
+      text = [title, abstract].join("\n")
+
+      Misc.fixutf8(text)
     end
   end
 
