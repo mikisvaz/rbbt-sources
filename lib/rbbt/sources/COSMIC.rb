@@ -8,7 +8,8 @@ module COSMIC
   COSMIC.claim COSMIC.mutations, :proc do 
     url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v63_300113.tsv.gz"
 
-    tsv = TSV.open(Open.open(url), :type => :list, :header_hash => "", :key_field => "Mutation ID", :namespace => "Hsa/jun2011")
+    stream = CMD.cmd('awk \'BEGIN{FS="\t"} { if ($12 != "" && $12 != "Mutation ID") { sub($12, "COSM" $12 ":" $4)}; print}\'', :in => Open.open(url), :pipe => true)
+    tsv = TSV.open(stream, :type => :list, :header_hash => "", :key_field => "Mutation ID", :namespace => "Hsa/jun2011")
     tsv.fields = tsv.fields.collect{|f| f == "Gene name" ? "Associated Gene Name" : f}
     tsv.add_field "Genomic Mutation" do |mid, values|
       position = values["Mutation GRCh37 genome position"]
@@ -62,13 +63,13 @@ module COSMIC
       end
     end
 
-    tsv.to_s.gsub(/^(\d)/m,'COSM\1').gsub(/(\d)-(\d)/,'\1:\2')
+    tsv.to_s.gsub(/(\d)-(\d)/,'\1:\2')
   end
 
   COSMIC.claim COSMIC.mutations_hg18, :proc do |filename|
     require 'rbbt/sources/organism'
+    file = COSMIC.mutations.open
     begin
-      file = Open.open(COSMIC.mutations.find, :nocache => true) 
 
       while (line = file.gets) !~ /Genomic Mutation/; end
       fields = line[1..-2].split("\t")
@@ -146,5 +147,3 @@ if defined? Entity
     end
   end
 end
-
-COSMIC.mutations_hg18.produce
