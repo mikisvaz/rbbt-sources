@@ -14,7 +14,7 @@ module Pfam
     tsv.to_s
   end
 
-  NAMES_FILE = InterPro.pfam_names.find
+  NAMES_FILE = InterPro.pfam_names.produce
 
   def self.name_index
     @name_index ||= TSV.open NAMES_FILE, :single, :unnamed => true
