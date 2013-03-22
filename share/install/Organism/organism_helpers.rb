@@ -624,10 +624,10 @@ end
 
 file 'transcript_3utr' => ["transcript_5utr"] do |t|
 end
-
-file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr", "transcript_sequence"] do |t|
+file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr", "transcript_phase", "transcript_sequence"] do |t|
   transcript_5utr     = TSV.open(File.expand_path('./transcript_5utr'), :unnamed => true)
   transcript_3utr     = TSV.open(File.expand_path('./transcript_3utr'), :unnamed => true)
+  transcript_phase     = TSV.open(File.expand_path('./transcript_phase'), :unnamed => true)
   transcript_sequence = TSV.open(File.expand_path('./transcript_sequence'), :unnamed => true)
   transcript_protein  = TSV.open(File.expand_path('./transcripts'), :fields => ["Ensembl Protein ID"], :type => :single, :unnamed => true)
 
@@ -638,7 +638,12 @@ file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr",
     next if protein.nil? or protein.empty?
     utr5 = transcript_5utr[transcript]
     utr3 = transcript_3utr[transcript]
-    psequence = Bio::Sequence::NA.new(sequence[utr5..sequence.length-utr3-1]).translate
+    phase = transcript_phase[transcript] || 0
+    if phase < 0
+      utr5 = - phase if utr5 == 0
+      phase = 0
+    end
+    psequence = Bio::Sequence::NA.new(("N" * phase) << sequence[utr5..sequence.length-utr3-1]).translate
     protein_sequence[protein]=psequence
   end
 
