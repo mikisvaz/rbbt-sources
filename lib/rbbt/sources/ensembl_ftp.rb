@@ -1,15 +1,11 @@
 require 'rbbt/util/open'
 require 'rbbt/sources/organism'
 require 'rbbt/tsv'
+require 'rbbt/sources/ensembl'
 require 'net/ftp'
 
 module Ensembl
-
   
-  def self.releases
-    @releases ||= Rbbt.share.Ensembl.release_dates.find.tsv :key_field => "build"
-  end
-
   module FTP
 
     SERVER = "ftp.ensembl.org"

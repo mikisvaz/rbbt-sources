@@ -161,5 +161,14 @@ if defined? Entity
       end
     end
   end
+
+  if defined? GenomicMutation and Entity === GenomicMutation
+    module GenomicMutation
+      property :dbSNP => :array2single do
+        dbSNP.mutations.tsv(:persist => true, :key_field => "Genomic Mutation", :fields => ["RS ID"], :type => :single).values_at *self
+      end
+    end
+
+  end
 end
 

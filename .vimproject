@@ -20,9 +20,10 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    STITCH.rb
    barcode.rb
    bibtex.rb
-   biomart.rb
    cath.rb
+   ensembl.rb
    ensembl_ftp.rb
+   biomart.rb
    entrez.rb
    go.rb
    gscholar.rb
