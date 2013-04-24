@@ -61,6 +61,11 @@ class TestOrganism < Test::Unit::TestCase
     assert_equal mutation_19, Organism.liftOver([mutation_18], target_build, source_build).first
   end
 
+  def test_orhtolog
+    require 'rbbt/entity/gene'
+    assert_equal ["ENSG00000133703"], Gene.setup("Kras", "Associated Gene Name", "Mmu/jun2011").ensembl.ortholog("Hsa/jun2011")
+  end
+
   #def test_genes_at_chromosome
   #  pos = [12, 117799500]
   #  assert_equal "ENSG00000089250", Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)
