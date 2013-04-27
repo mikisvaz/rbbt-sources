@@ -6,7 +6,7 @@ module COSMIC
   self.subdir = "share/databases/COSMIC"
 
   COSMIC.claim COSMIC.mutations, :proc do 
-    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v63_300113.tsv.gz"
+    url = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_v64_260313.tsv.gz"
 
     stream = CMD.cmd('awk \'BEGIN{FS="\t"} { if ($12 != "" && $12 != "Mutation ID") { sub($12, "COSM" $12 ":" $4)}; print}\'', :in => Open.open(url), :pipe => true)
     tsv = TSV.open(stream, :type => :list, :header_hash => "", :key_field => "Mutation ID", :namespace => "Hsa/jun2011")
