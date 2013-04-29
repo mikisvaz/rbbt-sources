@@ -530,7 +530,7 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
     begin
       p = Organism.root
       p.replace File.expand_path("./chromosome_#{chr}")
-      p.sub!(%r{.*/share/organisms/},'share/organisms/')
+      p.sub!(%r{.*/organisms/},'share/organisms/')
       p = Path.setup(p, 'rbbt', Organism)
       chr_str = p.produce.read
     rescue Exception
