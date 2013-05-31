@@ -50,16 +50,13 @@ if defined? Entity and defined? Gene and Entity === Gene
       tfs = TFacts.targets.keys
       self.name.collect{|gene| tfs.include? gene}
     end
-    persist :_ary_is_transcription_factor?
 
     property :transcription_regulators => :array2single do
       Gene.setup(TFacts.regulators.tsv(:persist => true).values_at(*self.name), "Associated Gene Name", self.organism)
     end
-    persist :_ary_transcription_regulators
 
     property :transcription_targets => :array2single do
       Gene.setup(TFacts.targets.tsv(:persist => true).values_at(*self.name), "Associated Gene Name", self.organism)
     end
-    persist :_ary_transcription_targets
   end
 end

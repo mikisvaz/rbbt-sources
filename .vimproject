@@ -20,11 +20,13 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    STITCH.rb
    barcode.rb
    bibtex.rb
+   biomart.rb
    cath.rb
+   dbSNP.rb
    ensembl.rb
    ensembl_ftp.rb
-   biomart.rb
    entrez.rb
+   genomes1000.rb
    go.rb
    gscholar.rb
    jochem.rb
@@ -36,8 +38,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    tfacts.rb
    uniprot.rb
    wgEncodeBroadHmm.rb
-   genomes1000.rb
-   dbSNP.rb
   }
  }
  share=share{
