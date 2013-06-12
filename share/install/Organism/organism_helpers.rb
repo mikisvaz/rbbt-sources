@@ -451,7 +451,11 @@ rule /^chromosome_.*/ do |t|
   ftp = Net::FTP.new("ftp.ensembl.org")
   ftp.passive = true
   ftp.login
-  ftp.chdir("pub/#{ release }/fasta/")
+  if release.nil? or release == 'current'
+    ftp.chdir("pub/current_fasta/")
+  else
+    ftp.chdir("pub/#{ release }/fasta/")
+  end
   ftp.chdir($scientific_name.downcase.sub(" ",'_'))
   ftp.chdir('dna')
   file = ftp.nlst.select{|file| file =~ /chromosome\.#{ chr }\.fa/}.first
