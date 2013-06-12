@@ -10,11 +10,22 @@ module Ensembl
 
     SERVER = "ftp.ensembl.org"
 
+    def self.mysql_path(release)
+    end
+
     def self.ftp_name_for(organism)
       code, build = organism.split "/"
       build ||= "current"
 
       if build.to_s == "current"
+        release = 'current'
+        name = Organism.scientific_name(organism)
+        ftp = Net::FTP.new(Ensembl::FTP::SERVER)
+        ftp.passive = true
+        ftp.login
+        ftp.chdir(File.join('pub', 'current_mysql'))
+        file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last
+        ftp.close
       else
         release = Ensembl.releases[build]
         name = Organism.scientific_name(organism)
@@ -30,7 +41,11 @@ module Ensembl
 
     def self.ftp_directory_for(organism)
       release, ftp_name = ftp_name_for(organism)
-      File.join('/pub/', release, 'mysql', ftp_name)
+      if release == 'current'
+        File.join('/pub/', 'current_mysql', ftp_name)
+      else
+        File.join('/pub/', release, 'mysql', ftp_name)
+      end
     end
 
     def self.base_url(organism)
