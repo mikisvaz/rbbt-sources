@@ -1,3 +1,4 @@
+require 'rbbt'
 require 'rbbt/util/open'
 require 'rbbt/resource'
 require 'rbbt/sources/cath'
@@ -33,6 +34,7 @@ module UniProt
 
 
   UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
+  UNIPROT_FASTA="http://www.uniprot.org/uniprot/[PROTEIN].fasta"
   def self.pdbs(protein)
     url = UNIPROT_TEXT.sub "[PROTEIN]", protein
     text = Open.read(url)
@@ -52,6 +54,58 @@ module UniProt
     }
     pdb
   end
+
+  def self.sequence(protein)
+    url = UNIPROT_FASTA.sub "[PROTEIN]", protein
+    text = Open.read(url)
+
+    text.split(/\n/).select{|line| line !~ /^>/} * ""
+  end
+
+  def self.features(protein)
+    url = UNIPROT_TEXT.sub "[PROTEIN]", protein
+    text = Open.read(url)
+
+    text = text.split(/\n/).select{|line| line =~ /^FT/} * "\n"
+
+    parts = text.split(/^(FT   \w+)/)
+    parts.shift
+
+    features = []
+
+    type = nil
+    parts.each do |part|
+      parts
+      if part[0..1] == "FT"
+        type = part.gsub(/FT\s+/,'')
+        next
+      end
+      value = part.gsub("\nFT", '').gsub(/\s+/, ' ')
+      case
+      when value.match(/(\d+) (\d+) (.*)/)
+        start, eend, description = $1, $2, $3
+        description.gsub(/^FT\s+/m, '')
+      when value.match(/(\d+) (\d+)/)
+        start, eend = $1, $2
+        description = nil
+      else
+        Log.debug "Value not understood: #{ value }"
+      end
+
+
+      feature = {
+        :type => type,
+        :start => start.to_i, 
+        :end => eend.to_i, 
+        :description => description,
+      }
+
+      features << feature
+    end
+
+    features
+  end
+
 
   def self.variants(protein)
     url = UNIPROT_TEXT.sub "[PROTEIN]", protein
