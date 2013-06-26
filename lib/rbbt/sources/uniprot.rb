@@ -46,11 +46,14 @@ module UniProt
       id, method, resolution, region = $1.split(";").collect{|v| v.strip}
       begin
         chains, start, eend = region.match(/(\w+)=(\d+)-(\d+)/).values_at(1,2,3)
+        start = start.to_i
+        eend = eend.to_i
+        start, eend = eend, start if start > eend
       rescue
         Log.warn("Error process Uniprot PDB line: #{line}")
         next
       end
-      pdb[id.downcase] = {:method => method, :resolution => resolution, :region => (start.to_i..eend.to_i), :chains => chains}
+      pdb[id.downcase] = {:method => method, :resolution => resolution, :region => (start..eend), :chains => chains}
     }
     pdb
   end
