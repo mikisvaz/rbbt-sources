@@ -117,19 +117,19 @@ if defined? Entity
   if defined? Gene and Entity === Gene
     module Gene
       property :go_terms => :array2single do 
-        @go_terms ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).values_at *self.ensembl
+        @go_terms ||= Organism.gene_go(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).chunked_values_at self.ensembl
       end
 
       property :go_bp_terms => :array2single do 
-        @go_bp_terms ||= Organism.gene_go_bp(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).values_at *self.ensembl
+        @go_bp_terms ||= Organism.gene_go_bp(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).chunked_values_at self.ensembl
       end
 
       property :go_cc_terms => :array2single do 
-        @go_cc_terms ||= Organism.gene_go_cc(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).values_at *self.ensembl
+        @go_cc_terms ||= Organism.gene_go_cc(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).chunked_values_at self.ensembl
       end
 
       property :go_mf_terms => :array2single do 
-        @go_mf_terms ||= Organism.gene_go_mf(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).values_at *self.ensembl
+        @go_mf_terms ||= Organism.gene_go_mf(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).chunked_values_at self.ensembl
       end
  
     end
