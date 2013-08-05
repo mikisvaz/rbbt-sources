@@ -18,7 +18,7 @@ module GO
   # only the name field is used.
   def self.init
     Persist.persist_tsv(nil, 'gene_ontology', {}, :persist => true) do |info|
-      info.serializer = :marshal if info.respond_to? :serializer and info.serializer == :type
+      info.serializer = :marshal if info.respond_to? :serializer
       Rbbt.share.databases.GO.gene_ontology.read.split(/\[Term\]/).each{|term| 
         term_info = {}
 
@@ -37,11 +37,11 @@ module GO
       }
 
       info
-    end
+    end.tap{|o| o.unnamed = true}
   end
 
   def self.info
-    @info ||= self.init
+    @@info ||= self.init
   end
 
   def self.goterms
@@ -94,7 +94,7 @@ if defined? Entity
     self.annotation :organism
 
     property :name => :array2single do
-      @name ||= GO.id2name(self)
+      GO.id2name(self)
     end
 
     property :genes => :array2single do |*args|

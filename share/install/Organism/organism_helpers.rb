@@ -441,6 +441,23 @@ file 'chromosomes' do |t|
   File.open(t.name, 'w') do |f| f.puts goterms end
 end
 
+file 'blacklist_chromosomes' => 'chromosomes' do |t|
+  list = TSV.open(t.prerequisites.first).keys.select{|c| c.index('_') or c.index('.')}
+  File.open(t.name, 'w') do |f| f.puts list * "\n" end
+end
+
+file 'blacklist_genes' => ['blacklist_chromosomes', 'gene_positions'] do |t|
+  Open.read(t.prerequisites.first)
+  genes = CMD.cmd("grep -f '#{t.prerequisites.first}' | cut -f 1", :in => Open.open(t.prerequisites.last)).read.split("\n").uniq
+  File.open(t.name, 'w') do |f| f.puts genes * "\n" end
+end
+
+file 'sanctioned_genes' => ['blacklist_genes', 'gene_positions'] do |t|
+  genes = CMD.cmd("cut -f 1", :in => Open.open(t.prerequisites.last)).read.split("\n").uniq - Open.read(t.prerequisites.first).split("\n")
+  File.open(t.name, 'w') do |f| f.puts genes * "\n" end
+end
+
+
 rule /^chromosome_.*/ do |t|
   chr = t.name.match(/chromosome_(.*)/)[1]
 
