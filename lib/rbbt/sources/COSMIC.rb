@@ -146,7 +146,7 @@ if defined? Entity
       end
 
       property :COSMIC_mutations => :single2array do
-        GenomicMutation.setup(COSMIC.mutation_index(organism).values_at(*self.COSMIC_rsids).uniq, "COSMIC mutations over #{self.name || self}", organism, true)
+        GenomicMutation.setup(COSMIC.mutation_index(organism).values_at(*self.COSMIC_rsids).uniq, "COSMIC mutations over #{self.name || self}", organism, false)
       end
     end
   end
