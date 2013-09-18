@@ -54,6 +54,7 @@ module PubMed
       [:year     , "Journal/JournalIssue/PubDate/Year"],
       [:month    , "Journal/JournalIssue/PubDate/Month"],
       [:pages    , "Pagination/MedlinePgn"],
+      [:author    , "AuthorList/Author"],
       [:abstract , "Abstract/AbstractText"],
     ]
 
