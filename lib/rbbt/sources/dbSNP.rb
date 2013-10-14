@@ -83,7 +83,7 @@ module DbSNP
     begin
       File.open(filename, 'w') do |f|
         f.puts "#: :type=:flat#:namespace=Hsa/may2012"
-        f.puts "#" + ["RS ID", "Genomic Mutation", "GMAF", "G5", "G5A", "dbSNP Build ID"] * "\t"
+        f.puts "#" + ["RS ID", "Genomic Mutation"] * "\t"
         while line = file.gets do
           next if line[0] == "#"[0]
 
