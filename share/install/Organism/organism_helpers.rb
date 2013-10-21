@@ -461,6 +461,9 @@ end
 rule /^chromosome_.*/ do |t|
   chr = t.name.match(/chromosome_(.*)/)[1]
 
+  # HACK: Skip LRG chromosomes
+  raise "LRG chromosomes not supported: #{ chr }" if chr =~ /^LRG_/
+
   archive = File.basename(FileUtils.pwd) =~ /^([a-z]{3}[0-9]{4})$/i ? $1 : nil
 
   release = Ensembl.releases[archive]
