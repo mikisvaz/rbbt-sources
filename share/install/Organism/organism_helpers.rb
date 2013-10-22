@@ -462,7 +462,7 @@ rule /^chromosome_.*/ do |t|
   chr = t.name.match(/chromosome_(.*)/)[1]
 
   # HACK: Skip LRG chromosomes
-  raise "LRG chromosomes not supported: #{ chr }" if chr =~ /^LRG_/
+  raise "LRG and GL chromosomes not supported: #{ chr }" if chr =~ /^(?:LRG_|GL0)/
 
   archive = File.basename(FileUtils.pwd) =~ /^([a-z]{3}[0-9]{4})$/i ? $1 : nil
 
@@ -553,13 +553,14 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
   chr_transcript_ranges.each do |chr, transcript_ranges|
 
     begin
+      raise "LRG, GL, HG, and HSCHR chromosomes not supported: #{chr}" if chr =~ /^(?:LRG_|GL0|HG|HSCHR)/
       p = Organism.root
       p.replace File.expand_path("./chromosome_#{chr}")
       p.sub!(%r{.*/organisms/},'share/organisms/')
       p = Path.setup(p, 'rbbt', Organism)
       chr_str = p.produce.read
     rescue Exception
-      Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered): #{$!.message}")
+      Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered)")
       next
     end
 
@@ -649,6 +650,7 @@ end
 
 file 'transcript_3utr' => ["transcript_5utr"] do |t|
 end
+
 file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr", "transcript_phase", "transcript_sequence"] do |t|
   transcript_5utr     = TSV.open(File.expand_path('./transcript_5utr'), :unnamed => true)
   transcript_3utr     = TSV.open(File.expand_path('./transcript_3utr'), :unnamed => true)
@@ -676,142 +678,3 @@ file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr",
     Open.write(t.name, protein_sequence.to_s)
   end
 end
-
-#{{{ OLD
-
-#file 'transcript_phase' do |t|
-#  tsv = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["Phase"], :type => :single, :cast => :to_i)
-#
-#  transcript_cds_start = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, [['CDNA Start','cds_start']], [], nil, :type => :flat, :namespace => $namespace)
-#  transcript_cds_start.through do |transcript, values|
-#    phase = values.compact.reject{|p| p.empty?}.select{|p| p == "1" or p == "2"}.first
-#    tsv[transcript] = phase.to_i unless phase.nil?
-#  end
-#
-#  File.open(t.name, 'w') do |f| f.puts tsv end
-#end
-#
-#file 'transcript_3utr' do |t|
-#  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single#cast=to_i"
-#    f.puts "#Ensembl Transcript ID\t3' UTR Length"
-#    utrs.each do |seq,trans|
-#      trans.each do |tran|
-#        f.puts [tran, seq.length] * "\t" if seq =~ /^[ACTG]+$/
-#      end
-#    end
-#  end
-#end
-#
-#file 'transcript_5utr' do |t|
-#  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single#cast=to_i"
-#    f.puts "#Ensembl Transcript ID\t5' UTR Length"
-#    utrs.each do |seq,trans|
-#      trans.each do |tran|
-#        f.puts [tran, seq.length] * "\t" if seq =~ /^[ACTG]+$/
-#      end
-#    end
-#  end
-#end
-
-
-
-#file 'transcript_sequence' do |t|
-#  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single"
-#    f.puts "#Ensembl Transcript ID\tTranscript Sequence"
-#    sequences.each do |seq, genes|
-#      genes.each do |gene|
-#        f.write gene 
-#        f.write "\t" 
-#        f.write seq
-#        f.write "\n"
-#      end
-#    end
-#  end
-#end
-
-#file 'transcript_phase' do |t|
-#  tsv = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["Phase"], :type => :single, :cast => :to_i)
-#
-#  transcript_cds_start = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, [['CDNA Start','cds_start']], [], nil, :type => :flat, :namespace => $namespace)
-#  transcript_cds_start.through do |transcript, values|
-#    phase = values.compact.reject{|p| p.empty?}.select{|p| p == "1" or p == "2"}.first
-#    tsv[transcript] = phase.to_i unless phase.nil?
-#  end
-#
-#  File.open(t.name, 'w') do |f| f.puts tsv end
-#end
-#
-#file 'transcript_3utr' do |t|
-#  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_3utr, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single#cast=to_i"
-#    f.puts "#Ensembl Transcript ID\t3' UTR Length"
-#    utrs.each do |seq,trans|
-#      trans.each do |tran|
-#        f.puts [tran, seq.length] * "\t" if seq =~ /^[ACTG]+$/
-#      end
-#    end
-#  end
-#end
-#
-#file 'transcript_5utr' do |t|
-#  utrs = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_5utr, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single#cast=to_i"
-#    f.puts "#Ensembl Transcript ID\t5' UTR Length"
-#    utrs.each do |seq,trans|
-#      trans.each do |tran|
-#        f.puts [tran, seq.length] * "\t" if seq =~ /^[ACTG]+$/
-#      end
-#    end
-#  end
-#end
-
-#file 'transcript_sequence' do |t|
-#  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_sequence, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single"
-#    f.puts "#Ensembl Transcript ID\tTranscript Sequence"
-#    sequences.each do |seq, genes|
-#      genes.each do |gene|
-#        f.write gene 
-#        f.write "\t" 
-#        f.write seq
-#        f.write "\n"
-#      end
-#    end
-#  end
-#end
-#file 'protein_sequence' => 'chromosomes' do |t|
-#  #chromosomes = TSV.open(t.prerequisites.first).keys
-#  #sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace, :chunk_filter => ['chromosome_name', chromosomes])
-#  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_sequence, [], nil, :type => :flat, :namespace => $namespace)
-#
-#  File.open(t.name, 'w') do |f| 
-#    f.puts "#: :type=:single"
-#    f.puts "#Ensembl Protein ID\tProtein Sequence"
-#    sequences.each do |seq, genes|
-#      genes.each do |gene|
-#        f.write gene 
-#        f.write "\t" 
-#        f.write seq
-#        f.write "\n"
-#      end
-#    end
-#  end
-#end
-
-
-
