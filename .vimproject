@@ -68,7 +68,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    }
    STITCH=STITCH{
     Rakefile
-    }
+   }
    Genomes1000=Genomes1000{
     Rakefile
    }
