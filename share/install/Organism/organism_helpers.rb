@@ -145,7 +145,7 @@ file 'lexicon' => 'identifiers' do |t|
   entrez_description.fields = ["Entrez Gene Description"]
 
   tsv.attach entrez_description
-  Open.write(t.name, tsv.to_s)
+  Misc.sensiblewrite(t.name, tsv.to_s)
 end
 
 
@@ -217,13 +217,13 @@ end
 file 'transcript_exons' do |t|
   exons = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_exons, [], nil, :keep_empty => true, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts exons end
+  Misc.sensiblewrite(t.name, exons.to_s)
 end
 
 file 'exon_phase' do |t|
   exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exon_phase, [], nil, :keep_empty => true, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts exons end
+  Misc.sensiblewrite(t.name, exons.to_s)
 end
 
 
@@ -253,7 +253,7 @@ file 'transcript_phase' => ['exon_phase', 'transcript_exons'] do |t|
     }
   end
 
-  File.open(t.name, 'w') do |f| f.puts tsv end
+  Misc.sensiblewrite(t.name, tsv.to_s)
 end
 
 
@@ -280,7 +280,7 @@ file 'gene_pmids' do |t|
   tsv.each do |gene, pmids|
     text << "\n" << gene << "\t" << pmids * "|"
   end
-  Open.write(t.name, text)
+  Misc.sensiblewrite(t.name, text)
 end
 
 def coding_transcripts_for_exon(exon, exon_transcripts, transcript_info) 
@@ -347,7 +347,7 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
     string << exon << "\t" << transcript_offsets.keys * "|" << "\t" << transcript_offsets.values * "|" << "\n"
   end
 
-  Open.write(t.name, string)
+  Misc.sensiblewrite(t.name, string)
 end
 
 file 'gene_go' do |t|
@@ -368,7 +368,7 @@ file 'gene_go' do |t|
         ["molecular_function"] * values["GO MF ID"].reject{|go| go.empty?}.length 
     end
 
-    File.open(t.name, 'w') do |f| f.puts goterms.slice(["GO ID", "GO Namespace"]) end
+    Misc.sensiblewrite(t.name, goterms.slice(["GO ID", "GO Namespace"]).to_s)
   else
     goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => $namespace)
 
@@ -487,7 +487,7 @@ rule /^chromosome_.*/ do |t|
   Misc.lock t.name + '.rake' do
     TmpFile.with_file do |tmpfile|
       ftp.getbinaryfile(file, tmpfile)
-      Open.write(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
+      Misc.sensiblewrite(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
       ftp.close
     end
   end
@@ -579,9 +579,7 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
     end
   end
 
-  Misc.lock t.name + '.rake' do
-    Open.write(t.name, transcript_sequence.to_s)
-  end
+  Misc.sensiblewrite(t.name, transcript_sequence.to_s)
 end
 
 file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
@@ -643,8 +641,8 @@ file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
   end
 
   Misc.lock t.name + '.rake' do
-    Open.write(t.name, transcript_utr5.to_s)
-    Open.write(t.name.sub('transcript_5utr', 'transcript_3utr'), transcript_utr3.to_s)
+    Misc.sensiblewrite(t.name, transcript_utr5.to_s)
+    Misc.sensiblewrite(t.name.sub('transcript_5utr', 'transcript_3utr'), transcript_utr3.to_s)
   end
 end
 
@@ -674,7 +672,5 @@ file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr",
     protein_sequence[protein]=psequence
   end
 
-  Misc.lock t.name + '.rake' do
-    Open.write(t.name, protein_sequence.to_s)
-  end
+  Misc.sensiblewrite(t.name, protein_sequence.to_s)
 end
