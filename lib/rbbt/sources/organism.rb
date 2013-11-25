@@ -10,6 +10,12 @@ module Organism
     Rbbt.share.install.Organism.find.glob('???').collect{|f| File.basename(f)}
   end
 
+  def self.allowed_biomart_archives
+    Rbbt.etc.allowed_biomart_archives.exists? ? 
+      Rbbt.etc.allowed_biomart_archives.list :
+      nil
+  end
+
 
   Organism.installable_organisms.each do |organism|
     claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
