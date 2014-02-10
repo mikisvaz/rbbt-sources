@@ -144,6 +144,12 @@ module Organism
     }.first
   end
 
+  def self.organism_code(name)
+    organisms.select{|organism|
+      organism == name or Organism.scientific_name(organism) =~ /#{ name }/i
+    }.first
+  end
+
   def self.known_ids(name)
     TSV::Parser.new(Organism.identifiers(name).open).all_fields
   end
