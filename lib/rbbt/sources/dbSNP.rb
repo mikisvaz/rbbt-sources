@@ -7,11 +7,11 @@ module DbSNP
   extend Resource
   self.subdir = "share/databases/dbSNP"
 
-  URL = "ftp://ftp.ncbi.nlm.nih.gov/snp/organisms/human_9606/VCF/common_all.vcf.gz"
+  NCBI_URL = "ftp://ftp.ncbi.nlm.nih.gov/snp/organisms/human_9606/VCF/common_all.vcf.gz"
 
   DbSNP.claim DbSNP.mutations_ncbi, :proc do
     tsv = TSV.setup({}, :key_field => "RS ID", :fields => ["Genomic Mutation"], :type => :flat)
-    file = Open.open(URL, :nocache => true) 
+    file = Open.open(NCBI_URL, :nocache => true) 
     while line = file.gets do
       next if line[0] == "#"[0]
       chr, position, id, ref, alt = line.split "\t"
