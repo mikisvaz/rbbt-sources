@@ -1,6 +1,7 @@
-require 'rbbt'
+require 'rbbt-util'
 require 'rbbt/tsv'
 require 'rbbt/resource'
+require 'rbbt/util/filecache'
 require 'rbbt/bow/bow'
 require 'set'
 
@@ -70,85 +71,44 @@ module Entrez
 
   private 
 
-  def self.get_online(geneids)
 
-    genes_complete =  geneids.is_a?(Array) ? geneids : [geneids]
+  def self.get_gene(geneids)
+    _array = Array === geneids
 
-    genes = []
-    Misc.divide(genes_complete, (genes_complete.length / 100) + 1).each do |geneids_list|
-      begin
-        Misc.try3times do
-          url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&retmode=xml&id=#{geneids_list * ","}" 
+    geneids = [geneids] unless Array === geneids
+    geneids = geneids.compact.collect{|id| id}
 
-          xml = Open.read(url, :wget_options => {:quiet => true}, :nocache => true)
+    result_files = FileCache.cache_online_elements(geneids, 'gene-{ID}.xml') do |ids|
+      result = {}
+      values = []
+      Misc.divide(ids, (ids.length / 100) + 1).each do |list|
+        begin
+          Misc.try3times do
+            url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&retmode=xml&id=#{list * ","}" 
 
-          genes += xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
+            xml = Open.read(url, :wget_options => {:quiet => true}, :nocache => true)
+
+            values += xml.scan(/(<Entrezgene>.*?<\/Entrezgene>)/sm).flatten
+          end
+        rescue
+          Log.error $!.message
         end
-      rescue
-        puts $!.message
-        genes += geneids_list.collect{|g| nil}
       end
-    end
 
-    if geneids.is_a? Array
-      list = Hash[*genes_complete.zip([nil]).flatten]
-      genes.each{|gene|
+      values.each do |xml|
         geneid = gene.match(/<Gene-track_geneid>(\d+)/)[1]
-        geneid = geneid.to_i unless list.include? geneid
-        list[geneid] = gene
-      }
-      return list
-    else
-      return genes.first
-    end
-  end
-
-  public
-
-  def self.gene_filename(id)
-    'gene-' + id.to_s + '.xml'
-  end
-
-  def self.get_gene(geneid)
-    return nil if geneid.nil?
-
-    if Array === geneid
-      missing = []
-      list = {}
-
-      geneid.each{|p|
-        next if p.nil?
-        if FileCache.found(gene_filename p)
-          list[p] = Gene.new(Open.read(FileCache.path(gene_filename p)))
-        else
-          missing << p 
-        end
-      }
-
-
-      return list unless missing.any?
-      genes = get_online(missing)
-
-      genes.each{|p, xml|
-        filename = gene_filename p    
-        FileCache.add(filename,xml) unless FileCache.found(filename)
-        list[p] =  Gene.new(xml)
-      }
-
-      return list
-    else
-      filename = gene_filename geneid    
-
-
-      if FileCache.found(filename)
-        return Gene.new(Open.read(FileCache.path(filename)))
-      else
-        xml = get_online(geneid)
-
-        FileCache.add(filename, xml) unless FileCache.found(filename)
-
-        return Gene.new(xml)
+        
+        result[geneid] = xml
       end
+    end
+
+    genes = {}
+    geneids.each{|id| genes[id] = Gene.new(Open.read(result_files[id])) }
+
+    if _array
+      genes
+    else
+      genes.values.first
     end
   end
 

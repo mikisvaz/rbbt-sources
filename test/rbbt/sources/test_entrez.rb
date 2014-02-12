@@ -21,21 +21,12 @@ class TestEntrez < Test::Unit::TestCase
     assert(data['850320'].include? '1574125') 
   end
 
-  def test_getonline
-    geneids = 9129
-
-    assert_match(/PRP3 pre-mRNA processing factor/s, Entrez.get_online(geneids))
-
-    geneids = [9129,9]
-    assert_match(/PRP3 pre-mRNA processing factor/s, Entrez.get_online(geneids)[9129])
-  end
-
   def test_getgene
     geneids = 9129
-    assert_equal([["PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)"]], Entrez.get_gene(geneids).description)
+    assert_equal([["pre-mRNA processing factor 3"]], Entrez.get_gene(geneids).description)
 
     geneids = [9129, 728049]
-    assert_equal([["PRP3 pre-mRNA processing factor 3 homolog (S. cerevisiae)"]], Entrez.get_gene(geneids)[9129].description)
+    assert_equal([["pre-mRNA processing factor 3"]], Entrez.get_gene(geneids)[9129].description)
   end
 
   def test_similarity
