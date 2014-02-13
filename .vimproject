@@ -11,34 +11,39 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  }
  lib=lib {
   sources=rbbt/sources{
-   COSMIC.rb
+   biomart.rb
+   ensembl.rb
+   ensembl_ftp.rb
+
+   organism.rb
+
+   uniprot.rb
+   entrez.rb
+
    COSTART.rb
    CTCAE.rb
    HPRD.rb
-   InterPro.rb
-   NCI.rb
-   PSI_MI.rb
    STITCH.rb
+
+   PSI_MI.rb
+
    barcode.rb
-   bibtex.rb
-   biomart.rb
+
+   InterPro.rb
    cath.rb
-   dbSNP.rb
-   ensembl.rb
-   ensembl_ftp.rb
-   entrez.rb
-   genomes1000.rb
-   go.rb
-   gscholar.rb
-   jochem.rb
-   organism.rb
    pfam.rb
-   polysearch.rb
-   pubmed.rb
+   NCI.rb
    reactome.rb
    tfacts.rb
-   uniprot.rb
+   go.rb
+
+   jochem.rb
    wgEncodeBroadHmm.rb
+
+   bibtex.rb
+   pubmed.rb
+   gscholar.rb
+   polysearch.rb
   }
  }
  share=share{

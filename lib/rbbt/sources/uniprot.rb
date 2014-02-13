@@ -32,6 +32,37 @@ module UniProt
     tsv.to_s
   end
 
+  def self.get_uniprot_entry(uniprotids)
+    _array = Array === uniprotids
+
+    uniprotids = [uniprotids] unless Array === uniprotids
+    uniprotids = uniprotids.compact.collect{|id| id}
+
+    result_files = FileCache.cache_online_elements(uniprotids, 'uniprot-{ID}.xml') do |ids|
+      result = {}
+      ids.each do |id|
+        begin
+          Misc.try3times do
+
+            content = Open.read(UNIPROT_TEXT.sub("[PROTEIN]", id), :wget_options => {:quiet => true}, :nocache => true)
+
+            result[id] = content
+          end
+        rescue
+          Log.error $!.message
+        end
+      end
+    end
+
+    uniprots = {}
+    uniprotids.each{|id| uniprots[id] = Open.read(result_files[id]) }
+
+    if _array
+      uniprots
+    else
+      uniprots.values.first
+    end
+  end
 
   UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
   UNIPROT_FASTA="http://www.uniprot.org/uniprot/[PROTEIN].fasta"
@@ -66,8 +97,9 @@ module UniProt
   end
 
   def self.features(protein)
-    url = UNIPROT_TEXT.sub "[PROTEIN]", protein
-    text = Open.read(url)
+    #url = UNIPROT_TEXT.sub "[PROTEIN]", protein
+    #text = Open.read(url)
+    text = get_uniprot_entry(protein)
 
     text = text.split(/\n/).select{|line| line =~ /^FT/} * "\n"
 
