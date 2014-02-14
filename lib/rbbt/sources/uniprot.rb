@@ -1,5 +1,6 @@
-require 'rbbt'
+require 'rbbt-util'
 require 'rbbt/util/open'
+require 'rbbt/util/filecache'
 require 'rbbt/resource'
 require 'rbbt/sources/cath'
 require 'rbbt/sources/uniprot'
@@ -32,6 +33,9 @@ module UniProt
     tsv.to_s
   end
 
+  UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
+  UNIPROT_FASTA="http://www.uniprot.org/uniprot/[PROTEIN].fasta"
+
   def self.get_uniprot_entry(uniprotids)
     _array = Array === uniprotids
 
@@ -52,6 +56,7 @@ module UniProt
           Log.error $!.message
         end
       end
+      result
     end
 
     uniprots = {}
@@ -64,11 +69,42 @@ module UniProt
     end
   end
 
-  UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
-  UNIPROT_FASTA="http://www.uniprot.org/uniprot/[PROTEIN].fasta"
+  def self.get_uniprot_sequence(uniprotids)
+    _array = Array === uniprotids
+
+    uniprotids = [uniprotids] unless Array === uniprotids
+    uniprotids = uniprotids.compact.collect{|id| id}
+
+    result_files = FileCache.cache_online_elements(uniprotids, 'uniprot-sequence-{ID}') do |ids|
+      result = {}
+      ids.each do |id|
+        begin
+          Misc.try3times do
+
+            url = UNIPROT_FASTA.sub "[PROTEIN]", id
+            text = Open.read(url, :nocache => true)
+
+            result[id] = text.split(/\n/).select{|line| line !~ /^>/} * ""
+          end
+        rescue
+          Log.error $!.message
+        end
+      end
+      result
+    end
+
+    uniprots = {}
+    uniprotids.each{|id| uniprots[id] = Open.read(result_files[id]) }
+
+    if _array
+      uniprots
+    else
+      uniprots.values.first
+    end
+  end
+
   def self.pdbs(protein)
-    url = UNIPROT_TEXT.sub "[PROTEIN]", protein
-    text = Open.read(url)
+    text = get_uniprot_entry(protein)
 
     pdb = {}
 
@@ -90,15 +126,10 @@ module UniProt
   end
 
   def self.sequence(protein)
-    url = UNIPROT_FASTA.sub "[PROTEIN]", protein
-    text = Open.read(url)
-
-    text.split(/\n/).select{|line| line !~ /^>/} * ""
+    get_uniprot_sequence(protein)
   end
 
   def self.features(protein)
-    #url = UNIPROT_TEXT.sub "[PROTEIN]", protein
-    #text = Open.read(url)
     text = get_uniprot_entry(protein)
 
     text = text.split(/\n/).select{|line| line =~ /^FT/} * "\n"
@@ -110,7 +141,6 @@ module UniProt
 
     type = nil
     parts.each do |part|
-      parts
       if part[0..1] == "FT"
         type = part.gsub(/FT\s+/,'')
         next
@@ -143,8 +173,7 @@ module UniProt
 
 
   def self.variants(protein)
-    url = UNIPROT_TEXT.sub "[PROTEIN]", protein
-    text = Open.read(url)
+    text = get_uniprot_entry(protein)
 
     text = text.split(/\n/).select{|line| line =~ /^FT/} * "\n"
 
@@ -189,8 +218,7 @@ module UniProt
   end
 
   def self.cath(protein)
-    url = UNIPROT_TEXT.sub "[PROTEIN]", protein
-    text = Open.read(url)
+    text = get_uniprot_entry(protein)
 
     cath = {}
     text.split(/\n/).each{|l| 
