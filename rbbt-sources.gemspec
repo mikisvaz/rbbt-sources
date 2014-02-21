@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Miguel Vazquez"]
-  s.date = "2014-02-14"
+  s.date = "2014-02-21"
   s.description = "Data sources like PubMed, Entrez Gene, or Gene Ontology"
   s.email = "miguel.vazquez@fdi.ucm.es"
   s.files = [
