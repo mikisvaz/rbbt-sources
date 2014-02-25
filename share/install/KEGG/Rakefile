@@ -1,0 +1,114 @@
+require File.join(File.dirname(__FILE__),'../lib/rake_helper')
+
+define_source_tasks  "h.sapiens" => "ftp://ftp.genome.jp/pub/kegg/genes/organisms/hsa/H.sapiens.ent",
+  "hsa_gene_map.tab" => "ftp://ftp.genome.jp/pub/kegg/pathway/organisms/hsa/hsa_gene_map.tab",
+  "drugs" => "ftp://ftp.genome.jp/pub/kegg/medicus/drug/drug",
+  "pathways" => "ftp://ftp.genome.jp/pub/kegg/pathway/pathway"
+
+
+file :identifiers => 'source/h.sapiens' do |t|
+  pairs = {}
+  entry = nil
+  Open.read(t.prerequisites.first).each do |line|
+    if line =~ /^ENTRY\s+(\d+)/
+      entry = $1
+      next
+    end
+
+    if line =~ /Ensembl: (ENSG\d+)/
+      pairs[entry] = $1
+    end
+  end
+
+  Open.write(t.name, ['#Ensembl Gene ID','KEGG Gene ID'] * "\t" + "\n" + pairs.collect{|entry, ens| [ens, "hsa:" + entry] * "\t"} * "\n")
+end
+
+file :gene_drug => 'source/drugs' do |t|
+  pairs = {}
+  drug = nil
+  Open.read(t.prerequisites.first).
+    scan(/^[A-Z].*?(?:^[A-Z])/sm).select{|line| line =~ /^ENTRY|TARGET/}.collect{|line| line.sub(/\s+/,' ')}.each do |line|
+      if line =~ /^ENTRY\s+(\w+)/
+        drug = $1
+        next
+      end
+
+      if line =~ /TARGET.*?\[HSA:(.*?)\]/
+        genes = $1.split(/\s/)
+        genes.each do |gene|
+          pairs[gene] ||= []
+          pairs[gene] << drug
+        end
+      end
+  end
+
+  Open.write(t.name, ['#KEGG Gene ID', 'KEGG Drug ID'] * "\t" + "\n" + pairs.collect{|gene, drugs| ["hsa:" + gene, drugs * "|" ] * "\t"} * "\n")
+end
+
+file :drugs => 'source/drugs' do |t|
+  info = {}
+  drug = nil
+  Open.read(t.prerequisites.first).
+    scan(/^[A-Z].*?(?:^[A-Z])/sm).select{|line| line =~ /^ENTRY|NAME|DBLINKS/}.collect{|line| line.sub(/\s+/,' ')}.each do |line|
+      if line =~ /^ENTRY\s+(\w+)/
+        drug = $1
+        next
+      end
+
+      if line =~ /^NAME(.*)/
+        names = $1.split(/;/)
+        names.each do |name|
+          info[drug] ||= [[],[]]
+          info[drug][0] << name.chomp.strip
+        end
+      end
+
+      if line =~ /^DBLINKS(.*)/
+        $1.match(/PubChem: (\d*)/)
+        pubchem = $1
+        next unless pubchem
+        info[drug] ||= [[],[]]
+        info[drug][1] << pubchem.chomp.strip
+      end
+  end
+
+  Open.write(t.name, ['#KEGG Drug ID', 'KEGG Drug Name', 'PubChem Drug ID'] * "\t" + "\n" + info.collect{|drug, info| [drug, info.collect{|v| v * "|"} ].flatten * "\t"} * "\n")
+end
+
+file :pathways => 'source/pathways' do |t|
+  descs = {}
+  names = {}
+  klass = {}
+  pathway = nil
+  Open.read(t.prerequisites.first).split(/\n/).each do |line|
+    if line =~ /ENTRY\s+(\w+)/
+      pathway = $1.strip
+    end
+
+    if line =~ /NAME (.*)/
+      names[pathway] = $1.strip
+    end
+
+    if line =~ /DESCRIPTION (.*)/
+      descs[pathway] = $1.strip
+    end
+
+    if line =~ /CLASS (.*)/
+      klass[pathway] = $1.strip
+    end
+  end
+  
+  Open.write(t.name, "#: :type=:list\n" + ['#KEGG Pathway ID', 'Pathway Name', 'Pathway Description', 'Pathway Class'] * "\t" + "\n" + names.keys.collect{|pathway| [pathway, names[pathway], descs[pathway], klass[pathway]] * "\t"} * "\n")
+end
+
+process_tsv :gene_pathway, 'hsa_gene_map.tab',
+  :sep2 => ' ' do 
+  headers ['KEGG Gene ID', 'KEGG Pathway ID']
+  data do |gene, pathway|
+    "hsa:#{ gene }\t#{pathway.flatten.collect{|name| "hsa" + name} * "|"}"
+  end
+end
+
+add_to_defaults [:pathways, :drugs, :gene_drug, :genes]
+
+

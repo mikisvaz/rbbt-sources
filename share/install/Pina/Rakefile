@@ -1,0 +1,16 @@
+require File.join(File.dirname(__FILE__),'../lib/rake_helper')
+
+define_source_tasks  "Homo sapiens-20110628.txt" => "http://cbg.garvan.unsw.edu.au/pina/download/Homo%20sapiens-20110628.txt"
+
+process_tsv :protein_protein, 'Homo sapiens-20110628.txt',
+  :key         => 0, 
+  :fix         => lambda{|l| l.gsub("uniprotkb:", '').gsub("(gene name)",'').gsub("pubmed:",'').gsub("|", ';;').gsub(/\([^)]+\)/,'')}, 
+  :fields      => [1,6,8], 
+  :header_hash => "#",
+  :merge       => true,
+  :keep_empty  => true do 
+
+  headers ['UniProt/SwissProt Accession', 'Interactor UniProt/SwissProt Accession', 'Method', 'PMID']
+end
+
+

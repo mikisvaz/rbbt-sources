@@ -1,0 +1,211 @@
+require File.join(File.dirname(__FILE__),'../lib/rake_helper')
+
+define_source_tasks "genes" => "http://www.pharmgkb.org/commonFileDownload.action?filename=genes.zip",
+  "drugs" => "http://www.pharmgkb.org/commonFileDownload.action?filename=drugs.zip",
+  "diseases" => "http://www.pharmgkb.org/commonFileDownload.action?filename=diseases.zip",
+  "relationships" => "http://www.pharmgkb.org/commonFileDownload.action?filename=relationships.zip",
+  "variants" => "http://www.pharmgkb.org/commonFileDownload.action?filename=variantAnnotations.zip",
+  "pathways" => "http://www.pharmgkb.org/commonFileDownload.action?filename=pathways-tsv.zip"
+ 
+
+process_tsv :diseases, 'diseases', 
+  :header_hash => "",
+  :fix => proc{|l| l.gsub(/","/,'|').gsub(/"/,'').gsub(/,(\t|$)/,'\1')} do
+  headers ['PhGKB Disease ID']
+end
+
+process_tsv :identifiers, 'genes', 
+  :header_hash => "",
+  :fix => proc{|l| l.gsub(/","/,'|').gsub(/"/,'').gsub(/,(\t|$)/,'\1')} do
+  headers ['PhGKB Gene ID', 'Entrez Gene ID', 'Ensembl Gene Id', 'UniProt/SwissProt Accession', 'Long Name', 'Associated Gene Name']
+end
+
+process_tsv :drugs, 'drugs', 
+  :header_hash => "",
+  :fields => ['Name', 'DrugBank Id', 'SMILES', "MeSH IDs"],
+  :fix => proc{|l| l.gsub(/","/,'|').gsub(/"/,'').gsub(/,(\t|$)/,'\1')} do
+  headers ['PhGKB Drug ID', 'Drug Name', 'DrugBank Id', 'SMILES', "MeSH ID"]
+end
+
+process_tsv :relationships, 'relationships',
+  :header_hash => "",
+  :merge => true,
+  :fix => proc{|l| 
+    l.gsub!(/Gene:|Drug:|Disease:/,'')
+    parts = l.split("\t")
+    rels = parts.pop
+    parts = [parts.values_at(0, 2) * ":"]
+    pmids = []
+    pathways = []
+    rsids = []
+    rels.split(',').each do |r|
+      case
+      when r =~ /PMID:(.*)/
+        pmids << $1
+      when r =~ /Pathway:(.*)/
+        pathways << $1
+      when r =~ /RSID:(.*)/
+        rsids << $1
+      end
+    end
+
+    parts << pmids * "|"
+    parts << pathways * "|"
+    parts << rsids * "|"
+
+    parts * "\t"
+  },
+  :keep_empty => true do
+
+  headers ['PhGKB Relationship', "PMID", "PhGKB Pathway ID", "Variant ID"]
+end
+
+
+process_tsv :gene_drug, 'relationships',
+  :select => proc{|l| l =~ /^Gene:/ && l =~ /Drug:/}, 
+  :header_hash => "",
+  :merge => true,
+  :fix => proc{|l| 
+    l.gsub!(/Gene:|Drug:|Disease:/,'')
+    parts = l.split("\t")
+    rels = parts.pop
+    parts = parts.values_at 0, 2
+
+    parts * "\t"
+  },
+  :keep_empty => true do
+
+  headers ['PhGKB Gene ID', 'PhGKB Drug ID']
+end
+
+process_tsv :gene_disease, 'relationships', 
+  :select => proc{|l| l =~ /^Gene:/ && l =~ /Disease:/}, 
+  :key_field => 1, 
+  :fields => 3, 
+  :merge => true,
+  :header_hash => "",
+  :fix => proc{|l| l.gsub(/Gene:|Drug:|Disease/,'')},
+  :keep_empty => true do
+
+  headers ['PhGKB Gene ID', 'PhGKB Disease ID']
+end
+
+process_tsv :variants, 'variants', 
+  :key_field => 1, 
+  :fields => [3,7,8,9,10,4,6,5], 
+  :header_hash => "",
+  :merge => true,
+  :fix => proc{|l| l.gsub(/Gene:|Drug:|Disease/,'')},
+  :keep_empty => true do
+
+  headers ['Variant ID', 'Associated Gene Name', 'Drug', 'Drug_Class', 'Disease', 'Curation', 'Feature', 'Annotation', 'Evidence']
+end
+
+file :pathways => 'source/pathways' do |t|
+  File.open(t.name, 'w') do |f|
+    f.puts "#" + ['PhGKB Pathway ID','Pathway Name','Pathway Annotation Source'] * "\t"
+    Open.read(t.prerequisites.first).split(/\n/).each do |line|
+      case
+      when line =~ /(PA\d+): (.*) - \((.*)\)/
+        f.puts [$1,$2,$3] * "\t"
+      when line =~ /(PA\d+): (.*)/
+        f.puts [$1,$2,""] * "\t"
+      end
+    end
+  end
+end
+
+file :gene_pathway => 'source/pathways' do |t|
+  pathways = {}
+  last_pathway = nil
+
+  Open.read(t.prerequisites.first).split(/\n/).each do |line|
+    if line =~ /(P.*):(.*)/
+      last_pathway = $1
+      pathways[last_pathway] = {:name => $2}
+    else
+      type, code, name = line.split(/\t/)
+      next unless type =='Gene'
+      pathways[last_pathway][:genes] ||= []
+      pathways[last_pathway][:genes] << name
+    end
+  end
+end
+
+file :gene_pathway => 'source/pathways' do |t|
+  pathways = {}
+  last_pathway = nil
+
+  Open.read(t.prerequisites.first).split(/\n/).each do |line|
+    if line =~ /(P.*):(.*)/
+      last_pathway = $1
+      pathways[last_pathway] = {:name => $2}
+    else
+      type, code, name = line.split(/\t/)
+      next unless type =='Gene'
+      pathways[last_pathway][:genes] ||= []
+      pathways[last_pathway][:genes] << name
+    end
+  end
+
+  File.open(t.name, 'w') do |f|
+    f.puts "#" + ['PhGKB Pathway ID',  'Pathway Name',  'Associated Gene Name'] * "\t"
+    pathways.each do |pathway, info|
+      next if info[:genes].nil?
+      f.puts "#{ pathway }\t#{info[:name]}\t#{info[:genes] * "|"}"
+    end
+  end
+end
+
+file :pathway_drugs => 'source/pathways' do |t|
+  pathways = {}
+  last_pathway = nil
+
+  Open.read(t.prerequisites.first).split(/\n/).each do |line|
+    if line =~ /(P.*):(.*)/
+      last_pathway = $1
+      pathways[last_pathway] = {:name => $2}
+    else
+      type, code, name = line.split(/\t/)
+    next unless type =='Drug'
+      pathways[last_pathway][:drugs] ||= []
+      pathways[last_pathway][:drugs] << code
+    end
+  end
+
+  File.open(t.name, 'w') do |f|
+    f.puts "#" + ["PhGKB Pathway ID", "PhGKB Drug ID"]* "\t"
+    pathways.each do |pathway, info|
+      next if info[:drugs].nil?
+      f.puts "#{ pathway }\t#{info[:drugs] * "|"}"
+    end
+  end
+end
+
+
+file :disease_pathway => 'source/pathways' do |t|
+  pathways = {}
+  last_pathway = nil
+
+  Open.read(t.prerequisites.first).split(/\n/).each do |line|
+    if line =~ /(P.*):(.*)/
+      last_pathway = $1
+      pathways[last_pathway] = {:name => $2}
+    else
+      type, code, name = line.split(/\t/)
+    next unless type =='Disease'
+      pathways[last_pathway][:diseases] ||= []
+      pathways[last_pathway][:diseases] << name
+    end
+  end
+
+  File.open(t.name, 'w') do |f|
+    f.puts "#" + %w(ID Name Diseases) * "\t"
+    pathways.each do |pathway, info|
+      next if info[:diseases].nil?
+      f.puts "#{ pathway }\t#{info[:name]}\t#{info[:diseases] * "|"}"
+    end
+  end
+end
+
+add_to_defaults [:gene_pathway, :drug_pathway, :disease_pathway]
