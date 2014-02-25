@@ -85,7 +85,3 @@ module Ensembl
     end
   end
 end
-
-if __FILE__ == $0
-  ddd Ensembl::FTP.ensembl_tsv("Hsa/may2012", 'exon')
-end

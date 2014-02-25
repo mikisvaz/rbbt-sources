@@ -96,14 +96,16 @@ module Entrez
       end
 
       values.each do |xml|
-        geneid = gene.match(/<Gene-track_geneid>(\d+)/)[1]
+        geneid = xml.match(/<Gene-track_geneid>(\d+)/)[1]
         
         result[geneid] = xml
       end
+
+      result
     end
 
     genes = {}
-    geneids.each{|id| genes[id] = Gene.new(Open.read(result_files[id])) }
+    geneids.each{|id| next if id.nil? or result_files[id].nil?; genes[id] = Gene.new(Open.read(result_files[id])) }
 
     if _array
       genes
