@@ -130,23 +130,6 @@ file :gene_pathway => 'source/pathways' do |t|
       pathways[last_pathway][:genes] << name
     end
   end
-end
-
-file :gene_pathway => 'source/pathways' do |t|
-  pathways = {}
-  last_pathway = nil
-
-  Open.read(t.prerequisites.first).split(/\n/).each do |line|
-    if line =~ /(P.*):(.*)/
-      last_pathway = $1
-      pathways[last_pathway] = {:name => $2}
-    else
-      type, code, name = line.split(/\t/)
-      next unless type =='Gene'
-      pathways[last_pathway][:genes] ||= []
-      pathways[last_pathway][:genes] << name
-    end
-  end
 
   File.open(t.name, 'w') do |f|
     f.puts "#" + ['PhGKB Pathway ID',  'Pathway Name',  'Associated Gene Name'] * "\t"

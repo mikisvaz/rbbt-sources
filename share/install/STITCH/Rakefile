@@ -1,7 +1,7 @@
 require File.join(File.dirname(__FILE__),'../lib/rake_helper')
 
-define_source_tasks "protein_chemicals" => "http://stitch.embl.de:8080/download/protein_chemical.links.v2.0.tsv.gz",
-  "chemicals" => "http://stitch.embl.de:8080/download/chemical.aliases.v2.0.tsv.gz"
+define_source_tasks "protein_chemicals" => "http://stitch.embl.de/download/protein_chemical.links.v3.1.tsv.gz",
+  "chemicals" => "http://stitch.embl.de/download/chemicals.v3.1.tsv.gz"
 
 process_tsv :protein_chemical, 'protein_chemicals',
   :key => 1,

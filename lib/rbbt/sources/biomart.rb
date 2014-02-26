@@ -46,6 +46,15 @@ module BioMart
     @archive_url = nil
   end
 
+  def self.with_archive(data)
+    begin
+      set_archive(data)
+      yield
+    ensure
+      unset_archive
+    end
+  end
+
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     open_options = Misc.add_defaults :wget_options => {"--read-timeout=" => 9000, "--tries=" => 1}
     repeats = true

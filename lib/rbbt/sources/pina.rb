@@ -1,15 +1,14 @@
-require 'phgx'
+require 'rbbt'
+require 'rbbt/resource'
 
 module Pina
   extend Resource
-  self.pkgdir = "phgx"
   self.subdir = "share/pina"
 
   Pina.claim Pina.root, :rake, Rbbt.share.install.Pina.Rakefile.find(:lib)
 end
 
 if defined? Entity and defined? Gene and Entity === Gene
-  require 'rbbt/entity/gene'
   require 'rbbt/entity/interactor'
   require 'rbbt/sources/PSI_MI'
 

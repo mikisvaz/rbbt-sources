@@ -125,7 +125,7 @@ def self.gene_text_similarity(gene, text)
   when String === gene || Fixnum === gene
     begin
       gene_text =  get_gene(gene).text
-    rescue CMD::CMDError
+    rescue NoMethodError, CMD::CMDError
       return 0
     end
   else

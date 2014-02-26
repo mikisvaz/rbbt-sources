@@ -1,6 +1,6 @@
 require 'rbbt'
+require 'rbbt/tsv'
 require 'rbbt/resource'
-require 'spreadsheet'
 
 module TFacts
   extend Resource
@@ -9,6 +9,7 @@ module TFacts
   TFacts.claim TFacts.source["Catalogues.xls"], :url, "http://www.tfacts.org/TFactS-new/TFactS-v2/tfacts/data/Catalogues.xls"
 
   TFacts.claim TFacts.targets, :proc do
+    require 'spreadsheet'
     book = Spreadsheet.open TFacts.source["Catalogues.xls"].produce.find
     sheet = book.worksheet 0
 
@@ -23,6 +24,7 @@ module TFacts
   end
 
   TFacts.claim TFacts.targets_signed, :proc do
+    require 'spreadsheet'
     book = Spreadsheet.open TFacts.source["Catalogues.xls"].produce.find
     sheet = book.worksheet 0
 

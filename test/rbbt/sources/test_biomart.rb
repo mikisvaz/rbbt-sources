@@ -8,6 +8,14 @@ require 'test/unit'
 
 class TestBioMart < Test::Unit::TestCase
 
+  def setup
+    BioMart.set_archive "jun2011"
+  end
+
+  def teardown
+    BioMart.unset_archive
+  end
+
   def test_get
     assert_raise BioMart::QueryError do 
       BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],['with_unknownattr'])
@@ -41,6 +49,8 @@ class TestBioMart < Test::Unit::TestCase
 
     TmpFile.with_file do |f|
       filename = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false}, :filename => f)
+      return
+      puts Open.read(filename)
       data = TSV.open Open.open(filename, :merge => true)
       assert(data['852236']['Protein ID'].include? 'CAA84864')
       assert_equal 'Entrez Gene', data.key_field
