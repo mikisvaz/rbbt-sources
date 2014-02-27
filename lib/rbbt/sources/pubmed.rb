@@ -1,44 +1,23 @@
-require 'rbbt'
+require 'rbbt-util'
 require 'libxml'
 require 'rbbt/sources/gscholar'
+require 'rbbt/util/filecache'
 
 # This module offers an interface with PubMed, to perform queries, and
 # retrieve simple information from articles. It uses the caching
 # services of Rbbt.
 module PubMed
 
-  private
   @@pubmed_lag = 1
-  def self.get_online(pmids)
 
-    pmids_complete =  pmids.is_a?(Array) ? pmids : [pmids]
+  # Performs the specified query and returns an array with the PubMed
+  # Ids returned. +retmax+ can be used to limit the number of ids
+  # returned, if is not specified 30000 is used.
+  def self.query(query, retmax=nil)
+    retmax ||= 30000
 
-    url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
-    articles = []
-
-    Misc.divide(pmids.sort_by{|v| v.nil? ? 0 : v.to_i}, (pmids.length / 1000) + 1).each do |pmid_list|
-      postdata = "db=pubmed&retmode=xml&id=#{pmid_list* ","}"
-      xml = TmpFile.with_file(postdata) do |postfile|
-        Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--post-file=" => postfile)
-      end
-
-      articles += xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
-    end
-
-    if pmids.is_a? Array
-      list = {}
-      articles.each{|article|
-        pmid = article.scan(/<PMID[^>]*?>(.*?)<\/PMID>/).flatten.first
-        list[pmid] = article
-      }
-      return list
-    else
-      return articles.first
-    end
-
+    Open.read("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?retmax=#{retmax}&db=pubmed&term=#{query}",:quiet => true, :nocache => true).scan(/<Id>(\d+)<\/Id>/).flatten
   end
-
-  public
 
   # Processes the xml with an articles as served by MedLine and extracts
   # the abstract, title and journal information
@@ -239,12 +218,48 @@ module PubMed
     end
   end
 
-  # Performs the specified query and returns an array with the PubMed
-  # Ids returned. +retmax+ can be used to limit the number of ids
-  # returned, if is not specified 30000 is used.
-  def self.query(query, retmax=nil)
-    retmax ||= 30000
+  def self.get_article(pmids)
+    _array = Array === pmids
 
-    Open.read("http://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?retmax=#{retmax}&db=pubmed&term=#{query}",:quiet => true, :nocache => true).scan(/<Id>(\d+)<\/Id>/).flatten
+    pmids = [pmids] unless Array === pmids
+    pmids = pmids.compact.collect{|id| id}
+
+    result_files = FileCache.cache_online_elements(pmids, 'pubmed-{ID}.xml') do |ids|
+      result = {}
+      values = []
+      Misc.divide(ids, (ids.length / 100) + 1).each do |list|
+        begin
+          Misc.try3times do
+            url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
+
+            postdata = "db=pubmed&retmode=xml&id=#{list* ","}"
+            xml = TmpFile.with_file(postdata) do |postfile|
+              Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--post-file=" => postfile)
+            end
+
+            values += xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
+          end
+        rescue
+          Log.exception $!
+        end
+      end
+
+      values.each do |xml|
+        pmid = xml.scan(/<PMID[^>]*?>(.*?)<\/PMID>/).flatten.first
+        
+        result[pmid] = xml
+      end
+
+      result
+    end
+
+    articles = {}
+    pmids.each{|id| next if id.nil? or result_files[id].nil?; articles[id] = Article.new(Open.read(result_files[id])) }
+
+    if _array
+      articles
+    else
+      articles.values.first
+    end
   end
 end

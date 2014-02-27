@@ -5,8 +5,8 @@ require 'test/unit'
 
 class TestGScholar < Test::Unit::TestCase
   def test_citation
-    assert_match GoogleScholar.citation_link("Ten Years of Pathway Analysis: Current Approaches and Outstanding Challenges").to_s, /cites/
-    assert_match GoogleScholar.number_cites("Ten Years of Pathway Analysis: Current Approaches and Outstanding Challenges").to_s, /\d+/
+    assert_match /cites/, GoogleScholar.citation_link("Ten Years of Pathway Analysis: Current Approaches and Outstanding Challenges").to_s
+    assert_match /\d+/, GoogleScholar.number_cites("Ten Years of Pathway Analysis: Current Approaches and Outstanding Challenges").to_s
   end
 
 end

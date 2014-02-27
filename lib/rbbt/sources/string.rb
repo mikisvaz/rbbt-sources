@@ -1,3 +1,5 @@
+require 'rbbt'
+require 'rbbt/resource'
 
 module STRING
   extend Resource

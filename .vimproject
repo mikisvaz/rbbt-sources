@@ -36,7 +36,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    reactome.rb
    tfacts.rb
    go.rb
-   pina.rb
 
    jochem.rb
    wgEncodeBroadHmm.rb
@@ -48,12 +47,12 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
 
    matador.rb
 
+   pina.rb
    kegg.rb
    matador.rb
    pharmagkb.rb
    stitch.rb
    string.rb
-
   }
  }
  share=share{
@@ -98,6 +97,9 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
     Rakefile
    }
    PharmaGKB=PharmaGKB{
+    Rakefile
+   }
+   Matador=Matador{
     Rakefile
    }
   }
