@@ -1,6 +1,4 @@
 require 'rbbt-util'
-require 'rbbt/entity/gene'
-require 'rbbt/tsv'
 require 'rbbt/sources/organism'
 
 module InterPro
