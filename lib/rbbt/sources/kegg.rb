@@ -110,11 +110,11 @@ if defined? Entity
           self 
         when format == "KEGG Gene ID"
           ensembl = from_kegg.clean_annotations
-          Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => ensembl, :format => new_format).run.chunked_values_at(ensembl), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+          Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => ensembl, :format => new_format).exec.chunked_values_at(ensembl), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
         when new_format == "KEGG Gene ID"
           to_kegg
         else
-          Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => self, :format => new_format).run.chunked_values_at(self), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+          Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => self, :format => new_format).exec.chunked_values_at(self), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
         end
       end
 
