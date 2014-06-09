@@ -535,7 +535,7 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
   chr_transcript_ranges ||= {}
   transcript_strand = {}
 
-  TSV.traverse 'transcript_exons' do |transcript,values|
+  TSV.traverse Path.setup(File.expand_path('transcript_exons')) do |transcript,values|
   #TSV.open('transcript_exons', :unnamed => true).through do |transcript, values|
     transcript_ranges = []
 
