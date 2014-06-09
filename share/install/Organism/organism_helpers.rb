@@ -78,17 +78,17 @@ $biomart_exons = [
 #{{{ Rules
 
 file 'entrez_taxids' do |t|
-  File.open(t.name, 'w') do |f| f.write $taxs * "\n" end
+  Misc.sensiblewrite(t.name, $taxs * "\n")
 end
 
 file 'scientific_name' do |t|
-  File.open(t.name, 'w') do |f| f.write $scientific_name end
+  Misc.sensiblewrite(t.name, $scientific_name)
 end
 
 file 'ortholog_key' do |t|
   raise "Ortholog key not defined. Set up $ortholog_key in the organism specific Rakefile; example $ortholog_key = 'human_ensembl_gene'" unless defined? $ortholog_key and not $ortholog_key.nil?
 
-  File.open(t.name, 'w') do |f| f.write $ortholog_key end
+  Misc.sensiblewrite(t.name, $ortholog_key)
 end
 
 file 'identifiers' do |t|
@@ -134,7 +134,7 @@ file 'identifiers' do |t|
     end
   end
 
-  File.open(t.name, 'w') do |f| f.puts identifiers end
+  Misc.sensiblewrite(t.name, identifiers.to_s)
 end
 
 file 'lexicon' => 'identifiers' do |t|
@@ -157,7 +157,7 @@ file 'protein_identifiers' do |t|
     end
   end
 
-  File.open(t.name, 'w') do |f| f.puts identifiers end
+  Misc.sensiblewrite(t.name, identifiers.to_s)
 end
 
 file 'transcript_probes' do |t|
@@ -168,20 +168,20 @@ file 'transcript_probes' do |t|
     end
   end
 
-  File.open(t.name, 'w') do |f| f.puts identifiers end
+  Misc.sensiblewrite(t.name, identifiers.to_s)
 end
 
 file 'gene_transcripts' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts transcripts end
+  Misc.sensiblewrite(t.name, transcripts.to_s)
 end
 
 file 'transcripts' => 'gene_positions' do |t|
   transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
   transcripts.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
-  File.open(t.name, 'w') do |f| f.puts transcripts end
+  Misc.sensiblewrite(t.name, transcripts.to_s)
 end
 
 file 'gene_positions' do |t|
@@ -193,7 +193,7 @@ end
 file 'gene_sequence' do |t|
   sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :flat, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| 
+  Misc.sensiblewrite(t.name) do |f|
     f.puts "#: :type=:single"
     f.puts "#Ensembl Gene ID\tGene Sequence"
     sequences.each do |seq, genes|
@@ -372,7 +372,7 @@ file 'gene_go' do |t|
   else
     goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => $namespace)
 
-    File.open(t.name, 'w') do |f| f.puts goterms end
+    Misc.sensiblewrite(t.name, goterms.to_s)
   end
 end
 
@@ -388,7 +388,7 @@ file 'gene_go_bp' => 'gene_go' do |t|
   end
 
 
-  File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
+  Misc.sensiblewrite(t.name, gene_go.slice("GO ID").to_s)
 end
 
 file 'gene_go_cc' => 'gene_go' do |t|
@@ -403,7 +403,7 @@ file 'gene_go_cc' => 'gene_go' do |t|
   end
 
 
-  File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
+  Misc.sensiblewrite(t.name, gene_go.slice("GO ID").to_s)
 end
 
 file 'gene_go_mf' => 'gene_go' do |t|
@@ -418,7 +418,7 @@ file 'gene_go_mf' => 'gene_go' do |t|
   end
 
 
-  File.open(t.name, 'w') do |f| f.puts gene_go.slice "GO ID" end
+  Misc.sensiblewrite(t.name, gene_go.slice("GO ID").to_s)
 end
 
 
@@ -426,19 +426,19 @@ end
 file 'gene_biotype' do |t|
   biotype = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_biotype, [], nil, :type => :single, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts biotype end
+  Misc.sensiblewrite(t.name, biotype.to_s)
 end
 
 file 'gene_pfam' do |t|
   pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts pfam end
+  Misc.sensiblewrite(t.name, pfam.to_s)
 end
 
 file 'chromosomes' do |t|
   goterms = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => $namespace)
 
-  File.open(t.name, 'w') do |f| f.puts goterms end
+  Misc.sensiblewrite(t.name, goterms.to_s)
 end
 
 file 'blacklist_chromosomes' => 'chromosomes' do |t|
@@ -449,12 +449,12 @@ end
 file 'blacklist_genes' => ['blacklist_chromosomes', 'gene_positions'] do |t|
   Open.read(t.prerequisites.first)
   genes = CMD.cmd("grep -f '#{t.prerequisites.first}' | cut -f 1", :in => Open.open(t.prerequisites.last)).read.split("\n").uniq
-  File.open(t.name, 'w') do |f| f.puts genes * "\n" end
+  Misc.sensiblewrite(t.name, genes * "\n")
 end
 
 file 'sanctioned_genes' => ['blacklist_genes', 'gene_positions'] do |t|
   genes = CMD.cmd("cut -f 1", :in => Open.open(t.prerequisites.last)).read.split("\n").uniq - Open.read(t.prerequisites.first).split("\n")
-  File.open(t.name, 'w') do |f| f.puts genes * "\n" end
+  Misc.sensiblewrite(t.name, genes * "\n")
 end
 
 
@@ -526,7 +526,7 @@ end
 
 
 
-#{{{ Special riles
+#{{{ Special files
 require 'bio'
 
 file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
@@ -535,7 +535,8 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
   chr_transcript_ranges ||= {}
   transcript_strand = {}
 
-  TSV.open('transcript_exons', :unnamed => true).through do |transcript, values|
+  TSV.traverse 'transcript_exons' do |transcript,values|
+  #TSV.open('transcript_exons', :unnamed => true).through do |transcript, values|
     transcript_ranges = []
 
     exons = Misc.zip_fields(values).sort_by{|exon,rank| rank.to_i}.collect{|exon,rank| exon}
@@ -555,19 +556,18 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
     chr_transcript_ranges[chr][transcript] ||= transcript_ranges
   end
 
-  transcript_sequence = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["Sequence"], :type => :single)
+  transcript_sequence = {}
   chr_transcript_ranges.each do |chr, transcript_ranges|
 
     begin
       raise "LRG, GL, HG, and HSCHR chromosomes not supported: #{chr}" if chr =~ /^(?:LRG_|GL0|HG|HSCHR)/
-      p = Organism.root.dup
-      p = p.annotate p.dup
-      p.replace File.expand_path("./chromosome_#{chr}")
+      p = File.expand_path("./chromosome_#{chr}")
+      Organism.root.annotate p
       p.sub!(%r{.*/organisms/},'share/organisms/')
-      p = Path.setup(p, 'rbbt', Organism)
       chr_str = p.produce.read
     rescue Exception
       Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered)")
+      Log.exception $!
       next
     end
 
@@ -585,6 +585,7 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
       transcript_sequence[transcript] = sequence
     end
   end
+  TSV.setup(transcript_sequence, :key_field => "Ensembl Transcript ID", :fields => ["Sequence"], :type => :single, :unnamed => true)
 
   Misc.sensiblewrite(t.name, transcript_sequence.to_s)
 end
