@@ -316,7 +316,6 @@ def exon_offset_in_transcript(exon, transcript, exons, transcript_exons)
 end
 
 file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts transcript_exons) do |t|
-  exons = TSV.open('exons')
   exon_transcripts = nil
   exon_transcripts = TSV.open('transcript_exons', :double, :key_field => "Ensembl Exon ID", :fields => ["Ensembl Transcript ID"], :merge => true)
   gene_transcripts = TSV.open('gene_transcripts', :flat)
@@ -326,14 +325,16 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   string = "#: :namespace=#{$namespace}\n"
   string += "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
 
-  exons.unnamed = true
   exon_transcripts.unnamed = true
   gene_transcripts.unnamed = true
   transcript_info.unnamed = true
   transcript_exons.unnamed = true
 
+  exons = TSV.open('exons')
+  exons.unnamed = true
   exons.monitor = true
   exons.through do |exon, info|
+    exon = exon.first if Array === exon
     gene, start, finish, strand, chr = info
 
     transcripts = coding_transcripts_for_exon(exon, exon_transcripts, transcript_info)
@@ -512,11 +513,15 @@ rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
   Misc.in_dir(archive) do
     BioMart.set_archive archive
     begin
+      old_namespace = $namespace
+      $namespace = $namespace + "/" << archive
       Rake::Task[task].invoke
     rescue
       Log.error "Error producing archived (#{archive}) version of #{task}: #{t.name}"
       Log.exception $!
       raise $!
+    ensure
+      $namespace = old_namespace
     end
     BioMart.unset_archive 
   end
@@ -535,8 +540,9 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
   chr_transcript_ranges ||= {}
   transcript_strand = {}
 
-  TSV.traverse Path.setup(File.expand_path('transcript_exons')) do |transcript,values|
   #TSV.open('transcript_exons', :unnamed => true).through do |transcript, values|
+  TSV.traverse Path.setup(File.expand_path('transcript_exons')) do |transcript,values|
+    transcript = transcript.first if Array === transcript
     transcript_ranges = []
 
     exons = Misc.zip_fields(values).sort_by{|exon,rank| rank.to_i}.collect{|exon,rank| exon}
