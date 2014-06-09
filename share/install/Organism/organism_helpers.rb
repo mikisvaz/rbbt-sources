@@ -187,7 +187,7 @@ end
 file 'gene_positions' do |t|
   sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_positions, [])
 
-  File.open(t.name, 'w') do |f| f.puts sequences end
+  Misc.sensiblewrite(t.name, sequences.to_s)
 end
 
 file 'gene_sequence' do |t|
@@ -211,7 +211,7 @@ file 'exons' => 'gene_positions' do |t|
   exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => $namespace)
   exons.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
-  File.open(t.name, 'w') do |f| f.puts exons end
+  Misc.sensiblewrite(t.name, exons.to_s)
 end
 
 file 'transcript_exons' do |t|
@@ -511,7 +511,13 @@ rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
   task    = $2
   Misc.in_dir(archive) do
     BioMart.set_archive archive
-    Rake::Task[task].invoke
+    begin
+      Rake::Task[task].invoke
+    rescue
+      Log.error "Error producing archived (#{archive}) version of #{task}: #{t.name}"
+      Log.exception $!
+      raise $!
+    end
     BioMart.unset_archive 
   end
 end
@@ -554,7 +560,8 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
 
     begin
       raise "LRG, GL, HG, and HSCHR chromosomes not supported: #{chr}" if chr =~ /^(?:LRG_|GL0|HG|HSCHR)/
-      p = Organism.root
+      p = Organism.root.dup
+      p = p.annotate p.dup
       p.replace File.expand_path("./chromosome_#{chr}")
       p.sub!(%r{.*/organisms/},'share/organisms/')
       p = Path.setup(p, 'rbbt', Organism)
@@ -622,6 +629,8 @@ file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
 
     start_exon = exon2ensembl[start_exon]
     eend_exon = exon2ensembl[eend_exon]
+
+    raise "Transcript #{ transcript } missing exons" if transcript_exons[transcript].nil?
 
     exon_and_rank = Hash[*Misc.zip_fields(transcript_exons[transcript]).flatten]
 
