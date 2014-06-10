@@ -16,7 +16,6 @@ module Organism
       nil
   end
 
-
   Organism.installable_organisms.each do |organism|
     claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
 
