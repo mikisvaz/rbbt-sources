@@ -1,6 +1,7 @@
 require 'net/ftp'
 require 'rbbt/sources/ensembl_ftp'
 
+#Thread.current['namespace'] = $namespace
 
 $biomart_ensembl_gene = ['Ensembl Gene ID', 'ensembl_gene_id']
 $biomart_ensembl_protein = ['Ensembl Protein ID', 'ensembl_peptide_id']
@@ -92,7 +93,7 @@ file 'ortholog_key' do |t|
 end
 
 file 'identifiers' do |t|
-  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => $namespace)
+  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => Thread.current['namespace'])
   identifiers.unnamed =  true
 
   $biomart_identifiers.each do |name, key, prefix|
@@ -150,7 +151,7 @@ end
 
 
 file 'protein_identifiers' do |t|
-  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_identifiers, [], nil, :namespace => $namespace)
+  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_protein, $biomart_protein_identifiers, [], nil, :namespace => Thread.current['namespace'])
   $biomart_protein_identifiers.each do |name, key, prefix|
     if prefix
       identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
@@ -161,7 +162,7 @@ file 'protein_identifiers' do |t|
 end
 
 file 'transcript_probes' do |t|
-  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_probe_identifiers, [], nil, :namespace => $namespace)
+  identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_probe_identifiers, [], nil, :namespace => Thread.current['namespace'])
   $biomart_probe_identifiers.each do |name, key, prefix|
     if prefix
       identifiers.process name do |field, key, values| field.each{|v| v.replace "#{prefix}:#{v}"} end
@@ -172,13 +173,13 @@ file 'transcript_probes' do |t|
 end
 
 file 'gene_transcripts' do |t|
-  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat, :namespace => $namespace)
+  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_transcript, [], nil, :type => :flat, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, transcripts.to_s)
 end
 
 file 'transcripts' => 'gene_positions' do |t|
-  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => $namespace)
+  transcripts = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript, [], nil, :type => :list, :namespace => Thread.current['namespace'])
   transcripts.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   Misc.sensiblewrite(t.name, transcripts.to_s)
@@ -191,7 +192,7 @@ file 'gene_positions' do |t|
 end
 
 file 'gene_sequence' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :flat, :namespace => $namespace)
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_sequence, [], nil, :type => :flat, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name) do |f|
     f.puts "#: :type=:single"
@@ -208,20 +209,20 @@ file 'gene_sequence' do |t|
 end
 
 file 'exons' => 'gene_positions' do |t|
-  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => $namespace)
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exons, [], nil, :merge => false, :type => :list, :namespace => Thread.current['namespace'])
   exons.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   Misc.sensiblewrite(t.name, exons.to_s)
 end
 
 file 'transcript_exons' do |t|
-  exons = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_exons, [], nil, :keep_empty => true, :namespace => $namespace)
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_exons, [], nil, :keep_empty => true, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, exons.to_s)
 end
 
 file 'exon_phase' do |t|
-  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exon_phase, [], nil, :keep_empty => true, :namespace => $namespace)
+  exons = BioMart.tsv($biomart_db, $biomart_ensembl_exon, $biomart_exon_phase, [], nil, :keep_empty => true, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, exons.to_s)
 end
@@ -263,11 +264,11 @@ $biomart_variation_id = ["SNP ID", "refsnp_id"]
 $biomart_variation_position = [["Chromosome Name", "chr_name"], ["Chromosome Start", "chrom_start"], ["Variant Alleles", "allele"]]
 
 file 'germline_variations' do |t|
-  BioMart.tsv($biomart_db_germline_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
+  BioMart.tsv($biomart_db_germline_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => Thread.current['namespace'])
 end
 
 file 'somatic_variations' do |t|
-  BioMart.tsv($biomart_db_somatic_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => $namespace)
+  BioMart.tsv($biomart_db_somatic_variation, $biomart_variation_id, $biomart_variation_position, [], nil, :keep_empty => true, :type => :list, :filename => t.name, :namespace => Thread.current['namespace'])
 end
 
 
@@ -275,7 +276,7 @@ end
 
 file 'gene_pmids' do |t|
   tsv =  Entrez.entrez2pubmed($taxs)
-  text = "#: :namespace=#{$namespace}\n"
+  text = "#: :namespace=#{Thread.current['namespace']}\n"
   text += "#Entrez Gene ID\tPMID"
   tsv.each do |gene, pmids|
     text << "\n" << gene << "\t" << pmids * "|"
@@ -322,7 +323,7 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
   transcript_info  = TSV.open('transcripts', :list, :fields => ["Ensembl Protein ID"])
   transcript_exons = TSV.open('transcript_exons', :double, :fields => ["Ensembl Exon ID","Exon Rank in Transcript"])
 
-  string = "#: :namespace=#{$namespace}\n"
+  string = "#: :namespace=#{Thread.current['namespace']}\n"
   string += "#Ensembl Exon ID\tEnsembl Transcript ID\tOffset\n"
 
   exon_transcripts.unnamed = true
@@ -353,7 +354,7 @@ end
 
 file 'gene_go' do |t|
   if File.basename(FileUtils.pwd) =~ /^[a-z]{3}([0-9]{4})$/i and $1.to_i <= 2009
-    goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go_2009, [], nil, :type => :double, :namespace => $namespace)
+    goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go_2009, [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
     goterms.each do |key, values|
       values.each do |list| list.uniq! end
@@ -371,7 +372,7 @@ file 'gene_go' do |t|
 
     Misc.sensiblewrite(t.name, goterms.slice(["GO ID", "GO Namespace"]).to_s)
   else
-    goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => $namespace)
+    goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go, [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
     Misc.sensiblewrite(t.name, goterms.to_s)
   end
@@ -425,19 +426,19 @@ end
 
 
 file 'gene_biotype' do |t|
-  biotype = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_biotype, [], nil, :type => :single, :namespace => $namespace)
+  biotype = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_biotype, [], nil, :type => :single, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, biotype.to_s)
 end
 
 file 'gene_pfam' do |t|
-  pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => $namespace)
+  pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, pfam.to_s)
 end
 
 file 'chromosomes' do |t|
-  goterms = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => $namespace)
+  goterms = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, goterms.to_s)
 end
@@ -483,7 +484,7 @@ rule /^chromosome_.*/ do |t|
 
   raise "Fasta file for chromosome not found: '#{ chr }' - #{ archive }, #{ release }" if file.nil?
 
-  Log.debug("Downloading chromosome sequence: #{ file }")
+  Log.debug("Downloading chromosome sequence: #{ file } - #{release} #{t.name}")
 
   Misc.lock t.name + '.rake' do
     TmpFile.with_file do |tmpfile|
@@ -497,13 +498,13 @@ end
 rule /^possible_ortholog_(.*)/ do |t|
   other = t.name.match(/ortholog_(.*)/)[1]
   other_key = Organism.ortholog_key(other).produce.read
-  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", "inter_paralog_" + other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => $namespace)
+  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", "inter_paralog_" + other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => Thread.current['namespace'])
 end
 
 rule /^ortholog_(.*)/ do |t|
   other = t.name.match(/ortholog_(.*)/)[1]
   other_key = Organism.ortholog_key(other).produce.read
-  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => $namespace)
+  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => Thread.current['namespace'])
 end
 
 rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
@@ -513,15 +514,15 @@ rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
   Misc.in_dir(archive) do
     BioMart.set_archive archive
     begin
-      old_namespace = $namespace
-      $namespace = $namespace + "/" << archive
+      old_namespace = Thread.current['namespace']
+      Thread.current['namespace'] = Thread.current['namespace'] + "/" << archive
       Rake::Task[task].invoke
     rescue
       Log.error "Error producing archived (#{archive}) version of #{task}: #{t.name}"
       Log.exception $!
       raise $!
     ensure
-      $namespace = old_namespace
+      Thread.current['namespace'] = old_namespace
     end
     BioMart.unset_archive 
   end

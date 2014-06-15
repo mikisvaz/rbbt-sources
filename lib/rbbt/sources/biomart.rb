@@ -35,15 +35,15 @@ module BioMart
     if defined? Rbbt and Rbbt.etc.allowed_biomart_archives.exists?
       raise "Biomart archive #{ date } is not allowed in this installation" unless Rbbt.etc.allowed_biomart_archives.read.split("\n").include? date
     end
-    @archive = date
-    @archive_url = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
-    Log.debug "Using Archive URL #{ @archive_url }"
+    Thread.current['archive'] = date
+    Thread.current['archive_url'] = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
+    Log.debug "Using Archive URL #{ Thread.current['archive_url'] }"
   end
 
   def self.unset_archive
     Log.debug "Restoring current version URL #{BIOMART_URL}"
-    @archive = nil
-    @archive_url = nil
+    Thread.current['archive'] = nil
+    Thread.current['archive_url'] = nil
   end
 
   def self.with_archive(data)
@@ -79,7 +79,7 @@ module BioMart
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
-    url = @archive_url ? @archive_url + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
+    url = Thread.current['archive_url'] ? Thread.current['archive_url'] + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
 
     begin
       response = Open.read(url, open_options.dup)
@@ -191,8 +191,8 @@ module BioMart
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     attrs ||= []
 
-    if @archive_url 
-      attrs = attrs.reject{|attr| (MISSING_IN_ARCHIVE[@archive] || []).include? attr[1]}
+    if Thread.current['archive_url'] 
+      attrs = attrs.reject{|attr| (MISSING_IN_ARCHIVE[Thread.current['archive']] || []).include? attr[1]}
     end
 
 
