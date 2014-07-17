@@ -3,7 +3,7 @@ require 'rbbt/resource'
 
 module STRING
   extend Resource
-  self.subdir = "share/string"
+  self.subdir = "share/databases/string"
 
   STRING.claim STRING.root, :rake, Rbbt.share.install.STRING.Rakefile.find(:lib)
 end

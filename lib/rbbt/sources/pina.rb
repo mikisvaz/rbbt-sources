@@ -3,7 +3,7 @@ require 'rbbt/resource'
 
 module Pina
   extend Resource
-  self.subdir = "share/pina"
+  self.subdir = "share/databases/pina"
 
   Pina.claim Pina.root, :rake, Rbbt.share.install.Pina.Rakefile.find(:lib)
 end
