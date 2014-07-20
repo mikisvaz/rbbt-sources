@@ -6,8 +6,22 @@ module Organism
   self.pkgdir = "rbbt"
   self.subdir = "share/organisms"
 
-  def self.installable_organisms
+  def self.organism_codes(organism = nil)
+    if organism
+      Rbbt.etc.allowed_biomart_archives.list.collect{|build| [organism, build] * "/" }
+    else
+      Rbbt.etc.organisms.list.collect{|organism|
+        organism =~ /\// ? organism : Rbbt.etc.allowed_biomart_archives.list.collect{|build| [organism, build] * "/" }
+      }.flatten.compact.uniq
+    end
+  end
+
+  def self.installed_organisms
     Rbbt.share.install.Organism.find.glob('???').collect{|f| File.basename(f)}
+  end
+
+  def self.installable_organisms
+    self.installed_organisms
   end
 
   def self.allowed_biomart_archives
@@ -29,12 +43,19 @@ module Organism
 
     raise "Only organism 'Hsa' (Homo sapiens) supported" unless organism =~ /^Hsa/
 
-    return 'hg19' unless organism =~ /\//
+    return 'hg20' unless organism =~ /\//
     date = organism.split("/")[1] 
 
     release = Ensembl.releases[date]
 
-    release.sub(/.*-/,'').to_i > 54 ? 'hg19' : 'hg18'
+    release_number = release.sub(/.*-/,'').to_i
+    if release_number <= 54 
+      'hg18'
+    elsif release_number <= 70
+      'hg19'
+    else
+      'hg20'
+    end
   end
 
   def self.liftOver(positions, source, target)
