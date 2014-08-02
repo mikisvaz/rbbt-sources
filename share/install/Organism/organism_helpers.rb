@@ -519,7 +519,6 @@ rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
       Rake::Task[task].invoke
     rescue
       Log.error "Error producing archived (#{archive}) version of #{task}: #{t.name}"
-      Log.exception $!
       raise $!
     ensure
       Thread.current['namespace'] = old_namespace
