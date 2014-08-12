@@ -4,6 +4,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
  bin=bin {
  }
  etc=etc filter="*"{
+  organisms
   allowed_biomart_archives
   biomart=biomart{
    missing_in_archive
