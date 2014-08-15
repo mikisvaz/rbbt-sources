@@ -2,6 +2,8 @@ require 'rbbt'
 require 'rbbt/tsv'
 require 'rbbt/resource'
 require 'rbbt/entity'
+
+Workflow.require_workflow "InterPro"
 require 'rbbt/sources/InterPro'
 
 InterPro.claim InterPro.pfam_names, :proc do

@@ -573,7 +573,6 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
       chr_str = p.produce.read
     rescue Exception
       Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered)")
-      Log.exception $!
       next
     end
 

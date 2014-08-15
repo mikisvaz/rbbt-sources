@@ -12,7 +12,7 @@ $biomart_db_germline_variation = 'mmusculus_snp'
 $biomart_db_somatic_variation = 'mmusculus_snp_som'
 
 $biomart_lexicon = [ 
-  [ 'Associated Gene Name' , "external_gene_id"], 
+  [ 'Associated Gene Name' , "external_gene_name"], 
   [ 'HGNC symbol', "hgnc_symbol"  ],
   [ 'HGNC automatic gene name', "hgnc_automatic_gene_name"  ],
   [ 'HGNC curated gene name ', "hgnc_curated_gene_name"  ],
@@ -32,7 +32,7 @@ $biomart_probe_identifiers = [
 $biomart_identifiers = [ 
   [ 'Entrez Gene ID', "entrezgene"],
   [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
-  [ 'Associated Gene Name', "external_gene_id"  ],
+  [ 'Associated Gene Name', "external_gene_name"  ],
   [ 'CCDS ID', "ccds"  ],
   [ 'Protein ID', "protein_id"  ],
   [ 'RefSeq Protein ID', "refseq_peptide"  ],

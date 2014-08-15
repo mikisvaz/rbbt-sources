@@ -13,7 +13,7 @@ module BioMart
   
   class BioMart::QueryError < StandardError; end
 
-  BIOMART_URL = 'http://biomart.org/biomart/martservice?query='
+  BIOMART_URL = 'http://www.ensembl.org/biomart/martservice?query='
 
   MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.exists? ? Rbbt.etc.biomart.missing_in_archive.yaml : {}
 
@@ -36,7 +36,7 @@ module BioMart
       raise "Biomart archive #{ date } is not allowed in this installation" unless Rbbt.etc.allowed_biomart_archives.read.split("\n").include? date
     end
     Thread.current['archive'] = date
-    Thread.current['archive_url'] = BIOMART_URL.sub(/http:\/\/biomart\./, 'http://' + date + '.archive.ensembl.')
+    Thread.current['archive_url'] = BIOMART_URL.sub(/www/, date + '.archive')
     Log.debug "Using Archive URL #{ Thread.current['archive_url'] }"
   end
 
@@ -191,8 +191,17 @@ module BioMart
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     attrs ||= []
 
-    if Thread.current['archive_url'] 
-      attrs = attrs.reject{|attr| (MISSING_IN_ARCHIVE[Thread.current['archive']] || []).include? attr[1]}
+    if Thread.current['archive'] 
+      missing = MISSING_IN_ARCHIVE[Thread.current['archive']] || []
+      missing += MISSING_IN_ARCHIVE['all'] || []
+      attrs = attrs.uniq.reject{|attr| missing.include? attr[1]}
+      changes = {}
+      missing.select{|m| m.include? "~" }.each do |str|
+        orig,_sep, new = str.partition "~"
+        changes[orig] = new
+      end
+      attrs = attrs.collect{|n,k| [n, changes[k] || k] }
+      attrs
     end
 
 

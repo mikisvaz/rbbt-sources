@@ -30,7 +30,6 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
 
    barcode.rb
 
-   InterPro.rb
    cath.rb
    pfam.rb
    NCI.rb

@@ -16,7 +16,7 @@ class TestBioMart < Test::Unit::TestCase
     BioMart.unset_archive
   end
 
-  def test_get
+  def _test_get
     assert_raise BioMart::QueryError do 
       BioMart.get('scerevisiae_gene_ensembl','entrezgene', ['protein_id'],['with_unknownattr'])
     end
@@ -30,7 +30,7 @@ class TestBioMart < Test::Unit::TestCase
     assert(tsv['852236'][1].include? 'YBL044W')
   end
 
-  def test_query
+  def _test_query
     data = BioMart.query('scerevisiae_gene_ensembl','entrezgene', ['protein_id','refseq_peptide','external_gene_id','ensembl_gene_id'], [], nil, :nocache => false, :wget_options => { :quiet => false})
     assert(data['852236']['external_gene_id'].include? 'YBL044W')
 

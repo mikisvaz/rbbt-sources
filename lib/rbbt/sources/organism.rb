@@ -11,8 +11,8 @@ module Organism
       Rbbt.etc.allowed_biomart_archives.list.collect{|build| [organism, build] * "/" }
     else
       Rbbt.etc.organisms.list.collect{|organism|
-        organism =~ /\// ? organism : Rbbt.etc.allowed_biomart_archives.list.collect{|build| [organism, build] * "/" }
-      }.flatten.compact.uniq
+        organism =~ /\// ? organism : Rbbt.etc.allowed_biomart_archives.list.collect{|build| [organism, build] * "/" } + [organism]
+      }.flatten.compact.uniq 
     end
   end
 
