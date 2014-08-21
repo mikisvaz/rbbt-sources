@@ -9,7 +9,7 @@ require 'test/unit'
 class TestBioMart < Test::Unit::TestCase
 
   def setup
-    BioMart.set_archive "jun2011"
+    BioMart.set_archive Organism.default_code("Hsa")
   end
 
   def teardown

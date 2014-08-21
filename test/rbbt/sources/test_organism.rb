@@ -54,7 +54,7 @@ class TestOrganism < Test::Unit::TestCase
   def test_lift_over
     mutation_19 = "19:21131664:T"
     mutation_18 = "19:20923504:T"
-    source_build = "Hsa/jun2011"
+    source_build = Organism.default_code("Hsa")
     target_build = "Hsa/may2009"
 
     assert_equal mutation_18, Organism.liftOver([mutation_19], source_build, target_build).first
@@ -63,7 +63,7 @@ class TestOrganism < Test::Unit::TestCase
 
   def _test_orhtolog
     require 'rbbt/entity/gene'
-    assert_equal ["ENSG00000133703"], Gene.setup("Kras", "Associated Gene Name", "Mmu/jun2011").ensembl.ortholog("Hsa/jun2011")
+    assert_equal ["ENSG00000133703"], Gene.setup("Kras", "Associated Gene Name", "Mmu/jun2011").ensembl.ortholog(Organism.default_code("Hsa"))
   end
 
   #def _test_genes_at_chromosome

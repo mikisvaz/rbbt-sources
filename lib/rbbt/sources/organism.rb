@@ -6,6 +6,10 @@ module Organism
   self.pkgdir = "rbbt"
   self.subdir = "share/organisms"
 
+  def self.default_code(organism = "Hsa")
+    organism.split("/").first << "/feb2014"
+  end
+
   def self.organism_codes(organism = nil)
     if organism
       Rbbt.etc.allowed_biomart_archives.list.collect{|build| [organism, build] * "/" }
