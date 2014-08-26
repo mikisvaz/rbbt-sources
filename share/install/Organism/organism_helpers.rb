@@ -540,8 +540,8 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
   chr_transcript_ranges ||= {}
   transcript_strand = {}
 
-  #TSV.open('transcript_exons', :unnamed => true).through do |transcript, values|
-  TSV.traverse Path.setup(File.expand_path('transcript_exons')) do |transcript,values|
+  transcript_exons = Path.setup(File.expand_path('transcript_exons'))
+  TSV.traverse transcript_exons do |transcript,values|
     transcript = transcript.first if Array === transcript
     transcript_ranges = []
 
@@ -572,7 +572,8 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
       p.sub!(%r{.*/organisms/},'share/organisms/')
       chr_str = p.produce.read
     rescue Exception
-      Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered)")
+      Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered): #{$!.message}")
+      Log.exception $!
       next
     end
 

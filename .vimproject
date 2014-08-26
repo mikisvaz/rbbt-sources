@@ -117,6 +117,4 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    test_pubmed.rb
   }
  }
- data=data{
- }
 }
