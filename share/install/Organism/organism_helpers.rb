@@ -564,16 +564,15 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
 
   transcript_sequence = {}
   chr_transcript_ranges.each do |chr, transcript_ranges|
-
     begin
-      raise "LRG, GL, HG, and HSCHR chromosomes not supported: #{chr}" if chr =~ /^(?:LRG_|GL0|HG|HSCHR)/
+      raise "LRG, GL, HG, NT, and HSCHR chromosomes not supported: #{chr}" if chr =~ /^(?:LRG_|GL0|HG|HSCHR|NT)/
       p = File.expand_path("./chromosome_#{chr}")
       Organism.root.annotate p
       p.sub!(%r{.*/organisms/},'share/organisms/')
       chr_str = p.produce.read
     rescue Exception
-      Log.debug("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered): #{$!.message}")
-      Log.exception $!
+      Log.warn("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered): #{$!.message}")
+      raise $! unless $!.message =~ /not supported/
       next
     end
 
