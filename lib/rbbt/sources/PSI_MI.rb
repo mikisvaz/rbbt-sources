@@ -12,6 +12,8 @@ module PSI_MI
     tsv = TSV.setup({}, :type => :list, :key_field => "PSI-MI Term", :fields => ["Name", "Description"])
     Open.open(URL).read.split("[Term]").each do |chunk|
       id = chunk.scan(/id: ([^\n]*)/)[0]
+      next if id.nil?
+      id = id.first
       name = chunk.scan(/name: ([^\n]*)/)[0]
       description = chunk.scan(/def: "([^\n]*)"/)[0]
       tsv[id] = [name, description]
@@ -29,7 +31,7 @@ if defined? Entity
   module PSI_MITerm
     extend Entity
 
-    self.format = "PSI-MI Term"
+    self.format = "PSI-MI Term", "Method"
 
     property :name => :array2single do
       @@index ||= PSI_MI.identifiers.tsv(:persist => true, :fields => ["Name"], :type => :single)
