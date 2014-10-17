@@ -79,44 +79,44 @@ if defined? Entity
 
   if defined? Gene and Entity === Gene
     module Gene
-      self.format = "KEGG Gene ID"
+      add_identifiers KEGG.identifiers
 
-      def to_kegg
-        return self if format == "KEGG Gene ID"
-        if Array === self
-          Gene.setup(KEGG.index2kegg.values_at(*to("Ensembl Gene ID")), "KEGG Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
-        else
-          Gene.setup(KEGG.index2kegg[to("Ensembl Gene ID")], "KEGG Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
-        end
-      end
+      #def to_kegg
+      #  return self if format == "KEGG Gene ID"
+      #  if Array === self
+      #    Gene.setup(KEGG.index2kegg.values_at(*to("Ensembl Gene ID")), "KEGG Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+      #  else
+      #    Gene.setup(KEGG.index2kegg[to("Ensembl Gene ID")], "KEGG Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+      #  end
+      #end
 
-      def from_kegg
-        return self unless format == "KEGG Gene ID"
-        if Array === self
-          Gene.setup(KEGG.index2ens.values_at(*self), "Ensembl Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
-        else
-          Gene.setup(KEGG.index2ens[self], "Ensembl Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
-        end
-      end
+      #def from_kegg
+      #  return self unless format == "KEGG Gene ID"
+      #  if Array === self
+      #    Gene.setup(KEGG.index2ens.values_at(*self), "Ensembl Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+      #  else
+      #    Gene.setup(KEGG.index2ens[self], "Ensembl Gene ID", organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+      #  end
+      #end
 
-      def self.gene_kegg_pathway_index
-        @@gene_kegg_pathway_index ||= 
-          KEGG.gene_pathway.tsv(:persist => true, :key_field => "KEGG Gene ID", :fields => ["KEGG Pathway ID"], :type => :flat, :merge => true)
-      end
+      #def self.gene_kegg_pathway_index
+      #  @@gene_kegg_pathway_index ||= 
+      #    KEGG.gene_pathway.tsv(:persist => true, :key_field => "KEGG Gene ID", :fields => ["KEGG Pathway ID"], :type => :flat, :merge => true)
+      #end
 
-      property :to => :array2single do |new_format|
-        case
-        when format == new_format
-          self 
-        when format == "KEGG Gene ID"
-          ensembl = from_kegg.clean_annotations
-          Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => ensembl, :format => new_format).exec.chunked_values_at(ensembl), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
-        when new_format == "KEGG Gene ID"
-          to_kegg
-        else
-          Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => self, :format => new_format).exec.chunked_values_at(self), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
-        end
-      end
+      #property :to => :array2single do |new_format|
+      #  case
+      #  when format == new_format
+      #    self 
+      #  when format == "KEGG Gene ID"
+      #    ensembl = from_kegg.clean_annotations
+      #    Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => ensembl, :format => new_format).exec.chunked_values_at(ensembl), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+      #  when new_format == "KEGG Gene ID"
+      #    to_kegg
+      #  else
+      #    Gene.setup(Translation.job(:tsv_translate, "", :organism => organism, :genes => self, :format => new_format).exec.chunked_values_at(self), new_format, organism).tap{|o| o.extend AnnotatedArray if AnnotatedArray === self }
+      #  end
+      #end
 
       property :kegg_pathways => :array2single do
         @kegg_pathways ||= Gene.gene_kegg_pathway_index.values_at(*self.to_kegg).
