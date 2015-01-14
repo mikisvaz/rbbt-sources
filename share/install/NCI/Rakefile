@@ -6,6 +6,8 @@ module NCI
     doc = Nokogiri::XML(xml)
     pathways = {}
 
+    #{{{ Molecules
+    
     molecules = {}
     doc.xpath("//Molecule").each do |molecule|
       id = molecule.attribute('id').value
@@ -14,6 +16,8 @@ module NCI
       molecules[id] = {:xml => molecule, :proteins => names}
     end
 
+
+    #{{{ Interactions
 
     interactions = {}
     doc.xpath("//Interaction").each do |interaction|
@@ -25,6 +29,8 @@ module NCI
       interactions[id] = {:xml => interaction, :molecule_ids => molecule_ids, :pathway_ids => pathway_ids}
     end
 
+    #{{{ Pathways
+
     doc.xpath("//Pathway").each do |pathway|
       id = pathway.attribute('id').value
       subnet = pathway.attribute('subnet').value
@@ -32,8 +38,8 @@ module NCI
       short_name = pathway.xpath('ShortName').first.content if get_short_name
 
       interaction_ids = pathway.xpath("PathwayComponentList/PathwayComponent").collect{|component| component.attribute("interaction_idref").value}
-
       pathway_interactions = interaction_ids.collect{|i| interactions[i]}
+
       pathway_molecule_ids = pathway_interactions.collect{|info| info[:molecule_ids]}.compact.flatten
 
       pathway_uniprot_ids = pathway_molecule_ids.collect do |i| 
@@ -47,20 +53,22 @@ module NCI
       end
     end
     
+    #{{{ Sub-pathways ???
+    
     doc.xpath("//Pathway").each do |pathway|
       id = pathway.attribute('id').value
       subnet = pathway.attribute('subnet').value
       name = pathway.xpath('LongName').first.content
 
       interaction_ids = pathway.xpath("PathwayComponentList/PathwayComponent").collect{|component| component.attribute("interaction_idref").value}
-
       pathway_interactions = interaction_ids.collect{|i| interactions[i]}
+
       pathway_subnet_ids = pathway_interactions.collect{|info| info[:pathway_ids]}.compact.flatten
 
       pathway_subnet_ids.collect do |nid| 
         next unless pathways.include? nid
-        new_genes = pathways[id].last
-        pathways[nid][1] = (pathways[nid][1] + new_genes).uniq
+        new_genes = pathways[nid].last
+        pathways[id][1] = (pathways[id][1] + new_genes).uniq
       end
     end
 

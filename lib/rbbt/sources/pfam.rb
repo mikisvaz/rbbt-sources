@@ -76,6 +76,7 @@ if defined? Entity
 
 
   module InterProDomain
+    extend Entity
     property :pfam => :array2single do
       InterPro.pfam_index.values_at(*self).
         each{|domain| domain.organism = organism if domain.respond_to? :organism }

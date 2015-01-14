@@ -70,5 +70,3 @@ class TestBioMart < Test::Unit::TestCase
     end
   end
 end
-
-

@@ -56,7 +56,7 @@ module BioMart
   end
 
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
-    open_options = Misc.add_defaults :wget_options => {"--read-timeout=" => 9000, "--tries=" => 1}
+    open_options = Misc.add_defaults open_options, :wget_options => {"--read-timeout=" => 9000, "--tries=" => 1}
     repeats = true
     attrs   ||= []
     filters ||= ["with_#{main}"]
@@ -82,6 +82,7 @@ module BioMart
     url = Thread.current['archive_url'] ? Thread.current['archive_url'] + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
 
     begin
+      iii open_options
       response = Open.read(url, open_options.dup)
     rescue
       Open.remove_from_cache url, open_options
@@ -137,7 +138,6 @@ module BioMart
     open_options = Misc.add_defaults open_options, :nocache => false, :filename => nil, :field_names => nil, :by_chr => false
     filename, field_names, by_chr = Misc.process_options open_options, :filename, :field_names, :by_chr
     attrs   ||= []
-
     open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
 
     Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
@@ -161,10 +161,10 @@ module BioMart
     if chunks.any?
       chunks.each_with_index{|chunk,i|
         Log.low "Chunk #{ i + 1 } / #{chunks.length}: [#{chunk * ", "}]"
-        data = get(database, main, chunk, filters, data, open_options)
+        data = get(database, main, chunk, filters, data, open_options.dup)
       }
     else
-      data = get(database, main, [], filters, data, open_options)
+      data = get(database, main, [], filters, data, open_options.dup)
     end
 
     open_options[:filename] = "BioMart[#{main}+#{attrs.length}]"

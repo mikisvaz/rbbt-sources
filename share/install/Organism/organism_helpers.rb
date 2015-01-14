@@ -353,6 +353,7 @@ file 'exon_offsets' => %w(exons transcript_exons gene_transcripts transcripts tr
 end
 
 file 'gene_go' do |t|
+  iii 1
   if File.basename(FileUtils.pwd) =~ /^[a-z]{3}([0-9]{4})$/i and $1.to_i <= 2009
     goterms = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_go_2009, [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
