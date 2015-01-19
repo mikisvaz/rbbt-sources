@@ -99,11 +99,6 @@ if defined? Entity
       #  end
       #end
 
-      #def self.gene_kegg_pathway_index
-      #  @@gene_kegg_pathway_index ||= 
-      #    KEGG.gene_pathway.tsv(:persist => true, :key_field => "KEGG Gene ID", :fields => ["KEGG Pathway ID"], :type => :flat, :merge => true)
-      #end
-
       #property :to => :array2single do |new_format|
       #  case
       #  when format == new_format
@@ -118,8 +113,14 @@ if defined? Entity
       #  end
       #end
 
+
+      def self.gene_kegg_pathway_index
+        @@gene_kegg_pathway_index ||= 
+          KEGG.gene_pathway.tsv(:persist => true, :key_field => "KEGG Gene ID", :fields => ["KEGG Pathway ID"], :type => :flat, :merge => true)
+      end
+
       property :kegg_pathways => :array2single do
-        @kegg_pathways ||= Gene.gene_kegg_pathway_index.values_at(*self.to_kegg).
+        @kegg_pathways ||= Gene.gene_kegg_pathway_index.values_at(*self.to("KEGG Gene ID")).
           each{|pth| pth.organism = organism if pth.respond_to? :organism }.tap{|o| KeggPathway.setup(o, organism)}
       end
     end
