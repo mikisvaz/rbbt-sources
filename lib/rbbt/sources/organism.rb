@@ -55,7 +55,7 @@ module Organism
     release_number = release.sub(/.*-/,'').to_i
     if release_number <= 54 
       'hg18'
-    elsif release_number <= 70
+    elsif release_number <= 75
       'hg19'
     else
       'hg20'

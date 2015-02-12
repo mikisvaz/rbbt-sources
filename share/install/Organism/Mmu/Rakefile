@@ -32,6 +32,7 @@ $biomart_probe_identifiers = [
 $biomart_identifiers = [ 
   [ 'Entrez Gene ID', "entrezgene"],
   [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
+  [ 'MGI ID' , "mgi_id"] , 
   [ 'Associated Gene Name', "external_gene_name"  ],
   [ 'CCDS ID', "ccds"  ],
   [ 'Protein ID', "protein_id"  ],

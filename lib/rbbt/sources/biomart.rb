@@ -82,7 +82,6 @@ module BioMart
     url = Thread.current['archive_url'] ? Thread.current['archive_url'] + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
 
     begin
-      iii open_options
       response = Open.read(url, open_options.dup)
     rescue
       Open.remove_from_cache url, open_options

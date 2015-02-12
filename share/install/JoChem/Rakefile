@@ -16,7 +16,7 @@ def first(list)
 end
 
 def process_jochem
-  jochem = Open.open("http://www.biosemantics.org/uploads/file/Jochem/JochemV1_2.zip")
+  jochem = Open.open("http://www.biosemantics.org/downloads/file/Jochem/JochemV1_2.zip")
   identifiers = File.open('identifiers', 'w')
 
   identifiers.puts("#: :namespace=JoChem")
