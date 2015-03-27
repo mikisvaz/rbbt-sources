@@ -6,7 +6,8 @@ module Reactome
   self.subdir = "share/databases/Reactome"
 
   Reactome.claim Reactome.protein_pathways, :proc  do
-    url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+    #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+    url = "http://www.reactome.org/download/current/UniProt2Reactome.txt"
     tsv = TSV.open(Open.open(url), :key_field => 0, :fields => [1], :merge => true, :type => :double)
     tsv.key_field = "UniProt/SwissProt Accession"
     tsv.fields = ["Reactome Pathway ID"]
@@ -15,7 +16,8 @@ module Reactome
   end
 
   Reactome.claim Reactome.pathway_names, :proc  do
-    url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+    #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+    url = "http://www.reactome.org/download/current/UniProt2Reactome.txt"
     tsv = TSV.open(Open.open(url), :key_field => 1, :fields => [2], :type => :single)
     tsv.key_field = "Reactome Pathway ID"
     tsv.fields = ["Pathway Name"]
