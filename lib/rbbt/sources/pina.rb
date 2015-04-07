@@ -9,7 +9,7 @@ module Pina
 
     url = "http://cbg.garvan.unsw.edu.au/pina/download/Homo%20sapiens-20121210.txt"
 
-    dumper = TSV::Dumper.new :type => :list, :type => :double,
+    dumper = TSV::Dumper.new :type => :double,
       :key_field => 'UniProt/SwissProt Accession', :namespace => Organism.default_code("Hsa"), 
       :fields => ['Interactor UniProt/SwissProt Accession', 'Method', 'Publication'] 
 
