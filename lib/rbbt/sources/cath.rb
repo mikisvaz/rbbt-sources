@@ -59,7 +59,7 @@ module Cath
   end
 
   Rbbt.claim Rbbt.share.databases.CATH.CathDomainList, :proc do
-    domains = TSV.setup({}, :key_field => "Cath Domain", :type => :double, :fields => ["CATH domain name (seven characters)",
+    domains = TSV.setup({}, :key_field => "Cath Domain", :fields => ["CATH domain name (seven characters)",
                         "Class number", "Architecture number", "Topology number", "Homologous superfamily number", "S35 sequence cluster number",
                         "S60 sequence cluster number", "S95 sequence cluster number", "S100 sequence cluster number", "S100 sequence count number",
                         "Domain length", "Structure resolution (Angstroms)"], :type => :list)
