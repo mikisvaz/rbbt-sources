@@ -117,7 +117,7 @@ module UniProt
         eend = eend.to_i
         start, eend = eend, start if start > eend
       rescue
-        Log.warn("Error process Uniprot PDB line: #{line}")
+        Log.warn("Error process Uniprot PDB line: #{l}")
         next
       end
       pdb[id.downcase] = {:method => method, :resolution => resolution, :region => (start..eend), :chains => chains}

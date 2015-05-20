@@ -1,5 +1,6 @@
 all:
     - refseq_mrna
+<aug2014:
     - external_gene_name~external_gene_id
 may2010:
     - agilent_wholegenome
@@ -33,5 +34,3 @@ aug2007:
     - hgnc
     - hgnc_id
     - illumina_humanwg_6_v3
-dec2014:
-    - external_gene_id
