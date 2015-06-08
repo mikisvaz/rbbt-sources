@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Miguel Vazquez"]
-  s.date = "2015-05-28"
+  s.date = "2015-06-08"
   s.description = "Data sources like PubMed, Entrez Gene, or Gene Ontology"
   s.email = "miguel.vazquez@fdi.ucm.es"
   s.files = [
@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
     "lib/rbbt/sources/bibtex.rb",
     "lib/rbbt/sources/biomart.rb",
     "lib/rbbt/sources/cath.rb",
+    "lib/rbbt/sources/corum.rb",
     "lib/rbbt/sources/ensembl.rb",
     "lib/rbbt/sources/ensembl_ftp.rb",
     "lib/rbbt/sources/entrez.rb",
