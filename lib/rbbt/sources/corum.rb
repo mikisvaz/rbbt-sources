@@ -22,7 +22,16 @@ module CORUM
     url = "http://mips.helmholtz-muenchen.de/genre/proj/corum/allComplexes.csv"
     tsv = TSV.open(url, :header_hash => "", :sep => ';', :sep2 => ',', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
     tsv.namespace = organism
-    tsv.fields = tsv.fields.collect{|f| f.gsub('"','')}
+    tsv.fields = tsv.fields.collect{|f| f.gsub('"','')}.collect{|f|
+      case f
+      when "subunits (UniProt IDs)"
+        "UniProt/SwissProt Accession"
+      when "subunits (Entrez IDs)"
+        "Entrez Gene ID"
+      else
+        f
+      end
+    }
     tsv.key_field = "CORUM Complex ID"
     tsv.identifiers = CORUM.complex_names.produce.find
     tsv
@@ -39,7 +48,7 @@ if defined? Entity
     self.add_identifiers CORUM.complex_names, "CORUM Complex ID", "Complex name"
 
     property :genes => :array2single do
-      @genes ||= CORUM.complexes.tsv(:persist => true, :fields => ["subunits (UniProt IDs)"], :type => :flat).values_at *self
+      @genes ||= CORUM.complexes.tsv(:persist => true, :fields => ["UniProt/SwissProt Accession"], :type => :flat).values_at *self
     end
   end
 end
