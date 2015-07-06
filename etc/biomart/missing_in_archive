@@ -1,6 +1,6 @@
 all:
     - refseq_mrna
->jun2015:
+">jun2015":
     - uniprot_swissprot_accession
 <aug2014:
     - external_gene_name~external_gene_id

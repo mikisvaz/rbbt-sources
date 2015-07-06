@@ -257,4 +257,3 @@ module Organism
     Misc.total_length(exon_ranges)
   end
 end
-
