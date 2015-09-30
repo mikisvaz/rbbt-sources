@@ -1,4 +1,4 @@
-require 'rbbt'
+require 'rbbt-util'
 require 'rbbt/resource'
 require 'rbbt/persist/tsv'
 
@@ -83,6 +83,80 @@ module GO
       info[id]['namespace']
     end
   end
+
+  def self.ancestors_in(term, valid)
+    ancestors = id2ancestors(term)
+    return ancestors if FalseClass === valid
+    valid_ancestors = ancestors & valid
+    return valid_ancestors if valid_ancestors.any?
+    valid_ancestors.inject([]) do |acc,ancestor|
+      valid_a = ancestors_in ancestor, valid
+      acc = acc + valid_a
+    end
+  end
+
+  def self.group_genes(list, valid = nil)
+    valid = %w(GO:0005886 GO:0005634 GO:0005730 GO:0005829) if valid.nil?
+
+    compartment_leaves = {}
+    list.zip(list.go_cc_terms).each do |gene,terms|
+      valid_terms = terms.collect{|term| 
+        (valid.include?(term) ? term : ancestors_in(term, valid))
+      }.flatten
+      valid_terms - GOTerm.setup(valid_terms).flat_ancestry.flatten
+      valid_terms.each do |term|
+        compartment_leaves[term] ||= []
+        compartment_leaves[term].push(gene)
+      end
+    end
+
+    groups = {}
+    while compartment_leaves.length > 1
+
+      # Group common
+      group = false
+      new_compartment_leaves = {}
+      compartment_leaves.each do |c,l|
+        if l.length > 1
+          groups[c] = l
+          group = true
+          new_compartment_leaves[c] = [c]
+        else
+          new_compartment_leaves[c] = l
+        end
+      end
+      compartment_leaves = new_compartment_leaves
+
+      # Pull-up leaves
+      if group == false
+        new_compartment_leaves = {}
+        final = compartment_leaves.keys
+        compartment_leaves.each do |c,l|
+          final = final - GOTerm.setup(c.dup).flat_ancestry
+        end
+
+        compartment_leaves.each do |c,l|
+          if final.include? c
+            valid_an = ancestors_in c, valid
+            valid_an.each do |ancestor|
+              ancestor = valid.first
+              next if ancestor.nil?
+              new_compartment_leaves[ancestor] ||= []
+              new_compartment_leaves[ancestor].concat(l)
+            end
+          else
+            new_compartment_leaves[c] = l
+          end
+        end
+        compartment_leaves = new_compartment_leaves
+      end
+    end
+    ng = {}
+    groups.keys.reverse.each do |k|
+      ng[k] = {items: groups[k], id: k, name: id2name(k)}
+    end
+    ng
+  end
 end
 
 if defined? Entity 
@@ -112,6 +186,31 @@ if defined? Entity
       description
     end
 
+    property :ancestors => :single2array do
+      GOTerm.setup(GO.id2ancestors(self))
+    end
+
+    property :ancestor => :single2array do
+      ancestors.first
+    end
+
+    property :ancestry => :single2array do
+      ancestry = {}
+      self.ancestors.each do |ancestor|
+        prev = ancestor.ancestry
+        ancestry[ancestor] = prev
+      end
+      ancestry
+    end
+
+    property :flat_ancestry => :single2array do
+      ancestry = []
+      self.ancestors.each do |ancestor|
+        prev = ancestor.flat_ancestry
+        ancestry = ancestry + [ancestor] + prev
+      end
+      ancestry
+    end
   end
 
   if defined? Gene and Entity === Gene
@@ -131,7 +230,7 @@ if defined? Entity
       property :go_mf_terms => :array2single do 
         @go_mf_terms ||= Organism.gene_go_mf(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["GO ID"], :type => :flat, :merge => true, :namespace => organism).chunked_values_at self.ensembl
       end
- 
+
     end
   end
 end
