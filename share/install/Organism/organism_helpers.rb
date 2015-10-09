@@ -44,6 +44,10 @@ $biomart_transcript_5utr = [
   ["5' UTR", '5utr'],
 ]
 
+$biomart_transcript_biotype = [
+  ["Ensembl Transcript Biotype", 'transcript_biotype'],
+]
+
 
 $biomart_protein_sequence = [
   ['Protein Sequence','peptide'],
@@ -428,6 +432,12 @@ end
 
 file 'gene_biotype' do |t|
   biotype = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_biotype, [], nil, :type => :single, :namespace => Thread.current['namespace'])
+
+  Misc.sensiblewrite(t.name, biotype.to_s)
+end
+
+file 'transcript_biotype' do |t|
+  biotype = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_biotype, [], nil, :type => :single, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, biotype.to_s)
 end

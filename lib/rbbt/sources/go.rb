@@ -57,21 +57,30 @@ module GO
     end
   end
 
-  def self.id2ancestors(id)
+  def self.id2ancestors_by_type(id, type='is_a')
     if id.kind_of? Array
       info.values_at(*id).
-        select{|i| ! i['is_a'].nil?}.
-        collect{|i| i['is_a'].collect{|id| 
-        id.match(/(GO:\d+)/)[1] if id.match(/(GO:\d+)/)
-      }.compact
-      }
+        select{|i| ! i[type].nil?}.
+        collect{|i| 
+          res = i[type]
+          res = [res] unless Array === res
+          res.collect{|id| 
+            id.match(/(GO:\d+)/)[1] if id.match(/(GO:\d+)/)
+          }.compact
+        }
     else
-      return [] if id.nil? or info[id].nil? or info[id]['is_a'].nil?
-      info[id]['is_a'].
+      return [] if id.nil? or info[id].nil? or info[id][type].nil?
+      res = info[id][type]
+      res = [res] unless Array === res
+      res.
         collect{|id| 
         id.match(/(GO:\d+)/)[1] if id.match(/(GO:\d+)/)
       }.compact
     end
+  end
+
+  def self.id2ancestors(id)
+    id2ancestors_by_type(id, 'is_a') + id2ancestors_by_type(id, 'relationship')
   end
 
   def self.id2namespace(id)
@@ -89,10 +98,10 @@ module GO
     return ancestors if FalseClass === valid
     valid_ancestors = ancestors & valid
     return valid_ancestors if valid_ancestors.any?
-    valid_ancestors.inject([]) do |acc,ancestor|
+    ancestors.inject([]) do |acc,ancestor|
       valid_a = ancestors_in ancestor, valid
       acc = acc + valid_a
-    end
+    end.uniq
   end
 
   def self.group_genes(list, valid = nil)
@@ -100,10 +109,12 @@ module GO
 
     compartment_leaves = {}
     list.zip(list.go_cc_terms).each do |gene,terms|
+      terms = [] if terms.nil?
+      valid_terms = terms & valid
       valid_terms = terms.collect{|term| 
         (valid.include?(term) ? term : ancestors_in(term, valid))
       }.flatten
-      valid_terms - GOTerm.setup(valid_terms).flat_ancestry.flatten
+      #valid_terms - GOTerm.setup(valid_terms).flat_ancestry.flatten
       valid_terms.each do |term|
         compartment_leaves[term] ||= []
         compartment_leaves[term].push(gene)
@@ -112,7 +123,6 @@ module GO
 
     groups = {}
     while compartment_leaves.length > 1
-
       # Group common
       group = false
       new_compartment_leaves = {}
@@ -131,6 +141,7 @@ module GO
       if group == false
         new_compartment_leaves = {}
         final = compartment_leaves.keys
+        compartment_leaves
         compartment_leaves.each do |c,l|
           final = final - GOTerm.setup(c.dup).flat_ancestry
         end
@@ -139,10 +150,9 @@ module GO
           if final.include? c
             valid_an = ancestors_in c, valid
             valid_an.each do |ancestor|
-              ancestor = valid.first
-              next if ancestor.nil?
               new_compartment_leaves[ancestor] ||= []
-              new_compartment_leaves[ancestor].concat(l)
+              new_compartment_leaves[ancestor].push(c)
+              groups[ancestor].push(c) if groups[ancestor]
             end
           else
             new_compartment_leaves[c] = l
@@ -153,7 +163,7 @@ module GO
     end
     ng = {}
     groups.keys.reverse.each do |k|
-      ng[k] = {items: groups[k], id: k, name: id2name(k)}
+      ng[k] = {items: groups[k].uniq, id: k, name: id2name(k)}
     end
     ng
   end
