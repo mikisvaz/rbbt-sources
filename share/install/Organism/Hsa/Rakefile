@@ -22,8 +22,8 @@ $biomart_protein_identifiers = [
   [ 'Protein ID', "protein_id"  ],
   [ 'RefSeq Protein ID', "refseq_peptide"  ],
   [ 'Unigene ID', "unigene"  ],
-  [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
-  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
+  [ 'UniProt/SwissProt ID', "uniprot_swissprot"],
+  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"],
 ]
 
 $biomart_probe_identifiers = [
