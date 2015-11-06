@@ -190,27 +190,27 @@ module BioMart
   def self.tsv(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
     attrs ||= []
 
-    if current_archive = Thread.current['archive'] 
-      missing = MISSING_IN_ARCHIVE['all'] || []
-      missing += MISSING_IN_ARCHIVE[current_archive] || []
-      MISSING_IN_ARCHIVE.each do |k,v|
-        if k =~ /^<(.*)/ 
-          t = $1.strip
-          missing+=v if Organism.compare_archives(current_archive, t) == -1
-        elsif k=~ /^>(.*)/ 
-          t = $1.strip
-          missing+=v if Organism.compare_archives(current_archive, t) == 1
-        end
+    current_archive = Thread.current['archive'] 
+    missing = MISSING_IN_ARCHIVE['all'] || []
+    missing += MISSING_IN_ARCHIVE[current_archive] || [] if current_archive
+
+    MISSING_IN_ARCHIVE.each do |k,v|
+      if k =~ /^<(.*)/ 
+        t = $1.strip
+        missing+=v if Organism.compare_archives(current_archive, t) == -1
+      elsif k=~ /^>(.*)/ 
+        t = $1.strip
+        missing+=v if Organism.compare_archives(current_archive, t) == 1
       end
-      attrs = attrs.uniq.reject{|attr| missing.include? attr[1]}
-      changes = {}
-      missing.select{|m| m.include? "~" }.each do |str|
-        orig,_sep, new = str.partition "~"
-        changes[orig] = new
-      end
-      attrs = attrs.collect{|n,k| [n, changes[k] || k] }
-      attrs
     end
+    attrs = attrs.uniq.reject{|attr| missing.include? attr[1]}
+    changes = {}
+    missing.select{|m| m.include? "~" }.each do |str|
+      orig,_sep, new = str.partition "~"
+      changes[orig] = new
+    end
+    attrs = attrs.collect{|n,k| [n, changes[k] || k] }
+    attrs
 
 
     codes = attrs.collect{|attr| attr[1]}

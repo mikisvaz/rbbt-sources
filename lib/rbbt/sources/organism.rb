@@ -9,9 +9,11 @@ module Organism
   ARCHIVE_MONTH_INDEX = {}
   %w(jan feb mar apr may jun jul aug sep oct nov dec).each_with_index{|d,i| ARCHIVE_MONTH_INDEX[d] = i }
   def self.compare_archives(a1, a2)
+    a1 = a1.partition("/").last if a1 and a1.include? "/"
+    a2 = a2.partition("/").last if a2 and a2.include? "/"
     return 0 if a1 == a2
-    return -1 if a1 =~ /\// and not a2 =~ /\//
-    return 1 if a2 =~ /\// and not a1 =~ /\//
+    return -1 if a1 and a2.nil?
+    return 1 if a1.nil? and a2
 
     m1,y1 = a1.match(/(...)(\d+)/).values_at 1, 2
     m2,y2 = a2.match(/(...)(\d+)/).values_at 1, 2
