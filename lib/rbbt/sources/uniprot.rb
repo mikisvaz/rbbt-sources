@@ -72,7 +72,7 @@ module UniProt
   def self.get_uniprot_sequence(uniprotids)
     _array = Array === uniprotids
 
-    uniprotids = [uniprotids] unless Array === uniprotids
+    uniprotids = [uniprotids] unless _array
     uniprotids = uniprotids.compact.collect{|id| id}
 
     result_files = FileCache.cache_online_elements(uniprotids, 'uniprot-sequence-{ID}') do |ids|

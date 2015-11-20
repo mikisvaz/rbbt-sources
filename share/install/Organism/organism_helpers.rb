@@ -48,6 +48,10 @@ $biomart_transcript_biotype = [
   ["Ensembl Transcript Biotype", 'transcript_biotype'],
 ]
 
+$biomart_transcript_name = [
+  ["Ensembl Transcript Name", 'external_transcript_id'],
+]
+
 
 $biomart_protein_sequence = [
   ['Protein Sequence','peptide'],
@@ -442,6 +446,12 @@ file 'transcript_biotype' do |t|
   Misc.sensiblewrite(t.name, biotype.to_s)
 end
 
+file 'transcript_name' do |t|
+  biotype = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_name, [], nil, :type => :single, :namespace => Thread.current['namespace'])
+
+  Misc.sensiblewrite(t.name, biotype.to_s)
+end
+
 file 'gene_pfam' do |t|
   pfam = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_pfam, [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
@@ -699,4 +709,47 @@ file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr",
   end
 
   Misc.sensiblewrite(t.name, protein_sequence.to_s)
+end
+
+file 'ensembl2uniprot' => ["protein_sequence", "protein_identifiers"] do |t|
+  ensp2unis  = TSV.open(File.expand_path('./protein_identifiers'), :key_field => "Ensembl Protein ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :merge => true, :unnamed => true)
+  dumper = TSV::Dumper.new :key_field => "Ensembl Protein ID", :fields => ["UniProt/SwissProt Accession"], :namespace => Thread.current['namespace'], :type => :single
+  dumper.init
+  require 'rbbt/sources/uniprot'
+  TSV.traverse File.expand_path('./protein_sequence'), :into => dumper, :cpus => 20, :bar => true do |ensp,ensp_seq|
+    ensp = ensp.first if Array === ensp
+    unis = ensp2unis[ensp]
+    next if unis.nil? or unis.empty?
+    uni_seqs = UniProt.get_uniprot_sequence(unis)
+    best_uni = unis.zip(uni_seqs).sort_by do |uni,uni_seq|
+      (ensp_seq.length - uni_seq.length).abs
+    end.first.first
+    [ensp, best_uni]
+  end
+  Misc.sensiblewrite(t.name, dumper.stream)
+end
+
+file 'uniprot2ensembl' => ["protein_sequence", "protein_identifiers"] do |t|
+  uni2ensps  = TSV.open(File.expand_path('./protein_identifiers'), :fields => ["Ensembl Protein ID"], :key_field => "UniProt/SwissProt Accession", :type => :flat, :merge => true, :unnamed => true)
+  ensp2seq  = TSV.open(File.expand_path('./protein_sequence'), :unnamed => true)
+  dumper = TSV::Dumper.new :fields => ["Ensembl Protein ID"], :key_field => "UniProt/SwissProt Accession", :namespace => Thread.current['namespace'], :type => :single
+  dumper.init
+  require 'rbbt/sources/uniprot'
+  all_uni  = TSV.open(File.expand_path('./protein_identifiers'), :key_field => "UniProt/SwissProt Accession", :fields => [], :type => :double, :merge => true, :unnamed => true).keys.compact.reject{|u| u.empty?}
+  TSV.traverse all_uni, :into => dumper, :cpus => 1, :bar => true do |uni|
+    uni = uni.first if Array === uni
+    uni_seq = UniProt.get_uniprot_sequence(uni)
+    ensps = uni2ensps[uni]
+    next if ensps.nil? or ensps.empty?
+    best_ensp = ensps.sort_by do |ensp|
+      ensp_seq = ensp2seq[ensp]
+      if ensp_seq
+        (ensp_seq.length - uni_seq.length).abs
+      else
+        uni_seq.length
+      end
+    end.first
+    [uni, best_ensp]
+  end
+  Misc.sensiblewrite(t.name, dumper.stream)
 end
