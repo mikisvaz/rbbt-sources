@@ -1,4 +1,4 @@
-__all:
+"<jun2009":
     - refseq_mrna
 ">jun2015":
     - uniprot_swissprot
