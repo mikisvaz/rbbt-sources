@@ -48,6 +48,10 @@ $biomart_probe_identifiers = [
   [ 'Codelink ID', 'codelink' ],
   [ 'Illumina HumanWG 6 v2', 'illumina_humanwg_6_v2' ],
   [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
+  [ 'RefSeq mRNA' , "refseq_mrna"] , 
+  [ 'RefSeq ncRNA' , "refseq_ncrna"] , 
+  [ 'RefSeq mRNA predicted' , "refseq_mrna_predicted"] , 
+  [ 'RefSeq ncRNA predicted' , "refseq_ncrna_predicted"] , 
 ]
 
 $biomart_identifiers = [ 
@@ -56,13 +60,16 @@ $biomart_identifiers = [
   [ 'Associated Gene Name', "external_gene_name"  ],
   [ 'CCDS ID', "ccds"  ],
   [ 'Protein ID', "protein_id"  ],
+  [ 'RefSeq mRNA' , "refseq_mrna"] , 
+  [ 'RefSeq ncRNA' , "refseq_ncrna"] , 
+  [ 'RefSeq mRNA predicted' , "refseq_mrna_predicted"] , 
+  [ 'RefSeq ncRNA predicted' , "refseq_ncrna_predicted"] , 
   [ 'RefSeq Protein ID', "refseq_peptide"  ],
   [ 'Unigene ID', "unigene"  ],
   [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
   [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
   [ 'HGNC ID', "hgnc_id", 'HGNC'],
   #[ 'EMBL (Genbank) ID' , "embl"] , 
-  #[ 'RefSeq mRNA' , "refseq_mrna"] , 
 
   # Probes
   [ 'AFFY HC G110', 'affy_hc_g110' ],

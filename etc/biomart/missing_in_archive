@@ -1,4 +1,4 @@
-all:
+__all:
     - refseq_mrna
 ">jun2015":
     - uniprot_swissprot

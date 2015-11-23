@@ -127,12 +127,27 @@ file 'identifiers' do |t|
     end
   end
 
+  refseq_fields = identifiers.fields.select{|f| f =~ /RefSeq/}
+
+  if refseq_fields.any?
+    refseq_pos = refseq_fields.collect{|refseq_field| identifiers.identify_field refseq_field }
+    identifiers = identifiers.add_field "RefSeq ID" do |key,values|
+      refseq_ids = values.values_at *refseq_pos
+      refseq_ids.flatten.compact.reject{|v| v.empty?}
+    end
+
+    ordered_fields = identifiers.fields - ["RefSeq ID"]
+    pos = ordered_fields.index ordered_fields.select{|f| f =~ /RefSeq/}.first
+    ordered_fields[pos..pos-1] = "RefSeq ID"
+
+    identifiers = identifiers.reorder(:key, ordered_fields)
+  end
+
   entrez_synonyms = Rbbt.share.databases.entrez.gene_info.find.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key_field => 1, :fields => [4]
   entrez_synonyms.key_field = "Entrez Gene ID"
   entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
   identifiers.attach entrez_synonyms
-  
 
   identifiers.with_unnamed do
     identifiers.each do |key, values|
@@ -142,6 +157,7 @@ file 'identifiers' do |t|
       end
     end
   end
+
 
   Misc.sensiblewrite(t.name, identifiers.to_s)
 end
