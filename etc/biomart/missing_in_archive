@@ -1,5 +1,8 @@
 "<jun2009":
     - refseq_mrna
+    - refseq_ncrna
+    - refseq_mrna_predicted
+    - refseq_ncrna_predicted 
 ">jun2015":
     - uniprot_swissprot
     - uniprot_swissprot_accession~uniprot_swissprot
