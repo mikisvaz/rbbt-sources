@@ -48,4 +48,5 @@ $biomart_go_2009= [
 ]
 
 $namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
+Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
 load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
