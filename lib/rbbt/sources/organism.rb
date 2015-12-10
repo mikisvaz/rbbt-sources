@@ -171,7 +171,7 @@ module Organism
   end
 
   def self.guess_id(org, values)
-    field_matches = TSV.field_match_counts(Organism.identifiers(org).find, values)
+    field_matches = TSV.field_match_counts(Organism.identifiers(org).produce, values)
     field_matches.sort_by{|field, count| count.to_i}.last
   end
 
@@ -184,7 +184,7 @@ module Organism
   end
 
   def self.organism(name)
-    organisms.select{|organism|
+    installable_organisms.select{|organism|
       organism == name or Organism.scientific_name(organism) =~ /#{ name }/i
     }.first
   end
