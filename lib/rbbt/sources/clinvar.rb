@@ -74,5 +74,3 @@ module ClinVar
   end
 end
 
-iif ClinVar.mi_summary.produce(true).find if __FILE__ == $0
-
