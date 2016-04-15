@@ -1,8 +1,6 @@
 rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
  Rakefile
  Problems
- bin=bin {
- }
  etc=etc filter="*"{
   organisms
   allowed_biomart_archives
