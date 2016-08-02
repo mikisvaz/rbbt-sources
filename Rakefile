@@ -15,7 +15,7 @@ begin
     gem.add_dependency('rbbt-util', ">= 4.0.0")
     gem.add_dependency('rbbt-text')
     gem.add_dependency('mechanize')
-    gem.add_dependency('libxml-ruby')
+    gem.add_dependency('ox')
     gem.add_dependency('bio')
   end
   Jeweler::GemcutterTasks.new  

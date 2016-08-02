@@ -1,5 +1,5 @@
 require 'rbbt-util'
-require 'libxml'
+require 'ox'
 require 'rbbt/sources/gscholar'
 require 'rbbt/util/filecache'
 
@@ -33,7 +33,7 @@ module PubMed
       [:year     , "Journal/JournalIssue/PubDate/Year"],
       [:month    , "Journal/JournalIssue/PubDate/Month"],
       [:pages    , "Pagination/MedlinePgn"],
-      [:author    , "AuthorList/Author"],
+      [:author   , "AuthorList/Author"],
       [:abstract , "Abstract/AbstractText"],
     ]
 
@@ -52,33 +52,34 @@ module PubMed
       end
       [lastname.gsub(/\s/,'_'), year || "NOYEAR", abrev] * ""
     end
-    def self.parse_xml(xml)
-      parser  = LibXML::XML::Parser.string(xml)
-      pubmed  = parser.parse.find("/PubmedArticle").first
-      medline = pubmed.find("MedlineCitation").first
-      article = medline.find("Article").first
 
+    def self.parse_xml(xml)
+      parser  = Ox.parse(xml)
+      pubmed = parser
+      medline = pubmed.locate("MedlineCitation").first
+      article = medline.locate("Article").first
       info = {}
 
-      info[:pmid] = medline.find("PMID").first.content
+      info[:pmid] = medline.locate("PMID").first.text
 
       XML_KEYS.each do |p|
         name, key = p
-        node = article.find(key).first
+        node = article.locate(key).first
 
         next if node.nil?
 
-        info[name] = node.content
+        info[name] = node.text
       end
 
       bibentry = nil
-      info[:author] = article.find("AuthorList/Author").collect do |author|
+      info[:author] = article.locate("AuthorList/Author").collect do |author|
         begin
-          lastname = author.find("LastName").first.content
-          if author.find("ForeName").first.nil?
+          lastname = author.locate("LastName").first.text
+
+          if author.locate("ForeName").first.nil?
             forename = nil
           else
-            forename = author.find("ForeName").first.content.split(/\s/).collect{|word| if word.length == 1; then word + '.'; else word; end} * " "
+            forename = author.locate("ForeName").first.text.split(/\s/).collect{|word| if word.length == 1; then word + '.'; else word; end} * " "
           end
           bibentry ||= make_bibentry lastname, info[:year], info[:title]
         rescue
@@ -88,10 +89,10 @@ module PubMed
 
       info[:bibentry] = bibentry.downcase if bibentry
 
-      info[:pmc_pdf] = pubmed.find("PubmedData/ArticleIdList/ArticleId").select{|id| id[:IdType] == "pmc"}.first
+      info[:pmc_pdf] = pubmed.locate("PubmedData/ArticleIdList/ArticleId").select{|id| id[:IdType] == "pmc"}.first
 
       if info[:pmc_pdf]
-        info[:pmc_pdf] = PMC_PDF_URL.sub(/PMCID/, info[:pmc_pdf].content)
+        info[:pmc_pdf] = PMC_PDF_URL.sub(/PMCID/, info[:pmc_pdf].text)
       end
 
       info
@@ -230,7 +231,7 @@ module PubMed
       Misc.divide(ids, (ids.length / 100) + 1).each do |list|
         begin
           Misc.try3times do
-            url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
+            url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
 
             postdata = "db=pubmed&retmode=xml&id=#{list* ","}"
             xml = TmpFile.with_file(postdata) do |postfile|
@@ -246,7 +247,7 @@ module PubMed
 
       values.each do |xml|
         pmid = xml.scan(/<PMID[^>]*?>(.*?)<\/PMID>/).flatten.first
-        
+
         result[pmid] = xml
       end
 
