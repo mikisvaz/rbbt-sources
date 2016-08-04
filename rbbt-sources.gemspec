@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.require_paths = ["lib"]
   s.authors = ["Miguel Vazquez"]
-  s.date = "2015-12-17"
+  s.date = "2016-08-04"
   s.description = "Data sources like PubMed, Entrez Gene, or Gene Ontology"
   s.email = "miguel.vazquez@fdi.ucm.es"
   s.files = [
@@ -73,7 +73,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/mikisvaz/rbbt-sources"
   s.rubygems_version = "2.4.6"
   s.summary = "Data sources for the Ruby Bioinformatics Toolkit (rbbt)"
-  s.test_files = ["test/rbbt/sources/test_pubmed.rb", "test/rbbt/sources/test_pharmagkb.rb", "test/rbbt/sources/test_biomart.rb", "test/rbbt/sources/test_gscholar.rb", "test/rbbt/sources/test_kegg.rb", "test/rbbt/sources/test_pina.rb", "test/rbbt/sources/test_entrez.rb", "test/rbbt/sources/test_matador.rb", "test/rbbt/sources/test_HPRD.rb", "test/rbbt/sources/test_synapse.rb", "test/rbbt/sources/test_go.rb", "test/rbbt/sources/test_stitch.rb", "test/rbbt/sources/test_organism.rb", "test/rbbt/sources/test_string.rb", "test/rbbt/sources/test_tfacts.rb", "test/test_helper.rb"]
+  s.test_files = ["test/test_helper.rb", "test/rbbt/sources/test_gscholar.rb", "test/rbbt/sources/test_pina.rb", "test/rbbt/sources/test_synapse.rb", "test/rbbt/sources/test_string.rb", "test/rbbt/sources/test_pubmed.rb", "test/rbbt/sources/test_kegg.rb", "test/rbbt/sources/test_biomart.rb", "test/rbbt/sources/test_pharmagkb.rb", "test/rbbt/sources/test_stitch.rb", "test/rbbt/sources/test_matador.rb", "test/rbbt/sources/test_HPRD.rb", "test/rbbt/sources/test_tfacts.rb", "test/rbbt/sources/test_entrez.rb", "test/rbbt/sources/test_go.rb", "test/rbbt/sources/test_organism.rb"]
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
@@ -82,20 +82,20 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<rbbt-util>, [">= 4.0.0"])
       s.add_runtime_dependency(%q<rbbt-text>, [">= 0"])
       s.add_runtime_dependency(%q<mechanize>, [">= 0"])
-      s.add_runtime_dependency(%q<libxml-ruby>, [">= 0"])
+      s.add_runtime_dependency(%q<ox>, [">= 0"])
       s.add_runtime_dependency(%q<bio>, [">= 0"])
     else
       s.add_dependency(%q<rbbt-util>, [">= 4.0.0"])
       s.add_dependency(%q<rbbt-text>, [">= 0"])
       s.add_dependency(%q<mechanize>, [">= 0"])
-      s.add_dependency(%q<libxml-ruby>, [">= 0"])
+      s.add_dependency(%q<ox>, [">= 0"])
       s.add_dependency(%q<bio>, [">= 0"])
     end
   else
     s.add_dependency(%q<rbbt-util>, [">= 4.0.0"])
     s.add_dependency(%q<rbbt-text>, [">= 0"])
     s.add_dependency(%q<mechanize>, [">= 0"])
-    s.add_dependency(%q<libxml-ruby>, [">= 0"])
+    s.add_dependency(%q<ox>, [">= 0"])
     s.add_dependency(%q<bio>, [">= 0"])
   end
 end
