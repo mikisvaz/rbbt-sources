@@ -150,7 +150,7 @@ module UniProt
       when value.match(/(\d+) (\d+) (.*)/)
         start, eend, description = $1, $2, $3
         description.gsub(/^FT\s+/m, '')
-      when value.match(/(\d+) (\d+)/)
+      when value.match(/^\s+(\d+) (\d+)/)
         start, eend = $1, $2
         description = nil
       else
