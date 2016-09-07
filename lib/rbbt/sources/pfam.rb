@@ -10,7 +10,7 @@ InterPro.claim InterPro.pfam_names, :proc do
   pfam_domains = Pfam.domains.read.split("\n").collect{|l| l.split("\t").first}.compact.flatten
   tsv = nil
   TmpFile.with_file(pfam_domains * "\n") do |tmpfile|
-    tsv = TSV.open(CMD.cmd("cut -f 4,3 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro.source.protein2ipr.open, :pipe => true), :key_field => 1, :fields => [0], :type => :single)
+    tsv = TSV.open(CMD.cmd("cut -f 4,3 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro[".source"].protein2ipr.open, :pipe => true), :key_field => 1, :fields => [0], :type => :single)
   end
   tsv.key_field = "InterPro ID"
   tsv.fields = ["Domain Name"]
@@ -21,7 +21,7 @@ InterPro.claim InterPro.pfam_equivalences, :proc do
   pfam_domains = Pfam.domains.read.split("\n").collect{|l| l.split("\t").first}.compact.flatten
   tsv = nil
   TmpFile.with_file(pfam_domains * "\n") do |tmpfile|
-    tsv = TSV.open(CMD.cmd("cut -f 2,4 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro.source.protein2ipr.open, :pipe => true), :key_field => 0, :fields => [1], :type => :single)
+    tsv = TSV.open(CMD.cmd("cut -f 2,4 | sort -u |grep -w -f #{ tmpfile }", :in => InterPro[".source"].protein2ipr.open, :pipe => true), :key_field => 0, :fields => [1], :type => :single)
   end
   tsv.key_field = "InterPro ID"
   tsv.fields = ["Pfam Domain"]
@@ -34,7 +34,7 @@ module Pfam
   self.subdir = "share/databases/Pfam"
 
   Pfam.claim Pfam.domains, :proc  do
-    url = "ftp://ftp.sanger.ac.uk/pub/databases/Pfam/current_release/Pfam-A.clans.tsv.gz"
+    url = "ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.clans.tsv.gz"
     tsv = TSV.open(Open.open(url), :key_field => "Pfam Domain ID", :fields => ["Pfam Clan ID", "Code Name", "Name", "Description"])
     tsv.to_s
   end
