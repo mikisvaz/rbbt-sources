@@ -1,5 +1,6 @@
 require 'rbbt-util'
 require 'rbbt/resource'
+require 'rbbt/sources/organism'
 
 module CORUM
   extend Resource
@@ -10,17 +11,19 @@ module CORUM
   end
 
   CORUM.claim CORUM.complex_names, :proc do 
-    url = "http://mips.helmholtz-muenchen.de/genre/proj/corum/allComplexes.csv"
-    tsv = TSV.open(url, :header_hash => "", :sep => ';', :sep2 => ',', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
+    url = "http://mips.helmholtz-muenchen.de/corum/download/allComplexes.txt"
+    tsv = TSV.open(url, :header_hash => "", :sep2 => ';', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
     tsv.namespace = organism
     tsv.fields = tsv.fields.collect{|f| f.gsub('"','')}
     tsv.key_field = "CORUM Complex ID"
-    tsv.slice("Complex name").to_single
+    tsv = tsv.slice("ComplexName").to_single
+    tsv.fields = ["Complex name"]
+    tsv
   end
 
   CORUM.claim CORUM.complexes, :proc do 
-    url = "http://mips.helmholtz-muenchen.de/genre/proj/corum/allComplexes.csv"
-    tsv = TSV.open(url, :header_hash => "", :sep => ';', :sep2 => ',', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
+    url = "http://mips.helmholtz-muenchen.de/corum/download/allComplexes.txt"
+    tsv = TSV.open(url, :header_hash => "", :sep2 => ';', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
     tsv.namespace = organism
     tsv.fields = tsv.fields.collect{|f| f.gsub('"','')}.collect{|f|
       case f
