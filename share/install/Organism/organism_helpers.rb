@@ -414,6 +414,7 @@ file 'gene_go_bp' => 'gene_go' do |t|
   end
 
 
+  gene_go.filename = t.name
   Misc.sensiblewrite(t.name, gene_go.slice("GO ID").to_s)
 end
 
@@ -429,6 +430,7 @@ file 'gene_go_cc' => 'gene_go' do |t|
   end
 
 
+  gene_go.filename = t.name
   Misc.sensiblewrite(t.name, gene_go.slice("GO ID").to_s)
 end
 
@@ -444,6 +446,7 @@ file 'gene_go_mf' => 'gene_go' do |t|
   end
 
 
+  gene_go.filename = t.name
   Misc.sensiblewrite(t.name, gene_go.slice("GO ID").to_s)
 end
 

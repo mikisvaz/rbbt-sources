@@ -4,18 +4,19 @@ require 'rbbt/resource'
 
 module TFacts
   extend Resource
-  self.subdir = "share/databases/TF"
+  self.subdir = "share/databases/TFacts"
 
-  TFacts.claim TFacts.source["Catalogues.xls"], :url, "http://www.tfacts.org/TFactS-new/TFactS-v2/tfacts/data/Catalogues.xls"
+  TFacts.claim TFacts[".source"]["Catalogues.xls"], :url, "http://www.tfacts.org/TFactS-new/TFactS-v2/tfacts/data/Catalogues.xls"
 
   TFacts.claim TFacts.targets, :proc do
     require 'spreadsheet'
-    book = Spreadsheet.open TFacts.source["Catalogues.xls"].produce.find
+    book = Spreadsheet.open TFacts[".source"]["Catalogues.xls"].produce.find
     sheet = book.worksheet 0
 
-    tsv = TSV.setup({}, :key_field => "Associated Gene Name", :fields => ["Transcription Factor Associated Gene Name"], :namespace => "Hsa", :type => :flat)
+    tsv = TSV.setup({}, :key_field => "Target Gene (Associated Gene Name)", :fields => ["Transcription Factor (Associated Gene Name)"], :namespace => "Hsa", :type => :flat)
     sheet.each do |row|
       target, tf = row.values_at 0, 1
+      next if tf =~ /OFFICIAL_/
       tsv[target] ||= []
       tsv[target] << tf
     end
@@ -25,12 +26,13 @@ module TFacts
 
   TFacts.claim TFacts.targets_signed, :proc do
     require 'spreadsheet'
-    book = Spreadsheet.open TFacts.source["Catalogues.xls"].produce.find
+    book = Spreadsheet.open TFacts[".source"]["Catalogues.xls"].produce.find
     sheet = book.worksheet 0
 
-    tsv = TSV.setup({}, :key_field => "Associated Gene Name", :fields => ["Transcription Factor Associated Gene Name", "Sign"], :namespace => "Hsa", :type => :double)
+    tsv = TSV.setup({}, :key_field => "Target Gene (Associated Gene Name)", :fields => ["Transcription Factor (Associated Gene Name)", "Sign"], :namespace => "Hsa", :type => :double)
     sheet.each do |row|
       target, tf, sign = row.values_at 0, 1, 2
+      next if tf =~ /OFFICIAL_/
       tsv[target] ||= [[],[]]
       tsv[target][0] << tf
       tsv[target][1] << sign
@@ -40,7 +42,7 @@ module TFacts
   end
 
   TFacts.claim TFacts.regulators, :proc do
-    TFacts.targets.tsv.reorder("Transcription Factor Associated Gene Name").to_s
+    TFacts.targets.tsv.reorder("Transcription Factor (Associated Gene Name)").to_s
   end
 
 end
