@@ -27,15 +27,17 @@ module TFacts
   TFacts.claim TFacts.targets_signed, :proc do
     require 'spreadsheet'
     book = Spreadsheet.open TFacts[".source"]["Catalogues.xls"].produce.find
-    sheet = book.worksheet 0
+    sheet = book.worksheet 1
 
-    tsv = TSV.setup({}, :key_field => "Target Gene (Associated Gene Name)", :fields => ["Transcription Factor (Associated Gene Name)", "Sign"], :namespace => "Hsa", :type => :double)
+    tsv = TSV.setup({}, :key_field => "Target Gene (Associated Gene Name)", :fields => ["Transcription Factor (Associated Gene Name)", "Sign", "PMID"], :namespace => "Hsa", :type => :double)
     sheet.each do |row|
-      target, tf, sign = row.values_at 0, 1, 2
+      target, tf, sign, pmid = row.values_at(0, 1, 2, 5).collect{|e| e.to_s.gsub("\n", " ") }
+      pmid = pmid.split(";").select{|p| p =~ /^\d{5,}$/ }
       next if tf =~ /OFFICIAL_/
-      tsv[target] ||= [[],[]]
+      tsv[target] ||= [[],[],[]]
       tsv[target][0] << tf
       tsv[target][1] << sign
+      tsv[target][2] << pmid * ";"
     end
 
     tsv.to_s
