@@ -74,7 +74,7 @@ Gem::Specification.new do |s|
   s.homepage = "http://github.com/mikisvaz/rbbt-sources".freeze
   s.rubygems_version = "2.6.6".freeze
   s.summary = "Data sources for the Ruby Bioinformatics Toolkit (rbbt)".freeze
-  s.test_files = ["test/test_helper.rb".freeze, "test/rbbt/sources/test_pubmed.rb".freeze, "test/rbbt/sources/test_string.rb".freeze, "test/rbbt/sources/test_gscholar.rb".freeze, "test/rbbt/sources/test_biomart.rb".freeze, "test/rbbt/sources/test_go.rb".freeze, "test/rbbt/sources/test_pina.rb".freeze, "test/rbbt/sources/test_entrez.rb".freeze, "test/rbbt/sources/test_pharmagkb.rb".freeze, "test/rbbt/sources/test_organism.rb".freeze, "test/rbbt/sources/test_matador.rb".freeze, "test/rbbt/sources/test_tfacts.rb".freeze, "test/rbbt/sources/test_kegg.rb".freeze, "test/rbbt/sources/test_synapse.rb".freeze, "test/rbbt/sources/test_stitch.rb".freeze, "test/rbbt/sources/test_HPRD.rb".freeze]
+  s.test_files = ["test/rbbt/sources/test_pubmed.rb".freeze, "test/rbbt/sources/test_pharmagkb.rb".freeze, "test/rbbt/sources/test_biomart.rb".freeze, "test/rbbt/sources/test_gscholar.rb".freeze, "test/rbbt/sources/test_kegg.rb".freeze, "test/rbbt/sources/test_pina.rb".freeze, "test/rbbt/sources/test_entrez.rb".freeze, "test/rbbt/sources/test_matador.rb".freeze, "test/rbbt/sources/test_HPRD.rb".freeze, "test/rbbt/sources/test_synapse.rb".freeze, "test/rbbt/sources/test_go.rb".freeze, "test/rbbt/sources/test_stitch.rb".freeze, "test/rbbt/sources/test_organism.rb".freeze, "test/rbbt/sources/test_string.rb".freeze, "test/rbbt/sources/test_tfacts.rb".freeze, "test/test_helper.rb".freeze]
 
   if s.respond_to? :specification_version then
     s.specification_version = 4
