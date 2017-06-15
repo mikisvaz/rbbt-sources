@@ -47,6 +47,81 @@ module TFacts
     TFacts.targets.tsv.reorder("Transcription Factor (Associated Gene Name)").to_s
   end
 
+  TFacts.claim TFacts.tf_tg, :proc do
+    require 'spreadsheet'
+    book = Spreadsheet.open TFacts[".source"]["Catalogues.xls"].produce.find
+
+    tsv = TSV.setup({}, :key_field => "Transcription Factor (Associated Gene Name)", :fields => ["Target Gene (Associated Gene Name)", "Sign", "Species", "Source", "PMID"], :namespace => "Hsa", :type => :double)
+
+    sheet = book.worksheet 1
+    sheet.each do |row|
+      target, tf, sign, source, species, pmids = row.values_at(0, 1, 2, 3, 4, 5).collect{|v| v.to_s.gsub(/\s/, ' ') }
+      pmids = "" if pmids.nil? or pmids == "0"
+      next if tf =~ /OFFICIAL_/
+
+      species = species.split(";").compact.reject{|s| s.empty?}.collect{|s| 
+        case s
+        when /Homo sap/i
+          "Homo sapiens"
+        when /muscul/i
+          "Mus musculus"
+        else
+          s
+        end
+      }*";"
+      source = source.split(";").compact.reject{|s| s.empty?}*";"
+      pmids = pmids.split(";").compact.reject{|s| s.empty?}.collect{|s| s.sub(/\s*pmid:\s*/,'').strip}*";"
+
+      values = [target, sign, species, source, pmids]
+      values = values.collect{|v| [v]}
+      tsv.zip_new(tf, values)
+    end
+
+    sheet = book.worksheet 0
+    sheet.each do |row|
+      target, tf, source, species, pmids = row.values_at(0, 1, 2, 3, 4, 5).collect{|v| v.to_s.gsub(/\s/, ' ') }
+      next if tf =~ /OFFICIAL_/
+
+      species = species.split(";").compact.reject{|s| s.empty?}.collect{|s| 
+        case s
+        when /Homo sap/i
+          "Homo sapiens"
+        when /muscul/i
+          "Mus musculus"
+        else
+          s
+        end
+      }*";"
+      source = source.split(";").compact.reject{|s| s.empty?}*";"
+      pmids = "" if pmids.nil? or pmids == "0"
+      pmids = pmids.split(";").compact.reject{|s| s.empty?}.collect{|s| s.sub(/\s*pmid:\s*/,'').strip}*";"
+
+      current = tsv[tf]
+      if current and current[0].include? target
+        new = []
+        Misc.zip_fields(current).each do |ntarget,nsign,nspecies,nsource,npmids|
+          if target == ntarget
+            if species != nspecies
+              nspecies = (nspecies.split(";") + species.split(";")).uniq * ";"
+            end
+            npmids = (npmids.split(";") + pmids.split(";")).uniq * ";"
+          end
+          new << [ntarget, nsign, nspecies, nsource, npmids]
+        end
+        values = Misc.zip_fields(new)
+        tsv[tf] = values
+      else
+        pmids = "" if pmids.nil?
+
+        values = [target, "", species, source, pmids]
+        tsv.zip_new(tf, values)
+      end
+
+    end
+
+    tsv.to_s
+  end
+
 end
 
 if defined? Entity and defined? Gene and Entity === Gene

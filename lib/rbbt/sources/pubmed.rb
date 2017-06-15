@@ -227,14 +227,15 @@ module PubMed
     result_files = FileCache.cache_online_elements(pmids, 'pubmed-{ID}.xml') do |ids|
       result = {}
       values = []
-      Misc.divide(ids, (ids.length / 100) + 1).each do |list|
+      Misc.divide(ids, (ids.length / 20) + 1).each do |list|
         begin
           Misc.try3times do
             url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
 
             postdata = "db=pubmed&retmode=xml&id=#{list* ","}"
             xml = TmpFile.with_file(postdata) do |postfile|
-              Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--post-file=" => postfile)
+              #Open.read(url, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--post-file=" => postfile)
+              Open.read(url+'?'+postdata, :quiet => true, :nocache => true, :nice => @@pubmed_lag, :nice_key => "PubMed", "--__post-file=" => postfile)
             end
 
             values += xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
