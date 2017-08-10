@@ -672,6 +672,8 @@ file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
     transcript = transcript2ensembl[transcript_id]
     protein    = transcript_protein[transcript]
 
+    next if transcript =~ /^LRG/
+
     start_exon = exon2ensembl[start_exon]
     eend_exon = exon2ensembl[eend_exon]
 

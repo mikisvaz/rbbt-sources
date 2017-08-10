@@ -37,7 +37,14 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    tfacts.rb
    go.rb
    corum.rb
+
    MCLP.rb
+
+   phospho_ELM.rb
+   phospho_site_plus.rb
+
+   signor.rb
+   CASCADE.rb
 
    jochem.rb
    wgEncodeBroadHmm.rb
@@ -58,6 +65,8 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    MSigDB.rb
 
    clinvar.rb
+
+   oncodrive_role.rb
   }
  }
  share=share{

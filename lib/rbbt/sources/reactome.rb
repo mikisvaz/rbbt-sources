@@ -1,27 +1,53 @@
-require 'rbbt'
+require 'rbbt-util'
 require 'rbbt/resource'
 
 module Reactome
   extend Resource
   self.subdir = "share/databases/Reactome"
 
+  def self.organism(org="Hsa")
+    require 'rbbt/sources/organism'
+    Organism.default_code(org)
+  end
+
   Reactome.claim Reactome.protein_pathways, :proc  do
     #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
-    url = "http://www.reactome.org/download/current/UniProt2Reactome.txt"
-    tsv = TSV.open(Open.open(url), :key_field => 0, :fields => [1], :merge => true, :type => :double)
-    tsv.key_field = "UniProt/SwissProt Accession"
+    url = "http://reactome.org/download/current/Ensembl2Reactome.txt"
+    tsv = TSV.open(url, :key_field => 0, :fields => [1], :merge => true, :type => :flat, :tsv_grep => "Homo sapiens")
+    tsv.key_field = "Ensembl Gene ID"
     tsv.fields = ["Reactome Pathway ID"]
-    tsv.namespace = "Hsa"
+    tsv.namespace = Reactome.organism
     tsv.to_s
   end
+
+  Reactome.claim Reactome.protein_pathways_all, :proc  do
+    #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+    url = "http://reactome.org/download/current/Ensembl2Reactome_All_Levels.txt"
+    tsv = TSV.open(url, :key_field => 0, :fields => [1], :merge => true, :type => :flat, :tsv_grep => "Homo sapiens")
+    tsv.key_field = "Ensembl Gene ID"
+    tsv.fields = ["Reactome Pathway ID"]
+    tsv.namespace = Reactome.organism
+    tsv.to_s
+  end
+
 
   Reactome.claim Reactome.pathway_names, :proc  do
     #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
     url = "http://www.reactome.org/download/current/UniProt2Reactome.txt"
-    tsv = TSV.open(Open.open(url), :key_field => 1, :fields => [2], :type => :single)
+    tsv = TSV.open(Open.open(url), :key_field => 1, :fields => [3], :type => :single)
     tsv.key_field = "Reactome Pathway ID"
     tsv.fields = ["Pathway Name"]
-    tsv.namespace = "Hsa"
+    tsv.namespace = Reactome.organism
+    tsv.to_s
+  end
+
+  Reactome.claim Reactome.pathway_pathway, :proc  do
+    #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+    url = "http://reactome.org/download/current/ReactomePathwaysRelation.txt"
+    tsv = TSV.open(Open.open(url), :type => :flat, :merge => true)
+    tsv.key_field = "Reactome Pathway ID"
+    tsv.fields = ["Reactome Pathway ID"]
+    tsv.namespace = Reactome.organism
     tsv.to_s
   end
 
@@ -30,9 +56,38 @@ module Reactome
     tsv = TSV.open(CMD.cmd('cut -f 1,4,7,8,9|sed "s/UniProt://g;s/,/;/g"', :in => Open.open(url), :pipe => true), :type => :double, :merge => true)
     tsv.key_field = "UniProt/SwissProt Accession"
     tsv.fields = ["Interactor UniProt/SwissProt Accession", "Interaction type", "Reactions", "PMID"]
-    tsv.namespace = "Hsa"
+    tsv.namespace = Reactome.organism
     tsv.to_s
   end
+
+  #Reactome.claim Reactome.protein_pathways, :proc  do
+  #  #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+  #  url = "http://www.reactome.org/download/current/UniProt2Reactome.txt"
+  #  tsv = TSV.open(Open.open(url), :key_field => 0, :fields => [1], :merge => true, :type => :double)
+  #  tsv.key_field = "UniProt/SwissProt Accession"
+  #  tsv.fields = ["Reactome Pathway ID"]
+  #  tsv.namespace = Reactome.organism
+  #  tsv.to_s
+  #end
+
+  #Reactome.claim Reactome.pathway_names, :proc  do
+  #  #url = "http://www.reactome.org/download/current/uniprot_2_pathways.stid.txt"
+  #  url = "http://www.reactome.org/download/current/UniProt2Reactome.txt"
+  #  tsv = TSV.open(Open.open(url), :key_field => 1, :fields => [2], :type => :single)
+  #  tsv.key_field = "Reactome Pathway ID"
+  #  tsv.fields = ["Pathway Name"]
+  #  tsv.namespace = Reactome.organism
+  #  tsv.to_s
+  #end
+
+  #Reactome.claim Reactome.protein_protein, :proc  do
+  #  url = "http://www.reactome.org/download/current/homo_sapiens.interactions.txt.gz"
+  #  tsv = TSV.open(CMD.cmd('cut -f 1,4,7,8,9|sed "s/UniProt://g;s/,/;/g"', :in => Open.open(url), :pipe => true), :type => :double, :merge => true)
+  #  tsv.key_field = "UniProt/SwissProt Accession"
+  #  tsv.fields = ["Interactor UniProt/SwissProt Accession", "Interaction type", "Reactions", "PMID"]
+  #  tsv.namespace = Reactome.organism
+  #  tsv.to_s
+  #end
 
 end
 
@@ -82,3 +137,8 @@ if defined? Entity
     end
   end
 end
+
+Log.tsv Reactome.protein_pathways.produce.tsv if __FILE__ == $0
+Log.tsv Reactome.protein_pathways_all.produce.tsv if __FILE__ == $0
+Log.tsv Reactome.pathway_names.produce(true).tsv if __FILE__ == $0
+Log.tsv Reactome.pathway_pathway.produce.tsv if __FILE__ == $0
