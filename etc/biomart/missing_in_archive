@@ -1,10 +1,13 @@
+">dec2016":
+    - uniprot_swissprot_accession~uniprotswissprot
+    - uniprot_swissprot~uniprotswissprot
+    - codelink
 "<jun2009":
     - refseq_mrna
     - refseq_ncrna
     - refseq_mrna_predicted
     - refseq_ncrna_predicted 
 ">jun2015":
-    - uniprot_swissprot
     - uniprot_swissprot_accession~uniprot_swissprot
 <aug2014:
     - external_gene_name~external_gene_id

@@ -209,8 +209,12 @@ module BioMart
       orig,_sep, new = str.partition "~"
       changes[orig] = new
     end
-    attrs = attrs.collect{|n,k| [n, changes[k] || k] }
-    attrs
+    changed = true
+    while changed
+      new_attrs = attrs.collect{|n,k| [n, changes[k] || k] }
+      changed = new_attrs != attrs
+      attrs = new_attrs
+    end
 
 
     codes = attrs.collect{|attr| attr[1]}
