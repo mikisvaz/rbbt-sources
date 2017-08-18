@@ -14,7 +14,7 @@ module Entrez
     options = Misc.add_defaults options, :key_field => 1, :fields => [5], :persist => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
-    options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
+    options[:grep] = taxs.collect{|t| "^" + t.to_s}
     
     tsv = Rbbt.share.databases.entrez.gene_info.tsv :flat, options
     tsv.key_field = "Entrez Gene ID"
@@ -26,7 +26,7 @@ module Entrez
     options = Misc.add_defaults options, :key_field => 1, :fields => [2], :persist => true, :merge => true
 
     taxs = [taxs] unless Array === taxs
-    options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
+    options[:grep] = taxs.collect{|t| "^" + t.to_s}
     
     tsv = Rbbt.share.databases.entrez.gene_info.tsv :flat, options
     tsv.key_field = "Entrez Gene ID"
@@ -39,7 +39,7 @@ module Entrez
     options = {:key_field => 1, :fields => [2], :persist => true, :merge => true}
 
     taxs = [taxs] unless taxs.is_a?(Array)
-    options.merge! :grep => taxs.collect{|t| "^" + t.to_s}
+    options[:grep] = taxs.collect{|t| "^" + t.to_s}
 
     Rbbt.share.databases.entrez.gene2pubmed.tsv :flat, options
   end
