@@ -65,7 +65,7 @@ module GO
           res = i[type]
           res = [res] unless Array === res
           res.collect{|id| 
-            id.match(/(GO:\d+)/)[1] if id.match(/(GO:\d+)/)
+            id.match(/(GO:\d+)/)[1] if id =~ /(GO:\d+)/
           }.compact
         }
     else
@@ -74,7 +74,7 @@ module GO
       res = [res] unless Array === res
       res.
         collect{|id| 
-        id.match(/(GO:\d+)/)[1] if id.match(/(GO:\d+)/)
+        id.match(/(GO:\d+)/)[1] if id =~ /(GO:\d+)/
       }.compact
     end
   end

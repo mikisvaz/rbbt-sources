@@ -44,7 +44,7 @@ if defined? Entity
     self.format= "MSigDB Geneset ID"
 
     property :name => :single2array do
-      self.downcase.gsub("_",' ')
+      self.downcase.tr("_",' ')
     end
 
     property :genes => :single2array do

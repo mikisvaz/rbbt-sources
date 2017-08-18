@@ -136,8 +136,8 @@ module Organism
     Log.high "Attaching Translations for #{ org.inspect }, target #{target.inspect}, fields #{fields.inspect}"
     options = Misc.add_defaults options, :persist => true, :case_insensitive => false
 
-    options.merge! :key_field    => target unless target.nil?
-    options.merge! :fields => fields unless fields.nil?
+    options[:key_field] = target unless target.nil?
+    options[:fields] = fields unless fields.nil?
 
     index = identifiers(org).tsv options
 
@@ -150,8 +150,8 @@ module Organism
     double = Misc.process_options options, :double
 
 
-    options.merge! :target => target unless target.nil?
-    options.merge! :fields => fields unless fields.nil?
+    options[:target] = target unless target.nil?
+    options[:fields] = fields unless fields.nil?
 
     index = identifiers(org).index options
 
