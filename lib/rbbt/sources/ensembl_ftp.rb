@@ -24,7 +24,7 @@ module Ensembl
         ftp.passive = true
         ftp.login
         ftp.chdir(File.join('pub', 'current_mysql'))
-        file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last
+        file = ftp.list(name.downcase.tr(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last
         ftp.close
       else
         release = Ensembl.releases[build]
@@ -33,7 +33,7 @@ module Ensembl
         ftp.passive = true
         ftp.login
         ftp.chdir(File.join('pub', release, 'mysql'))
-        file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last
+        file = ftp.list(name.downcase.tr(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last
         ftp.close
       end
       [release, file]

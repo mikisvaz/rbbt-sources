@@ -79,7 +79,7 @@ module BioMart
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
-    url = Thread.current['archive_url'] ? Thread.current['archive_url'] + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
+    url = Thread.current['archive_url'] ? Thread.current['archive_url'] + query.tr("\n",' ') : BIOMART_URL + query.tr("\n",' ')
 
     begin
       response = Open.read(url, open_options.dup)

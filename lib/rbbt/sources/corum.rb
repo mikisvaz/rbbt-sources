@@ -12,9 +12,9 @@ module CORUM
 
   CORUM.claim CORUM.complex_names, :proc do 
     url = "http://mips.helmholtz-muenchen.de/corum/download/allComplexes.txt"
-    tsv = TSV.open(url, :header_hash => "", :sep2 => ';', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
+    tsv = TSV.open(url, :header_hash => "", :sep2 => ';', :fix => Proc.new{|l| "CORUM:" + l.delete('"')})
     tsv.namespace = organism
-    tsv.fields = tsv.fields.collect{|f| f.gsub('"','')}
+    tsv.fields = tsv.fields.collect{|f| f.delete('"')}
     tsv.key_field = "CORUM Complex ID"
     tsv = tsv.slice("ComplexName").to_single
     tsv.fields = ["Complex name"]
@@ -23,9 +23,9 @@ module CORUM
 
   CORUM.claim CORUM.complexes, :proc do 
     url = "http://mips.helmholtz-muenchen.de/corum/download/allComplexes.txt"
-    tsv = TSV.open(url, :header_hash => "", :sep2 => ';', :fix => Proc.new{|l| "CORUM:" + l.gsub('"','')})
+    tsv = TSV.open(url, :header_hash => "", :sep2 => ';', :fix => Proc.new{|l| "CORUM:" + l.delete('"')})
     tsv.namespace = organism
-    tsv.fields = tsv.fields.collect{|f| f.gsub('"','')}.collect{|f|
+    tsv.fields = tsv.fields.collect{|f| f.delete('"')}.collect{|f|
       case f
       when "subunits (UniProt IDs)"
         "UniProt/SwissProt Accession"

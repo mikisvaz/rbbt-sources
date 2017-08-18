@@ -31,7 +31,7 @@ module TFacts
 
     tsv = TSV.setup({}, :key_field => "Target Gene (Associated Gene Name)", :fields => ["Transcription Factor (Associated Gene Name)", "Sign", "PMID"], :namespace => "Hsa", :type => :double)
     sheet.each do |row|
-      target, tf, sign, pmid = row.values_at(0, 1, 2, 5).collect{|e| e.to_s.gsub("\n", " ") }
+      target, tf, sign, pmid = row.values_at(0, 1, 2, 5).collect{|e| e.to_s.tr("\n", " ") }
       pmid = pmid.split(";").select{|p| p =~ /^\d{5,}$/ }
       next if tf =~ /OFFICIAL_/
       tsv[target] ||= [[],[],[]]
