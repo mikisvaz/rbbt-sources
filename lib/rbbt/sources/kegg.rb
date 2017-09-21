@@ -3,8 +3,7 @@ require 'rbbt/resource'
 
 module KEGG
   extend Resource
-  self.pkgdir = "phgx"
-  self.subdir = "share/kegg"
+  self.subdir = "share/databases/kegg"
 
 
   KEGG.claim KEGG.root, :rake, Rbbt.share.install.KEGG.Rakefile.find(:lib)
