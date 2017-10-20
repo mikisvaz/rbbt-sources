@@ -172,7 +172,15 @@ module Organism
 
   def self.guess_id(org, values)
     field_matches = TSV.field_match_counts(Organism.identifiers(org).produce, values)
-    field_matches.sort_by{|field, count| count.to_i}.last
+    best = nil
+    best_count = 0
+    field_matches.each do |field,count|
+      if count >  best_count
+        best = field
+        best_count = count
+      end
+    end
+    [best, best_count]
   end
 
   def self.organisms
