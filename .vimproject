@@ -1,6 +1,9 @@
 rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
  Rakefile
  Problems
+ doc=doc{
+  ToDo.txt
+ }
  etc=etc filter="*"{
   organisms
   allowed_biomart_archives
@@ -45,6 +48,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    phospho_site_plus.rb
 
    signor.rb
+   oreganno.rb
    CASCADE.rb
 
    jochem.rb

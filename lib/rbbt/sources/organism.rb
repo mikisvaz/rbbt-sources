@@ -79,7 +79,7 @@ module Organism
     elsif release_number <= 75
       'hg19'
     else
-      'hg20'
+      'hg38'
     end
   end
 
@@ -88,14 +88,7 @@ module Organism
     source_hg = hg_build(source)
     target_hg = hg_build(target)
 
-    case
-    when (source_hg == 'hg19' and target_hg == 'hg18')
-      map_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/liftOver/hg19ToHg18.over.chain.gz" 
-    when (source_hg == 'hg18' and target_hg == 'hg19')
-      map_url = "http://hgdownload.cse.ucsc.edu/goldenPath/hg18/liftOver/hg18ToHg19.over.chain.gz" 
-    else
-      return positions
-    end
+    map_url = "http://hgdownload.cse.ucsc.edu/goldenPath/#{source_hg}/liftOver/#{source_hg}To#{target_hg.sub('h', 'H')}.over.chain.gz" 
 
     positions_bed = positions.collect{|position| 
       chr, pos = position.split(":").values_at(0,1)

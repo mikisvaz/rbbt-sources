@@ -6,8 +6,9 @@ require 'rbbt/persist/tsv'
 # now all it does is provide a translation form id to the actual names.
 module GO
 
-  Rbbt.claim Rbbt.share.databases.GO.gene_ontology, :url, 'ftp://ftp.geneontology.org/pub/go/ontology/gene_ontology.obo'
-  Rbbt.claim Rbbt.share.databases.GO.gslim_generic, :url, 'http://www.geneontology.org/GO_slims/goslim_generic.obo'
+  #Rbbt.claim Rbbt.share.databases.GO.gslim_generic, :url, 'http://www.geneontology.org/GO_slims/goslim_generic.obo'
+  Rbbt.claim Rbbt.share.databases.GO.gene_ontology, :url, 'http://purl.obolibrary.org/obo/go.obo'
+  Rbbt.claim Rbbt.share.databases.GO.annotations, :url, 'http://geneontology.org/gene-associations/goa_human.gaf.gz'
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
   TSV_GENE_ONTOLOGY = File.join(Persist.cachedir, 'gene_ontology')
@@ -57,6 +58,21 @@ module GO
     end
   end
 
+  def self.descendants(id)
+    list = Set.new
+    new = Set.new
+    new << id
+    while new.any?
+      list += new
+      new = Set.new
+      info.each do |new_id,values|
+        next unless values['is_a']
+        new << new_id if values['is_a'].select{|e| list.include? e.split("!").first[/GO:\d+/] }.any? && ! list.include?(new_id)
+      end
+    end
+    list
+  end
+
   def self.id2ancestors_by_type(id, type='is_a')
     if id.kind_of? Array
       info.values_at(*id).
@@ -93,7 +109,7 @@ module GO
     end
   end
 
-  def self.ancestors_in(term, valid)
+  def self.ancestors_in(term, valid = false)
     ancestors = id2ancestors(term)
     return ancestors if FalseClass === valid
     valid_ancestors = ancestors & valid

@@ -34,8 +34,6 @@ class TestGo < Test::Unit::TestCase
   def test_ancestors_in
     term = GOTerm.setup("GO:0005730")
     valid = %w(GO:0005886 GO:0005634 GO:0005730 GO:0005829)
-    iii term.name
-    iii GO.ancestors_in(term, valid)
   end
 
   def test_groups
@@ -44,12 +42,13 @@ class TestGo < Test::Unit::TestCase
 
     valid = %w(GO:0005886 GO:0005634 GO:0005730 GO:0005829 )
     valid = %w(GO:0005634 GO:0005730)
-    iii GO.group_genes(list, valid)
+    assert_equal GO.group_genes(list, valid)["GO:0005730"][:name], "nucleolus"
+    assert_equal GO.group_genes(list, valid)["GO:0005730"][:items].sort, %w(FBXW7 SP140)
   end
 
-  def test_nucleolus
-    nuo = "GO:0005730"
-    nu = "GO:0005634"
+  def test_descendants
+    assert GO.descendants("GO:0006281").include? "GO:0000012"
+    assert GO.descendants("GO:0006281").include? "GO:1990396"
   end
 end
 
