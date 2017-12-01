@@ -1,0 +1,46 @@
+1) Error producing data for may2017: on first execution of the sequence bootstrap
+it claimed that:
+
+11/30/17-11:09:50.219[6] Error producing archived (may2017) version of protein_sequence: may2017/protein_sequence
+11/30/17-11:09:50.219[6] Error in rake: Don't know how to build task 'exon_phase' (see --tasks)
+11/30/17-11:09:50.219[6] RuntimeError: Don't know how to build task 'exon_phase' (see --tasks)
+11/30/17-11:09:50.421[6] BACKTRACE: /home/mvazque2/git/rbbt-util/lib/rbbt/resource/rake.rb:52:in 'rescue in block in run'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task_manager.rb:59:in '[]'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:62:in 'lookup_prerequisite'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:58:in 'block in prerequisite_tasks'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:58:in 'map'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:58:in 'prerequisite_tasks'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:215:in 'invoke_prerequisites'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:194:in 'block in invoke_with_call_chain'
+/home/mvazque2/.rvm/rubies/ruby-2.4.1/lib64/ruby/2.4.0/monitor.rb:214:in 'mon_synchronize'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:188:in 'invoke_with_call_chain'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:217:in 'block in invoke_prerequisites'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:215:in 'each'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:215:in 'invoke_prerequisites'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:194:in 'block in invoke_with_call_chain'
+/home/mvazque2/.rvm/rubies/ruby-2.4.1/lib64/ruby/2.4.0/monitor.rb:214:in 'mon_synchronize'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:188:in 'invoke_with_call_chain'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:181:in 'invoke'
+/home/mvazque2/git/rbbt-sources/share/install/Organism/organism_helpers.rb:558:in 'block (2 levels) in <top (required)>'
+/home/mvazque2/git/rbbt-util/lib/rbbt/util/misc/system.rb:83:in 'in_dir'
+/home/mvazque2/git/rbbt-sources/share/install/Organism/organism_helpers.rb:553:in 'block in <top (required)>'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:251:in 'block in execute'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:251:in 'each'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:251:in 'execute'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:195:in 'block in invoke_with_call_chain'
+/home/mvazque2/.rvm/rubies/ruby-2.4.1/lib64/ruby/2.4.0/monitor.rb:214:in 'mon_synchronize'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:188:in 'invoke_with_call_chain'
+/home/mvazque2/.rvm/gems/ruby-2.4.1/gems/rake-12.3.0/lib/rake/task.rb:181:in 'invoke'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource/rake.rb:45:in 'block (2 levels) in run'
+/home/mvazque2/git/rbbt-util/lib/rbbt/util/misc/system.rb:83:in 'in_dir'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource/rake.rb:44:in 'block in run'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource/rake.rb:33:in 'fork'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource/rake.rb:33:in 'run'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource/util.rb:109:in 'run_rake'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource.rb:178:in 'block in produce'
+/home/mvazque2/git/rbbt-util/lib/rbbt/util/misc/lock.rb:49:in 'lock'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource.rb:147:in 'produce'
+/home/mvazque2/git/rbbt-util/lib/rbbt/resource/path.rb:268:in 'produce'
+/home/mvazque2/git/workflows/sequence/share/rbbt_commands/bootstrap:33:in 'block in <top (required)>'
+
+Insisting seems to have solved the issue.
