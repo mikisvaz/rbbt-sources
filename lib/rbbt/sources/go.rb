@@ -6,9 +6,17 @@ require 'rbbt/persist/tsv'
 # now all it does is provide a translation form id to the actual names.
 module GO
 
+  extend Resource
+  
+  extend Resource
+  self.subdir = 'share/databases/GO'
+
   #Rbbt.claim Rbbt.share.databases.GO.gslim_generic, :url, 'http://www.geneontology.org/GO_slims/goslim_generic.obo'
-  Rbbt.claim Rbbt.share.databases.GO.gene_ontology, :url, 'http://purl.obolibrary.org/obo/go.obo'
-  Rbbt.claim Rbbt.share.databases.GO.annotations, :url, 'http://geneontology.org/gene-associations/goa_human.gaf.gz'
+  GO.claim GO.gene_ontology, :url, 'http://purl.obolibrary.org/obo/go.obo'
+  GO.claim GO.Hsa.annotations, :url, 'http://geneontology.org/gene-associations/goa_human.gaf.gz'
+
+  GO.claim GO.annotations, :url, 'http://geneontology.org/gene-associations/goa_human.gaf.gz'
+
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
   TSV_GENE_ONTOLOGY = File.join(Persist.cachedir, 'gene_ontology')

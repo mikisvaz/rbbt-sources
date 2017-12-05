@@ -29,6 +29,7 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    HPRD.rb
    GTRD.rb
    STITCH.rb
+   PRO.rb
 
    PSI_MI.rb
 
