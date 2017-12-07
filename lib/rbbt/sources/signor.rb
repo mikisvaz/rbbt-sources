@@ -1,5 +1,6 @@
 require 'rbbt-util'
 require 'rbbt/resource'
+require 'rbbt/sources/uniprot'
 
 module Signor
   extend Resource
@@ -63,7 +64,8 @@ module Signor
     require 'rbbt/sources/organism'
 
     organism = Organism.default_code("Hsa")
-    uni2name = Organism.identifiers(organism).index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
+    #uni2name = Organism.identifiers(organism).index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
+    uni2name = UniProt.identifiers.Hsa.index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
 
     parser = TSV::Parser.new Signor.data
     fields = parser.fields

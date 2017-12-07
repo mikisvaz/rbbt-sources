@@ -9,6 +9,62 @@ module UniProt
   extend Resource
   self.subdir = "share/databases/UniProt"
 
+  def self.get_organism_ids(url, organism = nil)
+    tsv = {}
+    fields = []
+    TSV.traverse url, :type => :array, :bar => "Extracting UniProt IDs #{organism}" do |line|
+      uni, type, value = line.split("\t")
+      fields << type unless fields.include?(type)
+      pos = fields.index type
+
+      values = tsv[uni] 
+      values = [] if values.nil?
+      values[pos] ||= []
+      values[pos] << value
+      tsv[uni] = values
+    end
+    fields =  fields.collect do |field|
+      case field
+      when "Gene_Name"
+        "Associated Gene Name"
+      when "Ensembl"
+        "Ensembl Gene ID"
+      when "Ensembl_TRS"
+        "Ensembl Transcript ID"
+      when "Ensembl_PRO"
+        "Ensembl Protein ID"
+      else
+        field
+      end
+    end
+
+    new = TSV.setup({}, :key_field => "UniProt/SwissProt Accession", :fields => fields, :type => :double, :namespace => organism)
+    num_fields = fields.length
+    tsv.each do |k,values|
+      new_values = [nil] * num_fields
+      new_values = values
+      num_fields.times do |i|
+        new_values[i] = [] if new_values[i].nil?
+      end
+      new[k] = new_values
+    end
+    Log.tsv new
+    new
+  end
+
+  UniProt.claim UniProt.identifiers.Hsa, :proc do
+    url = "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz"
+    tsv = UniProt.get_organism_ids(url, "Hsa")
+    tsv.to_s
+  end
+
+  UniProt.claim UniProt.identifiers.Mmu, :proc do
+    url = "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/MOUSE_10090_idmapping.dat.gz"
+    tsv = UniProt.get_organism_ids(url, "Mmu")
+    tsv.to_a
+  end
+
+
   UniProt.claim UniProt.annotated_variants, :proc do
     url = "http://www.uniprot.org/docs/humsavar.txt"
     tsv = TSV.open(CMD.cmd('tail -n +31 | head -n -4|grep "[[:alpha:]]"', :in => Open.open(url), :pipe => true), 
