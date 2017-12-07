@@ -43,6 +43,7 @@ module GO
 
         next if term_info["id"].nil?
         info[term_info["id"]] = term_info
+        info[term_info["alt_id"]] = term_info if term_info["alt_id"]
       }
 
       info

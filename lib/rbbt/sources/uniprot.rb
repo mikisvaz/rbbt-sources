@@ -48,7 +48,7 @@ module UniProt
       end
       new[k] = new_values
     end
-    Log.tsv new
+
     new
   end
 
@@ -61,7 +61,7 @@ module UniProt
   UniProt.claim UniProt.identifiers.Mmu, :proc do
     url = "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/MOUSE_10090_idmapping.dat.gz"
     tsv = UniProt.get_organism_ids(url, "Mmu")
-    tsv.to_a
+    tsv.to_s
   end
 
 
