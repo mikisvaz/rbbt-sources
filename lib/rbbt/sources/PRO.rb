@@ -28,10 +28,9 @@ module PRO
     
     dumper = TSV::Dumper.new :key_field => "UniProt/SwissProt Accession", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :namespace => PRO.organism
     dumper.init
-    TSV.traverse PRO.identifiers, :into => dumper, :bar => true do |pro,values|
+    TSV.traverse PRO.identifiers, :into => dumper, :bar => true do |pro,unis|
       res = []
       res.extend MultipleResult
-      unis = values.first
 
       unis.each do |uni|
         res << [uni,unis]
