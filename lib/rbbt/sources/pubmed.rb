@@ -227,7 +227,9 @@ module PubMed
     result_files = FileCache.cache_online_elements(pmids, 'pubmed-{ID}.xml') do |ids|
       result = {}
       values = []
-      Misc.divide(ids, (ids.length / 20) + 1).each do |list|
+      chunks = Misc.divide(ids, (ids.length / 20) + 1)
+      bar = Log::ProgressBar.new_bar(chunks.length, :desc => "Downloading articles from PubMed")
+      chunks.each do |list|
         begin
           Misc.try3times do
             url = "http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi" 
@@ -240,8 +242,12 @@ module PubMed
 
             values += xml.scan(/(<PubmedArticle>.*?<\/PubmedArticle>)/smu).flatten
           end
-        rescue
+        rescue Aborted
+          raise $!
+        rescue Exception
           Log.exception $!
+        ensure
+          bar.tick
         end
       end
 
