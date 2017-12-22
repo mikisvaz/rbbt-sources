@@ -16,12 +16,13 @@ module PRO
   PRO.claim PRO.identifiers, :proc do 
     url = "ftp://ftp.pir.georgetown.edu/databases/ontology/pro_obo/PRO_mappings/uniprotmapping.txt"
 
-    dumper = TSV::Dumper.new :key_field => "PRO ID", :fields => ["UniProt/SwissProt Accession"], :type => :flat, :namespace => PRO.organism
+    dumper = TSV::Dumper.new :key_field => "PRO ID", :fields => ["UniProt/SwissProt Accession"], :type => :double, :namespace => PRO.organism
     dumper.init
     TSV.traverse Open.open(url), :type => :array, :into => dumper, :bar => true do |line|
       pro, uni = line.split("\t")
       [pro, [uni.split(":").last]]
     end
+    TSV.collapse_stream dumper
   end
 
   PRO.claim PRO.uniprot_equivalences, :proc do
@@ -42,6 +43,6 @@ module PRO
   end
 end
 
-iif PRO.identifiers.produce.find if __FILE__ == $0
+iif PRO.identifiers.produce(true).find if __FILE__ == $0
 iif PRO.uniprot_equivalences.produce(true).find if __FILE__ == $0
 
