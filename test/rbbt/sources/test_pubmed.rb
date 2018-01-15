@@ -31,6 +31,14 @@ class TestPubMed < Test::Unit::TestCase
     assert("vazquez2008sent", PubMed::Article.make_bibentry('vazquez', 2008, "SENT: Semantic features in text"))
     assert("vazquez2008aes", PubMed::Article.make_bibentry('vazquez', 2008, "An Example System"))
   end
+
+  def test_missing
+    pmids = '18627426,014966295'.split(",")
+    Log.severity = 0
+    assert PubMed.get_article(pmids).include? "014966295"
+    assert ! PubMed.get_article(pmids).include?("18627426")
+  end
+
 end
 
 

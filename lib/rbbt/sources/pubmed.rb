@@ -257,11 +257,19 @@ module PubMed
         result[pmid] = xml
       end
 
+      ids.each{|id| next if id.nil? or result[id]; fid = id.sub(/^0+/,''); next unless result[fid]; result[id] = result[fid]}
+      ids.each{|id| next if id.nil? or result[id]; result[id] = ""}
+
       result
     end
 
     articles = {}
-    pmids.each{|id| next if id.nil? or result_files[id].nil?; articles[id] = Article.new(Open.read(result_files[id])) }
+    pmids.each do |id| 
+      next if id.nil? or result_files[id].nil?
+      txt = Open.read(result_files[id]) 
+      next if txt.empty?
+      articles[id] = Article.new(txt) 
+    end
 
     if _array
       articles
