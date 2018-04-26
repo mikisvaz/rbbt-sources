@@ -52,6 +52,8 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    oreganno.rb
    CASCADE.rb
 
+   COREAD_phospho_proteome.rb
+
    jochem.rb
    wgEncodeBroadHmm.rb
 

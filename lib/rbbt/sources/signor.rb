@@ -100,7 +100,42 @@ module Signor
 
     Misc.collapse_stream dumper.stream
   end
+
+  Signor.claim Signor.phospho_sites, :proc do
+    uni2name = UniProt.identifiers.Hsa.index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
+
+    dumper = TSV::Dumper.new :key_field => "Phosphosite", :fields => ["Effect"], :type => :flat, :organism => Signor.organism
+    dumper.init
+
+    TSV.traverse Signor.protein_protein, :into => dumper, :bar => true do |source, values|
+      res = []
+      res.extend MultipleResult
+      Misc.zip_fields(values).each do |target, effect, mechanism, residue|
+        kinase = case mechanism
+                 when "phosphorylation" 
+                   true
+                 when "dephosphorylation" 
+                   false
+                 else
+                   next
+                 end
+        name = uni2name[target]
+        next if name.nil?
+        next if residue.nil? or residue.empty?
+        site = [name, residue] * ":"
+        positive = effect.include? "up-regulates"
+
+        activates = kinase && positive || (!kinase && !positive)
+
+        res << [site, activates ? "Activates" : "Deactivates"]
+      end
+      res
+    end
+
+    TSV.collapse_stream(dumper)
+  end
 end
 
-iif Signor.tf_tg.produce(true).find if __FILE__ == $0
+iif Signor.tf_tg.produce.find if __FILE__ == $0
+iif Signor.phospho_sites.produce(true).find if __FILE__ == $0
 
