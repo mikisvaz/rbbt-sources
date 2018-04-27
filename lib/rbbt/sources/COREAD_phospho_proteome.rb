@@ -85,7 +85,6 @@ module COREADPhosphoProteome
   end
 end
 
-Log.severity = 0
 iif COREADPhosphoProteome.data.produce.find if __FILE__ == $0
 iif COREADPhosphoProteome.phosphosite_levels.produce.find if __FILE__ == $0
 iif COREADPhosphoProteome.phosphosite_binary.produce.find if __FILE__ == $0
