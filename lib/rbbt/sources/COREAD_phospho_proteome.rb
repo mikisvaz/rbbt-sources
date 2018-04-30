@@ -25,7 +25,7 @@ module COREADPhosphoProteome
 
   COREADPhosphoProteome.claim COREADPhosphoProteome.data, :proc do 
     require 'rbbt/tsv/excel'
-    io = TSV.excel COREADPhosphoProteome[".source/mmc3.xlsx"].find, :text => true
+    io = TSV.excel COREADPhosphoProteome[".source/mmc3.xlsx"].produce.find, :text => true
     TSV.collapse_stream io
   end
 
@@ -46,13 +46,58 @@ module COREADPhosphoProteome
     require 'rbbt/matrix/barcode'
 
     m = RbbtMatrix.new COREADPhosphoProteome.phosphosite_levels.find
-    a = m.to_activity([3]).tsv(false)
+    a = m.to_activity(3).tsv(false)
     a
   end
 
-  COREADPhosphoProteome.claim COREADPhosphoProteome.signor_activity, :proc do
+  COREADPhosphoProteome.claim COREADPhosphoProteome.signor_activity_present, :proc do
     require 'rbbt/sources/signor'
     signor = Signor.phospho_sites.tsv
+
+    signor.add_field "Fixed" do |k,l|
+      case l.uniq.length 
+      when 1
+        l.first
+      when 2
+        "Unclear"
+      end
+    end
+    signor = signor.slice("Fixed").to_single
+
+    parser = TSV::Parser.new COREADPhosphoProteome.phosphosite_levels
+    dumper = TSV::Dumper.new parser.options
+    dumper.init
+    cell_lines = parser.fields
+    TSV.traverse parser, :into => dumper do |site,values|
+      osite = site
+      site = site.sub(':S', ':Ser').sub(':T', ':Thr').sub(':Y', ':Tyr')
+      next unless signor.include? site
+      new_values = values.flatten.zip(cell_lines).collect{|value,cell_line|
+        next if signor[site] == "Unclear"
+        case value
+        when nil, ""
+          signor[site] == "Activates" ? -1 : 1
+        else
+          signor[site] == "Activates" ? 1 : -1
+        end
+      }
+      [site, new_values]
+    end
+  end
+
+  COREADPhosphoProteome.claim COREADPhosphoProteome.signor_activity_100, :proc do
+    require 'rbbt/sources/signor'
+    signor = Signor.phospho_sites.tsv
+
+    signor.add_field "Fixed" do |k,l|
+      case l.uniq.length 
+      when 1
+        l.first
+      when 2
+        "Unclear"
+      end
+    end
+    signor = signor.slice("Fixed").to_single
 
     parser = TSV::Parser.new COREADPhosphoProteome.phosphosite_levels
     dumper = TSV::Dumper.new parser.options
@@ -62,12 +107,57 @@ module COREADPhosphoProteome
       site = site.sub(':S', ':Ser').sub(':T', ':Thr').sub(':Y', ':Tyr')
       next unless signor.include? site
       new_values = values.flatten.collect{|value|
-        next if signor[site].uniq.length > 2
+        next if signor[site] == "Unclear"
         case value
         when nil, ""
           signor[site] == "Activates" ? -1 : 1
         else
-          signor[site] == "Activates" ? 1 : -1
+          if value.to_f >= 100
+            signor[site] == "Activates" ? 1 : -1
+          else
+            signor[site] == "Activates" ? -1 : 1
+          end
+        end
+      }
+      [site, new_values]
+    end
+  end
+
+  COREADPhosphoProteome.claim COREADPhosphoProteome.signor_activity_levels, :proc do
+    require 'rbbt/sources/signor'
+    signor = Signor.phospho_sites.tsv
+
+    signor.add_field "Fixed" do |k,l|
+      case l.uniq.length 
+      when 1
+        l.first
+      when 2
+        "Unclear"
+      end
+    end
+    signor = signor.slice("Fixed").to_single
+
+
+    parser = TSV::Parser.new COREADPhosphoProteome.phosphosite_binary
+    dumper = TSV::Dumper.new parser.options
+    dumper.init
+    TSV.traverse parser, :into => dumper do |site,values|
+      osite = site
+      site = site.first if Array === site
+      site = site.sub(':S', ':Ser').sub(':T', ':Thr').sub(':Y', ':Tyr')
+      next unless signor.include? site
+      max = values.flatten.max
+      new_values = values.flatten.collect{|value|
+        next if signor[site] == "Unclear"
+        case value
+        when nil, ""
+          signor[site] == "Activates" ? -1 : 1
+        else
+          if value == max
+            signor[site] == "Activates" ? 1 : -1
+          else
+            signor[site] == "Activates" ? -1 : 1
+          end
         end
       }
       [site, new_values]
@@ -88,6 +178,6 @@ end
 iif COREADPhosphoProteome.data.produce.find if __FILE__ == $0
 iif COREADPhosphoProteome.phosphosite_levels.produce.find if __FILE__ == $0
 iif COREADPhosphoProteome.phosphosite_binary.produce.find if __FILE__ == $0
-iif COREADPhosphoProteome.signor_activity.produce.find if __FILE__ == $0
+iif COREADPhosphoProteome.signor_activity_present.produce(true).find if __FILE__ == $0
 iif COREADPhosphoProteome.cascade_levels.produce.find if __FILE__ == $0
 
