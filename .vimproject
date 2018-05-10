@@ -17,6 +17,8 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    ensembl.rb
    ensembl_ftp.rb
 
+   array_express.rb
+
    organism.rb
 
    synapse.rb
