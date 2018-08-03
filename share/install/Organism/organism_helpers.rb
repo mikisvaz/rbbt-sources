@@ -573,12 +573,13 @@ end
 #{{{ Special files
 require 'bio'
 
-file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
+file 'transcript_sequence' => ["exons", "transcript_exons", "blacklist_chromosomes"] do |t|
   exon_info = TSV.open('exons', :type => :list, :fields => ["Exon Strand", "Exon Chr Start", "Exon Chr End", "Chromosome Name"], :unnamed => true)
 
   chr_transcript_ranges ||= {}
   transcript_strand = {}
 
+  blacklist_chromosomes = Path.setup(File.expand_path('blacklist_chromosomes')).list
   transcript_exons = Path.setup(File.expand_path('transcript_exons'))
   TSV.traverse transcript_exons do |transcript,values|
     transcript = transcript.first if Array === transcript
@@ -604,7 +605,7 @@ file 'transcript_sequence' => ["exons", "transcript_exons"] do |t|
   transcript_sequence = {}
   chr_transcript_ranges.each do |chr, transcript_ranges|
     begin
-      raise "LRG, GL, HG, NT, KI, and HSCHR chromosomes not supported: #{chr}" if chr =~ /(?:LRG_|GL0|HG|HSCHR|NT|KI)/
+      raise "LRG, GL, HG, NT, KI, and HSCHR chromosomes not supported: #{chr}" if blacklist_chromosomes.include? chr
       p = File.expand_path("./chromosome_#{chr}")
       Organism.root.annotate p
       p.sub!(%r{.*/organisms/},'share/organisms/')

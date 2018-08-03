@@ -259,4 +259,20 @@ module Organism
     
     Misc.total_length(exon_ranges)
   end
+
+  def self.chromosome_sizes(organism = Organism.default_code("Hsa"))
+    chromosome_sizes = {}
+
+    Organism[organism].glob_all("chromosome_*").each do |file|
+      chromosome = file.split("_").last.split(".").first
+      size = if Open.gzip?(file) || Open.bgzip?(file)
+               CMD.cmd("zcat '#{ file }' | wc -c ").read
+             else
+               File.size(file)
+             end
+      chromosome_sizes[chromosome] = size.to_i
+    end
+
+    chromosome_sizes
+  end
 end

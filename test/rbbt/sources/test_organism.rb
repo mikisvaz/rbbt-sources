@@ -66,6 +66,10 @@ class TestOrganism < Test::Unit::TestCase
     assert_equal ["ENSG00000133703"], Gene.setup("Kras", "Associated Gene Name", "Mmu/jun2011").ensembl.ortholog(Organism.default_code("Hsa"))
   end
 
+  def test_chr_sizes
+    assert Organism.chromosome_sizes["2"].to_i > 10_000_000
+  end
+
   #def test_genes_at_chromosome
   #  pos = [12, 117799500]
   #  assert_equal "ENSG00000089250", Organism::Hsa.genes_at_chromosome_positions(pos.first, pos.last)
