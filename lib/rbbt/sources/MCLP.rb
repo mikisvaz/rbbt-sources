@@ -21,5 +21,5 @@ module MCLP
   end
 end
 
-iif MCLP.RPPA.produce(true).find if __FILE__ == $0
+iif MCLP.RPPA.produce.find if __FILE__ == $0
 
