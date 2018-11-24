@@ -32,6 +32,10 @@ $biomart_transcript = [
   $biomart_ensembl_gene
 ]
 
+$biomart_transcript_cds = [
+  ['CDS Start','cdna_coding_start'],
+]
+
 $biomart_transcript_sequence = [
   ['cDNA','cdna'],
 ]
@@ -207,6 +211,12 @@ file 'transcripts' => 'gene_positions' do |t|
   transcripts.attach TSV.open('gene_positions'), :fields => ["Chromosome Name"]
 
   Misc.sensiblewrite(t.name, transcripts.to_s)
+end
+
+file 'transcript_cds' do |t|
+  cds = BioMart.tsv($biomart_db, $biomart_ensembl_transcript, $biomart_transcript_cds, [], nil, :type => :single, :namespace => Thread.current['namespace'], :cast => :to_i)
+
+  Misc.sensiblewrite(t.name, cds.to_s)
 end
 
 file 'gene_positions' do |t|
