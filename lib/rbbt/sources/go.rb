@@ -6,7 +6,6 @@ require 'rbbt/persist/tsv'
 # now all it does is provide a translation form id to the actual names.
 module GO
 
-  extend Resource
   
   extend Resource
   self.subdir = 'share/databases/GO'
@@ -269,5 +268,4 @@ if defined? Entity
     end
   end
 end
-
 
