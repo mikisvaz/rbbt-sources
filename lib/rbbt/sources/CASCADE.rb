@@ -12,18 +12,8 @@ module CASCADE
   #self.search_paths = {}
   #self.search_paths[:default] = :lib
 
-
-  URL = 'https://bitbucket.org/asmundf/cascade'
-  CASCADE.claim CASCADE.interactions, :proc do 
-    io = nil
-    TmpFile.with_file do |tmp|
-      Misc.in_dir tmp do
-        Log.warn "Please enter bitbucket credentials to access the asmundf/cascade repo"
-        `git clone #{URL}`
-        io = Open.open("cascade/cascade.tsv")
-      end
-    end
-
+  def self.process_interactions(file)
+    io = Open.open(file)
     tsv = TSV.open(io, :merge => true, :header_hash => '')
 
     new_fields = ["ENTITYB"] + (tsv.fields - ["ENTITYB"])
@@ -36,33 +26,19 @@ module CASCADE
       values.collect{|v| v.scan(/\d+/) * ";;"}
     end
 
-    tsv.to_s
+    tsv
   end
 
-  CASCADE.claim CASCADE.members, :proc do 
-    io = nil
-    TmpFile.with_file do |tmp|
-      Misc.in_dir tmp do
-        Log.warn "Please enter bitbucket credentials to access the asmundf/cascade repo"
-        `git clone #{URL}`
-        io = Open.open("cascade/cascade_translation.tsv")
-      end
-    end
-
-    tsv = TSV.open(io, :merge => true, :header_hash => '', :type => :flat, :sep2 => /[,.]\s*/)
-
+  def self.process_members(file)
+    TSV.open(file, :merge => true, :header_hash => '', :type => :flat, :sep2 => /[,.]\s*/)
   end
 
-  CASCADE.claim CASCADE.paradigm, :proc do
-
-    tsv = CASCADE.interactions.tsv 
-    members = CASCADE.members.tsv 
-
+  def self.process_paradigm(interactions, members)
     proteins = Set.new members.values.flatten.uniq
     outputs = Set.new
     associations = {}
 
-    tsv.through do |source, values|
+    interactions.through do |source, values|
       values.zip_fields.each do |target,typea,ida,databasea,typeb,idb,databaseb,effect|
         next if typea == 'gene'
 
@@ -129,24 +105,35 @@ module CASCADE
     str
   end
 
-  CASCADE.claim CASCADE["topology.sif"], :proc do
 
-    tsv = CASCADE.interactions.tsv 
-
-    str = StringIO.new
-
-    tsv.through do |source, values|
-      values.zip_fields.each do |target,typea,ida,databasea,typeb,idb,databaseb,effect|
-
-        effect_symbol = '->' 
-        effect_symbol = '-|' if effect.include? 'inhibit' 
-
-        str.puts [source, effect_symbol, target] * " "
+  URL = 'https://bitbucket.org/asmundf/cascade'
+  CASCADE.claim CASCADE.interactions, :proc do 
+    io = nil
+    TmpFile.with_file do |tmp|
+      Misc.in_dir tmp do
+        Log.warn "Please enter bitbucket credentials to access the asmundf/cascade repo"
+        `git clone #{URL}`
+        process_interactions("cascade/cascade.tsv")
       end
     end
+  end
 
-    str.rewind
-    str
+  CASCADE.claim CASCADE.members, :proc do 
+    TmpFile.with_file do |tmp|
+      Misc.in_dir tmp do
+        Log.warn "Please enter bitbucket credentials to access the asmundf/cascade repo"
+        `git clone #{URL}`
+        process_members("cascade/cascade_translation.tsv")
+      end
+    end
+  end
+
+  CASCADE.claim CASCADE.paradigm, :proc do
+
+    interactions = CASCADE.interactions.tsv 
+    members = CASCADE.members.tsv 
+
+    process_paradigm(interactions, members)
   end
 
   CASCADE.claim CASCADE.output_nodes, :proc do
@@ -173,5 +160,5 @@ iif CASCADE.interactions.produce.find if __FILE__ == $0
 iif CASCADE.members.produce.find if __FILE__ == $0
 iif CASCADE.paradigm.produce.find if __FILE__ == $0
 iif CASCADE["topology.sif"].produce.find if __FILE__ == $0
-iif CASCADE.output_nodes.produce(true).find if __FILE__ == $0
+iif CASCADE.output_nodes.produce.find if __FILE__ == $0
 
