@@ -76,6 +76,8 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
    MSigDB.rb
 
    clinvar.rb
+   intogen.rb
+   cancer_genome_interpreter.rb
 
    oncodrive_role.rb
 
