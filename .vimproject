@@ -1,6 +1,5 @@
 rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sass *.txt *.conf" {
  Rakefile
- Problems
  doc=doc{
   ToDo.txt
  }
