@@ -8,6 +8,7 @@ module Organism
 
   ARCHIVE_MONTH_INDEX = {}
   %w(jan feb mar apr may jun jul aug sep oct nov dec).each_with_index{|d,i| ARCHIVE_MONTH_INDEX[d] = i }
+
   def self.compare_archives(a1, a2)
     a1 = a1.partition("/").last if a1 and a1.include? "/"
     a2 = a2.partition("/").last if a2 and a2.include? "/"
@@ -65,21 +66,26 @@ module Organism
 
   def self.hg_build(organism)
     require 'rbbt/sources/ensembl_ftp'
+    return 'hg19' unless organism =~ /\//
 
-    raise "Only organism 'Hsa' (Homo sapiens) supported" unless organism =~ /^Hsa/
+    species, date = organism.split("/")
 
-    return 'hg20' unless organism =~ /\//
-    date = organism.split("/")[1] 
+    case species
+    when "Hsa"
+      date = organism.split("/")[1] 
 
-    release = Ensembl.releases[date]
+      release = Ensembl.releases[date]
 
-    release_number = release.sub(/.*-/,'').to_i
-    if release_number <= 54 
-      'hg18'
-    elsif release_number <= 75
-      'hg19'
+      release_number = release.sub(/.*-/,'').to_i
+      if release_number <= 54 
+        'hg18'
+      elsif release_number <= 75
+        'hg19'
+      else
+        'hg38'
+      end
     else
-      'hg38'
+      raise "Only organism 'Hsa' (Homo sapiens) supported" unless organism =~ /^Hsa/
     end
   end
 

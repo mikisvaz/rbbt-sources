@@ -784,3 +784,16 @@ file 'uniprot2ensembl' => ["protein_sequence", "protein_identifiers"] do |t|
   end
   Misc.sensiblewrite(t.name, dumper.stream)
 end
+
+file 'gene_set' do |t|
+  path = File.expand_path(t.name)
+  dirname = File.dirname(path)
+  organism = File.basename(dirname)
+
+  release = Ensembl.org2release(organism)
+  num = release.split("-").last
+  build_code = num.to_i > 75 ? "GRCh38" : "GRCh37" 
+  url = "ftp://ftp.ensembl.org/pub/release-#{num}/gtf/homo_sapiens/Homo_sapiens.#{build_code}.#{num}.gtf.gz"
+  CMD.cmd("wget '#{url}' -O #{t.name}.gz")
+  nil
+end
