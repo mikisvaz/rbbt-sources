@@ -66,6 +66,8 @@ module Organism
 
   def self.hg_build(organism)
     require 'rbbt/sources/ensembl_ftp'
+    return organism if organism =~ /^hg\d\d$/
+
     return 'hg19' unless organism =~ /\//
 
     species, date = organism.split("/")

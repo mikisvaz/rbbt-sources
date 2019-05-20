@@ -806,7 +806,7 @@ file 'cdna_fasta' do |t|
   release = Ensembl.org2release(organism)
   num = release.split("-").last
   build_code = num.to_i > 75 ? "GRCh38" : "GRCh37" 
-  url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/homo_sapiens/cdna/Homo_sapiens.#{build_code}.cdna.all.fa.gz"
+  url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/homo_sapiens/cdna/Homo_sapiens.#{build_code}.#{num}.cdna.all.fa.gz"
   CMD.cmd("wget '#{url}' -O #{t.name}.gz")
   nil
 end
