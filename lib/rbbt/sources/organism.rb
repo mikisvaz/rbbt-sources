@@ -91,6 +91,19 @@ module Organism
     end
   end
 
+  def self.organism_for_build(build)
+    case build.to_s
+    when 'hg18'
+      "Hsa/may2008"
+    when 'hg19', 'b37'
+      "Hsa/feb2014"
+    when 'hg38'
+      "Hsa/may2017"
+    else
+      raise RbbtException, "Unknown organism build #{build}"
+    end
+  end
+
   def self.liftOver(positions, source, target)
 
     source_hg = hg_build(source)
