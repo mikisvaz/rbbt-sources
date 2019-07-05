@@ -648,12 +648,12 @@ end
 file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
   path = File.expand_path(t.name)
   dirname = File.dirname(path)
-  organism = File.basename(dirname)
 
-  if organism =~ /[a-z]{3}20[0-9]{2}/
-    build = organism
+  organism = File.basename(dirname)
+  if organism =~ /^[a-z]{3}20[0-9]{2}/
+    archive = organism
     organism = File.basename(File.dirname(dirname))
-    organism = File.join(organism, build)
+    organism = File.join(organism, archive)
   end
 
   translation        = Ensembl::FTP.ensembl_tsv(organism, 'translation', 'transcript_id', %w(seq_start start_exon_id seq_end end_exon_id), :type => :list, :unmamed => true)
@@ -788,12 +788,19 @@ end
 file 'gene_set' do |t|
   path = File.expand_path(t.name)
   dirname = File.dirname(path)
+
   organism = File.basename(dirname)
+  if organism =~ /^[a-z]{3}20[0-9]{2}/
+    archive = organism
+    organism = File.basename(File.dirname(dirname))
+    organism = File.join(organism, archive)
+  end
 
   release = Ensembl.org2release(organism)
   num = release.split("-").last
-  build_code = num.to_i > 75 ? "GRCh38" : "GRCh37" 
-  url = "ftp://ftp.ensembl.org/pub/release-#{num}/gtf/homo_sapiens/Homo_sapiens.#{build_code}.#{num}.gtf.gz"
+  build_code = Organism.GRC_build(organism)
+  scientific_name = $scientific_name
+  url = "ftp://ftp.ensembl.org/pub/release-#{num}/gtf/#{scientific_name.downcase.sub(" ", '_')}/#{scientific_name.sub(" ", '_')}.#{build_code}.#{num}.gtf.gz"
   CMD.cmd("wget '#{url}' -O #{t.name}.gz")
   nil
 end
@@ -801,12 +808,19 @@ end
 file 'cdna_fasta' do |t|
   path = File.expand_path(t.name)
   dirname = File.dirname(path)
+
   organism = File.basename(dirname)
+  if organism =~ /^[a-z]{3}20[0-9]{2}/
+    archive = organism
+    organism = File.basename(File.dirname(dirname))
+    organism = File.join(organism, archive)
+  end
 
   release = Ensembl.org2release(organism)
   num = release.split("-").last
-  build_code = num.to_i > 75 ? "GRCh38" : "GRCh37" 
-  url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/homo_sapiens/cdna/Homo_sapiens.#{build_code}.#{num}.cdna.all.fa.gz"
+  build_code = Organism.GRC_build(organism)
+  scientific_name = Organism.scientific_name(organism)
+  url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/#{scientific_name.downcase.sub(" ", '_')}/cdna/#{scientific_name.sub(" ", '_')}.#{build_code}.cdna.all.fa.gz"
   CMD.cmd("wget '#{url}' -O #{t.name}.gz")
   nil
 end

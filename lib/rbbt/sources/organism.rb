@@ -86,22 +86,48 @@ module Organism
       else
         'hg38'
       end
+    when "Mmu"
+      "mm10"
     else
-      raise "Only organism 'Hsa' (Homo sapiens) supported" unless organism =~ /^Hsa/
+      raise "Only organism 'Hsa' (Homo sapiens) and Mmu (Mus musculus) supported" 
+    end
+  end
+
+  def self.GRC_build(organism)
+    require 'rbbt/sources/ensembl_ftp'
+    return organism if organism =~ /^hg\d\d$/
+
+    return 'hg19' unless organism =~ /\//
+
+    species, date = organism.split("/")
+
+    case species
+    when "Hsa"
+      date = organism.split("/")[1] 
+
+      release = Ensembl.releases[date]
+
+      release_number = release.sub(/.*-/,'').to_i
+      if release_number <= 54 
+        'GRCh36'
+      elsif release_number <= 75
+        'GRCh37'
+      else
+        'GRCh38'
+      end
+    when "Mmu"
+      "GRCm38"
+    else
+      raise "Only organism 'Hsa' (Homo sapiens) and Mmu (Mus musculus) supported" 
     end
   end
 
   def self.organism_for_build(build)
-    case build.to_s
-    when 'hg18'
-      "Hsa/may2008"
-    when 'hg19', 'b37'
-      "Hsa/feb2014"
-    when 'hg38'
-      "Hsa/may2017"
-    else
-      raise RbbtException, "Unknown organism build #{build}"
-    end
+    build = build.sub('_noalt', '')
+
+    build_organism = Rbbt.etc.build_organism.tsv :type => :single
+
+    build_organism[build]
   end
 
   def self.liftOver(positions, source, target)

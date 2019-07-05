@@ -33,7 +33,7 @@ module Ensembl
         ftp.passive = true
         ftp.login
         ftp.chdir(File.join('pub', release, 'mysql'))
-        file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").collect{|l| l.split(" ").last}.last
+        file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").reject{|f| f =~ /\.gz$/}.collect{|l| l.split(" ").last}.last
         ftp.close
       end
       [release, file]
@@ -53,17 +53,17 @@ module Ensembl
     end
 
     def self.url_for(organism, table)
-      "#{base_url(organism)}/#{table}.txt.gz"
+      "#{base_url(organism)}/#{table}.txt.gz.bz2"
     end
 
     def self.has_table?(organism, table)
-      sql_file = Open.read("#{base_url(organism)}/#{File.basename(base_url(organism))}.sql.gz")
+      sql_file = CMD.cmd("wget '#{base_url(organism)}/#{File.basename(base_url(organism))}.sql.gz.bz2' -O  -| bunzip2| gunzip").read
       ! sql_file.match(/^CREATE TABLE .#{table}. \((.*?)^\)/sm).nil?
     end
 
     def self.fields_for(organism, table)
-      sql_file = Open.read("#{base_url(organism)}/#{File.basename(base_url(organism))}.sql.gz")
-
+      sql_file = CMD.cmd("wget '#{base_url(organism)}/#{File.basename(base_url(organism))}.sql.gz.bz2' -O  -| bunzip2| gunzip").read
+      
       chunk = sql_file.match(/^CREATE TABLE .#{table}. \((.*?)^\)/sm)[1]
       chunk.scan(/^\s+`(.*?)`/).flatten
     end
@@ -78,7 +78,7 @@ module Ensembl
         options[:key_field] = key_pos
         options[:fields]    = field_pos
       end
-      tsv = TSV.open(url, options)
+      tsv = TSV.open(CMD.cmd("wget '#{url}' -O - |bunzip2|gunzip", :pipe => true), options)
       tsv.key_field = key_field
       tsv.fields = fields
       tsv

@@ -14,7 +14,7 @@ class TestOrganism < Test::Unit::TestCase
   end
 
   def test_identifiers
-    assert Organism.identifiers('Hsa').tsv(:key_field => "Entrez Gene ID", :persist => true)['1020']["Associated Gene Name"].include?('CDK5')
+    assert Organism.identifiers('Hsa/feb2014').tsv(:key_field => "Entrez Gene ID", :persist => true)['1020']["Associated Gene Name"].include?('CDK5')
     assert Organism.identifiers('Sce').tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
     assert Organism.identifiers("Sce").tsv(:persist => true)['S000006120']["Ensembl Gene ID"].include?('YPL199C')
   end
@@ -68,6 +68,12 @@ class TestOrganism < Test::Unit::TestCase
 
   def test_chr_sizes
     assert Organism.chromosome_sizes["2"].to_i > 10_000_000
+  end
+
+  def test_build_organism
+    assert_equal 'Hsa/may2017', Organism.organism_for_build('hg38')
+    assert_equal 'Hsa/feb2014', Organism.organism_for_build('b37')
+    assert_equal 'Mmu/may2017', Organism.organism_for_build('mm10')
   end
 
   #def test_genes_at_chromosome
