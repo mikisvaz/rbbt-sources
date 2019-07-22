@@ -39,16 +39,23 @@ module CASCADE
     associations = {}
 
     interactions.through do |source, values|
-      values.zip_fields.each do |target,typea,ida,databasea,typeb,idb,databaseb,effect|
+      Misc.zip_fields(values.values_at("ENTITYB", "TYPEA", "IDA","DATABASEA", "TYPEB", "IDB", "DATABASEB", "EFFECT")).each do |target,typea,ida,databasea,typeb,idb,databaseb,effect|
         next if typea == 'gene'
+        typea.strip!
+        typeb.strip!
+
+        typea = 'output' if typea == 'phenotype'
+        typeb = 'output' if typeb == 'phenotype'
 
         if typeb == 'gene'
           target.sub!('_g','')
           type = '-t'
         elsif typeb == 'output' or typea == 'output'
           type = '-ap'
-        else
+        elsif typeb == 'protein' or typeb == 'protein family' or typeb == 'protein complex' or typeb == 'second messenger'
           type = '-a'
+        else 
+          raise "Unknown type #{typeb} #{source} #{target}"
         end
 
         proteins << source unless source.include? '_f' or source.include? '_c'
@@ -92,7 +99,6 @@ module CASCADE
         associations[[target,e]] = [type, '>']
       end
     end
-
 
     associations.each do |p,i|
       source, target = p
