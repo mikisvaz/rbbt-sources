@@ -102,7 +102,6 @@ module Signor
   end
 
   Signor.claim Signor.phospho_sites, :proc do
-    uni2name = UniProt.identifiers.Hsa.index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
 
     dumper = TSV::Dumper.new :key_field => "Phosphosite", :fields => ["Effect"], :type => :flat, :organism => Signor.organism
     dumper.init
@@ -119,10 +118,8 @@ module Signor
                  else
                    next
                  end
-        name = uni2name[target]
-        next if name.nil?
         next if residue.nil? or residue.empty?
-        site = [name, residue] * ":"
+        site = [target, residue] * ":"
         positive = effect.include? "up-regulates"
 
         activates = kinase && positive || (!kinase && !positive)

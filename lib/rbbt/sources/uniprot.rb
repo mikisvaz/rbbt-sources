@@ -66,7 +66,7 @@ module UniProt
 
 
   UniProt.claim UniProt.annotated_variants, :proc do
-    url = "http://www.uniprot.org/docs/humsavar.txt"
+    url = "https://www.uniprot.org/docs/humsavar.txt"
     tsv = TSV.open(CMD.cmd('tail -n +31 | head -n -4|grep "[[:alpha:]]"', :in => Open.open(url), :pipe => true), 
                    :fix => Proc.new{|line| parts = line.split(/\s+/); (parts[1..5] + [(parts[6..-1] || []) * " "]) * "\t"}, 
                    :type => :double,
@@ -89,8 +89,8 @@ module UniProt
     tsv.to_s
   end
 
-  UNIPROT_TEXT="http://www.uniprot.org/uniprot/[PROTEIN].txt"
-  UNIPROT_FASTA="http://www.uniprot.org/uniprot/[PROTEIN].fasta"
+  UNIPROT_TEXT="https://www.uniprot.org/uniprot/[PROTEIN].txt"
+  UNIPROT_FASTA="https://www.uniprot.org/uniprot/[PROTEIN].fasta"
 
   def self.get_uniprot_entry(uniprotids)
     _array = Array === uniprotids
