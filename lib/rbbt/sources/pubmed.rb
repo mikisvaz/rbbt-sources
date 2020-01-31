@@ -177,46 +177,46 @@ module PubMed
   # ID specified as an argument. If +pmid+ is an array instead of a single
   # identifier it returns an hash with the Article object for each id.
   # It uses the Rbbt cache to save the articles xml.
-  def self.get_article(pmid)
+  #def self.get_article(pmid)
 
-    if pmid.is_a? Array
-      missing = []
-      list = {}
+  #  if pmid.is_a? Array
+  #    missing = []
+  #    list = {}
 
-      pmid.each{|p|
-        filename = p.to_s + '.xml'
-        if File.exists? FileCache.path(filename)
-          list[p] = Article.new(Open.read(FileCache.path(filename)))
-        else
-          missing << p
-        end
-      }
+  #    pmid.each{|p|
+  #      filename = p.to_s + '.xml'
+  #      if File.exists? FileCache.path(filename)
+  #        list[p] = Article.new(Open.read(FileCache.path(filename)))
+  #      else
+  #        missing << p
+  #      end
+  #    }
 
-      return list unless missing.any?
+  #    return list unless missing.any?
 
-      articles = get_online(missing)
+  #    articles = get_online(missing)
 
-      articles.each{|p, xml|
-        filename = p + '.xml'
-        FileCache.add(filename,xml)
-        list[p] =  Article.new(xml)
-      }
+  #    articles.each{|p, xml|
+  #      filename = p + '.xml'
+  #      FileCache.add(filename,xml)
+  #      list[p] =  Article.new(xml)
+  #    }
 
-      return list
+  #    return list
 
-    else
-      filename = pmid.to_s + '.xml'
+  #  else
+  #    filename = pmid.to_s + '.xml'
 
-      if File.exists? FileCache.path(filename)
-        return Article.new(Open.read(FileCache.path(filename)))
-      else
-        xml = get_online(pmid)
-        FileCache.add(filename,xml)
+  #    if File.exists? FileCache.path(filename)
+  #      return Article.new(Open.read(FileCache.path(filename)))
+  #    else
+  #      xml = get_online(pmid)
+  #      FileCache.add(filename,xml)
 
-        return Article.new(xml)
-      end
-    end
-  end
+  #      return Article.new(xml)
+  #    end
+  #  end
+  #end
 
   def self.get_article(pmids)
     _array = Array === pmids
