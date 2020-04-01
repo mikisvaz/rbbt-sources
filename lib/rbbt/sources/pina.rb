@@ -7,7 +7,7 @@ module Pina
   Pina.claim Pina.protein_protein, :proc do
     require 'rbbt/sources/organism'
 
-    url = "http://cbg.garvan.unsw.edu.au/pina/download/Homo%20sapiens-20121210.txt"
+    url = "https://omics.bjcancer.org/pina/download/Homo%20sapiens-20140521.tsv"
 
     dumper = TSV::Dumper.new :type => :double,
       :key_field => 'UniProt/SwissProt Accession', :namespace => Organism.default_code("Hsa"), 
