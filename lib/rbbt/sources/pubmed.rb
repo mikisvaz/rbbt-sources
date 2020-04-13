@@ -109,6 +109,14 @@ module PubMed
       end
     end
 
+    def pmc_full_xml
+      begin
+        Open.read("https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pmc&id=#{pmid}")
+      rescue
+        nil
+      end
+    end
+
     def pdf_url
       return pmc_pdf if pmc_pdf
       @gscholar_pdf ||= begin
@@ -121,18 +129,22 @@ module PubMed
     end
 
     def full_text
-      return nil if pdf_url.nil?
-
-      text = nil
-      TmpFile.with_file do |pdf|
-
-        # Change user-agent, oh well...
-        `wget --user-agent=firefox #{ pdf_url } -O #{ pdf } -t 3`
-        TmpFile.with_file do |txt|
-          `pdftotext #{ pdf } #{ txt }`
-          text = Open.read(txt) if File.exists? txt
-        end
-      end
+      text = if pdf_url
+               text = nil
+               TmpFile.with_file do |pdf|
+                 # Change user-agent, oh well...
+                 `wget --user-agent=firefox #{ pdf_url } -O #{ pdf } -t 3`
+                 TmpFile.with_file do |txt|
+                   `pdftotext #{ pdf } #{ txt }`
+                   text = Open.read(txt) if File.exists? txt
+                 end
+               end
+               text
+             elsif pmc_full_xml
+               pmc_full_xml
+             else
+               nil
+             end
 
       Misc.fixutf8(text)
     end

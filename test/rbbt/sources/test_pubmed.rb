@@ -17,6 +17,12 @@ class TestPubMed < Test::Unit::TestCase
     pmid = '16438716'
     assert(PubMed.get_article(pmid).full_text =~ /Discovering/)
   end
+
+  def test_pmc_full_xml
+    pmid = '4304705'
+    assert PubMed.get_article(pmid).pmc_full_xml.include?("HBV antigen")
+  end
+ 
  
   def test_query
     assert(PubMed.query('chagoyen[All Fields] AND ("loattrfull text"[sb] AND hasabstract[text])').include? '16438716')

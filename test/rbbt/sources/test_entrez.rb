@@ -17,7 +17,10 @@ class TestEntrez < Test::Unit::TestCase
   def test_entrez2pubmed
     tax   = $yeast_tax
 
+    Log.severity = 0
     data = Entrez.entrez2pubmed(tax)
+    data.read
+    Log.tsv data
     assert(data['850320'].include? '1574125') 
   end
 
