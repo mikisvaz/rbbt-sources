@@ -27,7 +27,7 @@ module GO
   def self.init
     Persist.persist_tsv(nil, 'gene_ontology', {}, :persist => true) do |info|
       info.serializer = :marshal if info.respond_to? :serializer
-      Rbbt.share.databases.GO.gene_ontology.read.split(/\[Term\]/).each{|term| 
+      Rbbt.share.databases.GO.gene_ontology.produce.read.split(/\[Term\]/).each{|term| 
         term_info = {}
 
         term.split(/\n/). select{|l| l =~ /:/}.each{|l| 
