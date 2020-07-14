@@ -134,10 +134,13 @@ module BioMart
   # cause an error if the BioMart WS does not allow filtering with that
   # attribute.
   def self.query(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
+    IndiferentHash.setup(open_options)
     open_options = Misc.add_defaults open_options, :nocache => false, :filename => nil, :field_names => nil, :by_chr => false
     filename, field_names, by_chr = Misc.process_options open_options, :filename, :field_names, :by_chr
     attrs   ||= []
     open_options = Misc.add_defaults open_options, :keep_empty => false, :merge => true
+
+    IndiferentHash.setup(open_options)
 
     Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
 
@@ -167,6 +170,7 @@ module BioMart
     end
 
     open_options[:filename] = "BioMart[#{main}+#{attrs.length}]"
+
     if filename.nil?
       results = TSV.open data, open_options
       results.key_field = main
@@ -200,6 +204,7 @@ module BioMart
         missing+=v if Organism.compare_archives(current_archive, t) == -1
       elsif k=~ /^>(.*)/ 
         t = $1.strip
+        iii [current_archive, t, Organism.compare_archives(current_archive, t)]
         missing+=v if Organism.compare_archives(current_archive, t) == 1
       end
     end

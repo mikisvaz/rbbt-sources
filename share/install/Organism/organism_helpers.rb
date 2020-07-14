@@ -547,13 +547,13 @@ end
 rule /^possible_ortholog_(.*)/ do |t|
   other = t.name.match(/ortholog_(.*)/)[1]
   other_key = Organism.ortholog_key(other).produce.read
-  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", "inter_paralog_" + other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => Thread.current['namespace'])
+  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", "inter_paralog_" + other_key]], [], nil, :keep_empty => false, :type => :double, :filename => t.name, :namespace => Thread.current['namespace'])
 end
 
 rule /^ortholog_(.*)/ do |t|
   other = t.name.match(/ortholog_(.*)/)[1]
   other_key = Organism.ortholog_key(other).produce.read
-  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", other_key]], [], nil, :keep_empty => false, :type => :flat, :filename => t.name, :namespace => Thread.current['namespace'])
+  BioMart.tsv($biomart_db, $biomart_ensembl_gene, [["Ortholog Ensembl Gene ID", other_key]], [], nil, :keep_empty => false, :type => :double, :filename => t.name, :namespace => Thread.current['namespace'])
 end
 
 rule /[a-z]{3}[0-9]{4}\/.*/i do |t|
