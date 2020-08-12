@@ -204,7 +204,6 @@ module BioMart
         missing+=v if Organism.compare_archives(current_archive, t) == -1
       elsif k=~ /^>(.*)/ 
         t = $1.strip
-        iii [current_archive, t, Organism.compare_archives(current_archive, t)]
         missing+=v if Organism.compare_archives(current_archive, t) == 1
       end
     end
