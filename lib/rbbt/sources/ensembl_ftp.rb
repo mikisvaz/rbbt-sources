@@ -52,24 +52,35 @@ module Ensembl
       File.join("ftp://" + SERVER, ftp_directory_for(organism) )
     end
 
-    def self.url_for(organism, table)
-      "#{base_url(organism)}/#{table}.txt.gz.bz2"
+    def self.url_for(organism, table, extension)
+      File.join(base_url(organism), table) + ".#{extension}.gz"
+    end
+
+    def self._get_gz(url)
+      begin
+        CMD.cmd("wget '#{url}' -O  - | gunzip").read
+      rescue
+        CMD.cmd("wget '#{url}.bz2' -O  - | bunzip2 | gunzip").read
+      end
+    end
+
+    def self._get_file(organism, table, extension)
+      url = url_for(organism, table, extension)
+      self._get_gz(url)
     end
 
     def self.has_table?(organism, table)
-      sql_file = CMD.cmd("wget '#{base_url(organism)}/#{File.basename(base_url(organism))}.sql.gz.bz2' -O  -| bunzip2| gunzip").read
+      sql_file = _get_file(organism, File.basename(base_url(organism)), 'sql')
       ! sql_file.match(/^CREATE TABLE .#{table}. \((.*?)^\)/sm).nil?
     end
 
     def self.fields_for(organism, table)
-      sql_file = CMD.cmd("wget '#{base_url(organism)}/#{File.basename(base_url(organism))}.sql.gz.bz2' -O  -| bunzip2| gunzip").read
-      
+      sql_file = _get_file(organism, File.basename(base_url(organism)), 'sql')
       chunk = sql_file.match(/^CREATE TABLE .#{table}. \((.*?)^\)/sm)[1]
       chunk.scan(/^\s+`(.*?)`/).flatten
     end
 
     def self.ensembl_tsv(organism, table, key_field = nil, fields = nil, options = {})
-      url = url_for(organism, table)
       if key_field and fields
         all_fields = fields_for(organism, table)
         key_pos = all_fields.index key_field
@@ -78,7 +89,8 @@ module Ensembl
         options[:key_field] = key_pos
         options[:fields]    = field_pos
       end
-      tsv = TSV.open(CMD.cmd("wget '#{url}' -O - |bunzip2|gunzip", :pipe => true), options)
+
+      tsv = TSV.open(StringIO.new(_get_file(organism, table, "txt")), options)
       tsv.key_field = key_field
       tsv.fields = fields
       tsv
