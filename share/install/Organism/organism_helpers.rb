@@ -728,13 +728,18 @@ file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr",
   transcript_sequence.through do |transcript, sequence|
     protein = transcript_protein[transcript]
     next if protein.nil? or protein.empty?
+
     utr5 = transcript_5utr[transcript]
     utr3 = transcript_3utr[transcript]
     phase = transcript_phase[transcript] || 0
+
     if phase < 0
-      utr5 = - phase if utr5 == 0
+      if utr5.nil? || utr5 == 0 || utr5 == "0"
+        utr5 = 0
+      end
       phase = 0
     end
+
     psequence = Bio::Sequence::NA.new(("N" * phase) << sequence[utr5..sequence.length-utr3-1]).translate
     protein_sequence[protein]=psequence
   end
