@@ -88,8 +88,10 @@ module Organism
       end
     when "Mmu"
       "mm10"
+    when "Rno"
+      "rn6"
     else
-      raise "Only organism 'Hsa' (Homo sapiens) and Mmu (Mus musculus) supported" 
+      raise "Only organism 'Hsa' (Homo sapiens), 'Rno' (Rattus norvegicus), and Mmu (Mus musculus) supported" 
     end
   end
 
@@ -117,6 +119,8 @@ module Organism
       end
     when "Mmu"
       "GRCm38"
+    when "Rno"
+      "Rnor_6.0"
     else
       raise "Only organism 'Hsa' (Homo sapiens) and Mmu (Mus musculus) supported" 
     end
