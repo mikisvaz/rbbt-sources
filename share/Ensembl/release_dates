@@ -1,5 +1,10 @@
 #: :type=:single
 #Release	build
+release-100	apr2020
+release-99	jan2020
+release-98	sep2019
+release-97	jul2019
+release-96	apr2019
 release-95	jan2019
 release-94	oct2018
 release-93	jul2018
