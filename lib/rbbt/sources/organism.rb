@@ -149,12 +149,12 @@ module Organism
     new_positions = {}
 
     TmpFile.with_file(positions_bed) do |source_bed|
-      TmpFile.with_file() do |unmapped_file|
-        TmpFile.with_file() do |map_file|
+      TmpFile.with_file do |unmapped_file|
+        TmpFile.with_file do |map_file|
 
 
           Open.write(map_file, Open.read(map_url))
-          new_mutations = TmpFile.with_file() do |target_bed|
+          new_mutations = TmpFile.with_file do |target_bed|
             FileUtils.chmod(755, Rbbt.software.opt.bin.liftOver.produce.find)
             CMD.cmd("#{Rbbt.software.opt.bin.liftOver.find} '#{source_bed}' '#{map_file}' '#{target_bed}' '#{unmapped_file}'").read
             Open.read(target_bed) do |line|
