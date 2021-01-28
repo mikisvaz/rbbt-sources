@@ -203,7 +203,7 @@ module UniProt
       end
       value = part.gsub("\nFT", '').gsub(/\s+/, ' ')
       case
-      when value.match(/(\d+)..(\d+) (.*)/)
+      when value.match(/(\d+)\.\.(\d+) (.*)/)
         start, eend, description = $1, $2, $3
         description.gsub(/^FT\s+/m, '')
       when value.match(/(\d+) (\d+) (.*)/)
@@ -213,8 +213,9 @@ module UniProt
         start, eend = $1, $2
         description = nil
       when value.match(/(\d+) (.*)/)
-        start, description = $1, $2, $3
+        start, description = $1, $2
         eend = start
+        iii [start, eend, description]
         description.gsub(/^FT\s+/m, '')
       else
         Log.debug "Value not understood: #{ value }"
