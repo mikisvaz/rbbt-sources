@@ -212,6 +212,10 @@ module UniProt
       when value.match(/^\s+(\d+) (\d+)/)
         start, eend = $1, $2
         description = nil
+      when value.match(/(\d+) (.*)/)
+        start, description = $1, $2, $3
+        eend = start
+        description.gsub(/^FT\s+/m, '')
       else
         Log.debug "Value not understood: #{ value }"
       end
