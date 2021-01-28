@@ -203,6 +203,9 @@ module UniProt
       end
       value = part.gsub("\nFT", '').gsub(/\s+/, ' ')
       case
+      when value.match(/(\d+)..(\d+) (.*)/)
+        start, eend, description = $1, $2, $3
+        description.gsub(/^FT\s+/m, '')
       when value.match(/(\d+) (\d+) (.*)/)
         start, eend, description = $1, $2, $3
         description.gsub(/^FT\s+/m, '')
