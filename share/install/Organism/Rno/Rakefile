@@ -21,7 +21,7 @@ $biomart_lexicon = [
 $biomart_identifiers = [ 
   ['Entrez Gene ID', "entrezgene"],
   ['Ensembl Protein ID', "ensembl_peptide_id"  ],
-  ['Associated Gene Name' , "rgd_symbol"], 
+  ['Associated Gene Name' , "external_gene_name"], 
   ['Protein ID' , "protein_id"] , 
   ['UniProt/SwissProt ID' , "uniprot_swissprot"] , 
   ['UniProt/SwissProt Accession' , "uniprot_swissprot_accession"] , 
