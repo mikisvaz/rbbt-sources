@@ -46,6 +46,12 @@ module Organism
     Rbbt.share.install.Organism.find.glob('???').collect{|f| File.basename(f)}
   end
 
+  def self.prepared_organisms
+    Rbbt.share.organisms.glob_all("???/???????/{identifiers,chromosome_1,scientific_name}").collect{|f| 
+      [File.basename(File.dirname(File.dirname(f))), File.basename(File.dirname(f))] * "/"
+    }.uniq
+  end
+
   def self.installable_organisms
     self.installed_organisms
   end

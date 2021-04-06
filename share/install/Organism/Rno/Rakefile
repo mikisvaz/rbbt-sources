@@ -42,6 +42,14 @@ $biomart_identifiers = [
   #['Codelink ID ', "codelink"],
 ]
 
+$biomart_protein_identifiers = [
+  [ 'Protein ID', "protein_id"  ],
+  [ 'RefSeq Protein ID', "refseq_peptide"  ],
+  [ 'Unigene ID', "unigene"  ],
+  [ 'UniProt/SwissProt ID', "uniprot_swissprot"],
+  [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"],
+]
+
 $namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
 Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
 load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
