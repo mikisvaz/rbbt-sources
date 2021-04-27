@@ -58,8 +58,10 @@ module ClinVar
     require 'rbbt/workflow'
     Workflow.require_workflow "Sequence"
     variants = ClinVar.hg19.snv_summary.produce
-    muts = CMD.cmd('cut -f 1', :in => variants.open, :pipe => true)
-    consequence = Sequence.job(:mutated_isoforms_fast, "Clinvar", :mutations => muts, :non_synonymous => true, :organism => ClinVar.organism_hg19).clean.run(true)
+    muts = CMD.cmd("cut -f 1 #{ variants.find }",  :pipe => true)
+    consequence = Sequence.job(:mutated_isoforms_fast, "Clinvar", :mutations => muts, :non_synonymous => true, :organism => ClinVar.organism_hg19)
+    consequence.run
+    iif consequence
 
     options = TSV.parse_header(variants).options.merge({:key_field => "Mutated Isoform"})
     fields = options[:fields].length
