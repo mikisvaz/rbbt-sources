@@ -33,6 +33,8 @@ module UniProt
         "Ensembl Transcript ID"
       when "Ensembl_PRO"
         "Ensembl Protein ID"
+      when "GeneID"
+        "Entrez Gene ID"
       else
         field
       end
@@ -64,6 +66,11 @@ module UniProt
     tsv.to_s
   end
 
+  UniProt.claim UniProt.identifiers.Rno, :proc do
+    url = "ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/RAT_10116_idmapping.dat.gz"
+    tsv = UniProt.get_organism_ids(url, "Rno")
+    tsv.to_s
+  end
 
   UniProt.claim UniProt.annotated_variants, :proc do
     url = "https://www.uniprot.org/docs/humsavar.txt"
