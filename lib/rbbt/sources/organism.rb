@@ -72,9 +72,10 @@ module Organism
 
   def self.hg_build(organism)
     require 'rbbt/sources/ensembl_ftp'
+    organism = organism.strip 
     return organism if organism =~ /^hg\d\d$/
 
-    return 'hg19' unless organism =~ /\//
+    return organism unless organism =~ /\//
 
     species, date = organism.split("/")
 
@@ -101,35 +102,37 @@ module Organism
     end
   end
 
-  def self.GRC_build(organism)
+  def self.GRC_build(organism, with_release = false)
     require 'rbbt/sources/ensembl_ftp'
     return organism if organism =~ /^hg\d\d$/
 
-    return 'hg19' unless organism =~ /\//
+    return self.GRC_build(default_code(organism)) unless organism =~ /\//
 
     species, date = organism.split("/")
 
-    case species
-    when "Hsa"
-      date = organism.split("/")[1] 
+    build = case species
+            when "Hsa"
+              date = organism.split("/")[1] 
 
-      release = Ensembl.releases[date]
+              release = Ensembl.releases[date]
 
-      release_number = release.sub(/.*-/,'').to_i
-      if release_number <= 54 
-        'GRCh36'
-      elsif release_number <= 75
-        'GRCh37'
-      else
-        'GRCh38'
-      end
-    when "Mmu"
-      "GRCm38"
-    when "Rno"
-      "Rnor_6.0"
-    else
-      raise "Only organism 'Hsa' (Homo sapiens) and Mmu (Mus musculus) supported" 
-    end
+              release_number = release.sub(/.*-/,'').to_i
+              if release_number <= 54 
+                'GRCh36'
+              elsif release_number <= 75
+                'GRCh37'
+              else
+                'GRCh38'
+              end
+            when "Mmu"
+              "GRCm38"
+            when "Rno"
+              "Rnor_6.0"
+            else
+              raise "Only organism 'Hsa' (Homo sapiens) and Mmu (Mus musculus) supported" 
+            end
+
+    (release_number && with_release) ? build + "." + release_number.to_s : build
   end
 
   def self.organism_for_build(build)
@@ -332,4 +335,5 @@ module Organism
 
     chromosome_sizes
   end
+
 end
