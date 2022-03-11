@@ -104,7 +104,13 @@ module Organism
 
   def self.GRC_build(organism, with_release = false)
     require 'rbbt/sources/ensembl_ftp'
-    return organism if organism =~ /^hg\d\d$/
+    return organism if organism =~ /^GRC$/
+
+    if organism == "hg19" || organism == "b37"
+      return "GRCh37"
+    elsif organism == "hg38"
+      return "GRCh38"
+    end
 
     return self.GRC_build(default_code(organism)) unless organism =~ /\//
 
