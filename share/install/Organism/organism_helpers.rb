@@ -220,7 +220,7 @@ file 'transcript_cds' do |t|
 end
 
 file 'gene_positions' do |t|
-  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_positions, [])
+  sequences = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_gene_positions, [], nil, :type => :list, :namespace => Thread.current['namespace'])
 
   Misc.sensiblewrite(t.name, sequences.to_s)
 end
