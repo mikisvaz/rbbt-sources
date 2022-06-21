@@ -1,5 +1,4 @@
 require 'rbbt-util'
-require 'libxml'
 require 'rbbt/sources/gscholar'
 require 'rbbt/util/filecache'
 
@@ -53,18 +52,24 @@ module PubMed
       [lastname.gsub(/\s/,'_'), year || "NOYEAR", abrev] * ""
     end
     def self.parse_xml(xml)
-      parser  = LibXML::XML::Parser.string(xml)
-      pubmed  = parser.parse.find("/PubmedArticle").first
-      medline = pubmed.find("MedlineCitation").first
-      article = medline.find("Article").first
+      require 'nokogiri'
+
+      #parser  = LibXML::XML::Parser.string(xml)
+      #pubmed  = parser.parse.find("/PubmedArticle").first
+      #medline = parser.find("MedlineCitation").first
+      #article = medline.find("Article").first
+
+      parser  = Nokogiri.XML(xml)
+      medline = parser.search("MedlineCitation").first
+      article = medline.search("Article").first
 
       info = {}
 
-      info[:pmid] = medline.find("PMID").first.content
+      info[:pmid] = medline.search("PMID").first.content
 
       XML_KEYS.each do |p|
         name, key = p
-        node = article.find(key).first
+        node = article.search(key).first
 
         next if node.nil?
 
@@ -72,13 +77,13 @@ module PubMed
       end
 
       bibentry = nil
-      info[:author] = article.find("AuthorList/Author").collect do |author|
+      info[:author] = article.search("AuthorList/Author").collect do |author|
         begin
-          lastname = author.find("LastName").first.content
-          if author.find("ForeName").first.nil?
+          lastname = author.search("LastName").first.content
+          if author.search("ForeName").first.nil?
             forename = nil
           else
-            forename = author.find("ForeName").first.content.split(/\s/).collect{|word| if word.length == 1; then word + '.'; else word; end} * " "
+            forename = author.search("ForeName").first.content.split(/\s/).collect{|word| if word.length == 1; then word + '.'; else word; end} * " "
           end
           bibentry ||= make_bibentry lastname, info[:year], info[:title]
         rescue
@@ -88,7 +93,7 @@ module PubMed
 
       info[:bibentry] = bibentry.downcase if bibentry
 
-      info[:pmc_pdf] = pubmed.find("PubmedData/ArticleIdList/ArticleId").select{|id| id[:IdType] == "pmc"}.first
+      info[:pmc_pdf] = parser.search("PubmedData/ArticleIdList/ArticleId").select{|id| id[:IdType] == "pmc"}.first
 
       if info[:pmc_pdf]
         info[:pmc_pdf] = PMC_PDF_URL.sub(/PMCID/, info[:pmc_pdf].content)
@@ -270,7 +275,7 @@ module PubMed
         result[pmid] = xml
       end
 
-      ids.each{|id| next if id.nil? or result[id]; fid = id.sub(/^0+/,''); next unless result[fid]; result[id] = result[fid]}
+      ids.each{|id| next if id.nil? or result[id]; fid = String === id ? id.sub(/^0+/,'') : id; next unless result[fid]; result[id] = result[fid]}
       ids.each{|id| next if id.nil? or result[id]; result[id] = ""}
 
       result
