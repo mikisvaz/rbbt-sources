@@ -69,11 +69,11 @@ module PubMed
 
       XML_KEYS.each do |p|
         name, key = p
-        node = article.search(key).first
+        nodes = article.search(key)
 
-        next if node.nil?
+        next if nodes.nil? || nodes.empty?
 
-        info[name] = node.content
+        info[name] = nodes.collect{|n| n.content } * "\n\n"
       end
 
       bibentry = nil

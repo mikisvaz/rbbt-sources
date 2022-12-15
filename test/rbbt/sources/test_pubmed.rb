@@ -12,6 +12,12 @@ class TestPubMed < Test::Unit::TestCase
     pmids = ['16438716', 17204154]
     assert(PubMed.get_article(pmids)[pmid].title == "Discovering semantic features in the literature: a foundation for building functional associations.")
   end
+
+  def test_get_multi_abstract
+    pmid = "32141403"
+
+    assert PubMed.get_article(pmid).abstract.include?("This study shows PCOS patients are at increased risk of incident schizophrenia, and the metformin treatment has a protective effect against incident schizophrenia.")
+  end
  
   def test_full_text
     pmid = '16438716'
