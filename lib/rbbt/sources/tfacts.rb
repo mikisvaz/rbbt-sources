@@ -141,3 +141,10 @@ if defined? Entity and defined? Gene and Entity === Gene
     end
   end
 end
+
+
+if __FILE__ == $0
+  Log.severity = 0
+  iif TFactS.tf_tg.produce.find
+end
+

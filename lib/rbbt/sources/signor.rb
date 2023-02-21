@@ -19,17 +19,7 @@ module Signor
   end
   
   Signor.claim Signor.data, :proc do
-    sio = Signor[".source/all.csv"].open
-    io_tmp = Misc.remove_quoted_new_line(sio)
-    io = Misc.swap_quoted_character(io_tmp, ';', '--SEMICOLON--')
-    
-    tsv = TSV.open io, :header_hash => "", :sep => ";", :merge => true, :type => :double, :zipped => true, :monitor => true
-    tsv.each do |k,values|
-      clean_values = values.collect{|vs| vs.collect{|v| (v[0] == '"' and v[-1] = '"') ? v[1..-2] : v }.collect{|v| v.gsub("--SEMICOLON--", ';') } }
-
-      values.replace clean_values
-    end
-    tsv
+    Signor[".source/all.csv"].tsv :header_hash => '', :merge => true, :zipped => true
   end
 
   Signor.claim Signor.protein_protein, :proc do 
@@ -69,7 +59,7 @@ module Signor
 
     parser = TSV::Parser.new Signor.data
     fields = parser.fields
-    dumper = TSV::Dumper.new :key_field => "Source (UniProt/SwissProt Accession)", :fields => ["Target (Associated Gene Name)", "Effect", "Sign", "PMID"], :type => :double, :organism => Signor.organism
+    dumper = TSV::Dumper.new :key_field => "Source (UniProt/SwissProt Accession)", :fields => ["Target (Associated Gene Name)", "Effect", "Sign", "PMID"], :type => :double, :merge => true, :organism => Signor.organism
     dumper.init
     TSV.traverse parser, :into => dumper do |k,values|
       info = {}
@@ -82,12 +72,12 @@ module Signor
       res = []
       res.extend MultipleResult
 
-      info["TYPEB"].zip(info["IDB"]).zip(info["EFFECT"]).zip(info["MECHANISM"]).zip(info["PMID"]).each do |v|
-        typeb,idb,eff,mech,pmid = v.flatten
+      info["TYPEB"].zip(info["ENTITYB"]).zip(info["IDB"]).zip(info["EFFECT"]).zip(info["MECHANISM"]).zip(info["PMID"]).each do |v|
+        typeb,nameb,idb,eff,mech,pmid = v.flatten
         
         next unless typeb == "protein"
         next unless mech == "transcriptional regulation"
-        nameb = uni2name[idb]
+        nameb ||= uni2name[idb]
         next if nameb.nil?
         sign = "Unknown"
         sign = "UP" if eff.include? 'up-regulates'
@@ -133,6 +123,10 @@ module Signor
   end
 end
 
-iif Signor.tf_tg.produce.find if __FILE__ == $0
-iif Signor.phospho_sites.produce(true).find if __FILE__ == $0
+if __FILE__ == $0
+  Log.severity = 0
+  data = Signor.tf_tg.produce(true).find
+  Log.tsv data
+  #iif Signor.tf_tg.produce.find
+end
 
