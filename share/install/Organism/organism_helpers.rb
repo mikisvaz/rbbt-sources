@@ -121,7 +121,7 @@ file 'identifiers' do |t|
     names = values[name_pos]
 
     matches = entrez.select do |e|
-      entrez2name.include? e and (names & entrez2name[e]).any?
+      entrez2name.include?(e) && (names & entrez2name[e]).any?
     end
 
     if matches.any?
@@ -147,7 +147,7 @@ file 'identifiers' do |t|
     identifiers = identifiers.reorder(:key, ordered_fields)
   end
 
-  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.find.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :key_field => 1, :fields => [4]
+  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.find.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :fixed_grep => false, :key_field => 1, :fields => [4]
   entrez_synonyms.key_field = "Entrez Gene ID"
   entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
