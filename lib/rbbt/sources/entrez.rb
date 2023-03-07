@@ -2,7 +2,6 @@ require 'rbbt-util'
 require 'rbbt/tsv'
 require 'rbbt/resource'
 require 'rbbt/util/filecache'
-require 'rbbt/bow/bow'
 require 'set'
 
 module Entrez
@@ -15,7 +14,7 @@ module Entrez
 
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}, :fixed_grep => false
-    
+
     tsv = Rbbt.share.databases.entrez.gene_info.tsv :flat, options
     tsv.key_field = "Entrez Gene ID"
     tsv.fields    = ["Native ID"]
@@ -27,7 +26,7 @@ module Entrez
 
     taxs = [taxs] unless Array === taxs
     options.merge! :grep => taxs.collect{|t| "^" + t.to_s}, :fixed_grep => false
-    
+
     tsv = Rbbt.share.databases.entrez.gene_info.tsv :flat, options
     tsv.key_field = "Entrez Gene ID"
     tsv.fields    = ["Associated Gene Name"]
@@ -43,7 +42,7 @@ module Entrez
 
     Rbbt.share.databases.entrez.gene2pubmed.tsv :flat, options
   end
-  
+
   class Gene
     attr_reader :organism, :symbol, :description, :aka, :protnames, :summary, :comentaries
 
@@ -97,7 +96,7 @@ module Entrez
 
       values.each do |xml|
         geneid = xml.match(/<Gene-track_geneid>(\d+)/)[1]
-        
+
         result[geneid] = xml
       end
 
@@ -114,30 +113,31 @@ module Entrez
     end
   end
 
-# Counts the words in common between a chunk of text and the text
-# found in Entrez Gene for that particular gene. The +gene+ may be a
-# gene identifier or a Gene class instance.
-def self.gene_text_similarity(gene, text)
+  # Counts the words in common between a chunk of text and the text
+  # found in Entrez Gene for that particular gene. The +gene+ may be a
+  # gene identifier or a Gene class instance.
+  def self.gene_text_similarity(gene, text)
+    require 'rbbt/bow/bow'
 
-  case
-  when Entrez::Gene === gene
-    gene_text = gene.text
-  when String === gene || Fixnum === gene
-    begin
-      gene_text =  get_gene(gene).text
-    rescue NoMethodError, CMD::CMDError
+    case
+    when Entrez::Gene === gene
+      gene_text = gene.text
+    when String === gene || Fixnum === gene
+      begin
+        gene_text =  get_gene(gene).text
+      rescue NoMethodError, CMD::CMDError
+        return 0
+      end
+    else
       return 0
     end
-  else
-    return 0
+
+    gene_words = gene_text.words.to_set
+    text_words = text.words.to_set
+
+    return 0 if gene_words.empty? || text_words.empty?
+
+    common = gene_words.intersection(text_words)
+    common.length / (gene_words.length + text_words.length).to_f
   end
-
-  gene_words = gene_text.words.to_set
-  text_words = text.words.to_set
-
-  return 0 if gene_words.empty? || text_words.empty?
-
-  common = gene_words.intersection(text_words)
-  common.length / (gene_words.length + text_words.length).to_f
-end
 end
