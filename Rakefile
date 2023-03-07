@@ -14,6 +14,7 @@ begin
 
     gem.add_dependency('rbbt-util', ">= 4.0.0")
     gem.add_dependency('nokogiri')
+    gem.add_dependency('net-ftp')
     gem.add_dependency('bio')
   end
   Jeweler::GemcutterTasks.new  
