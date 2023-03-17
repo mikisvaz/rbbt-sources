@@ -68,7 +68,10 @@ module Organism
     module_eval "#{ organism } = with_key '#{organism}'"
   end
 
-  Rbbt.claim Rbbt.software.opt.bin.liftOver, :url, "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
+  Rbbt.claim Rbbt.software.opt.bin.liftOver, :proc do |file|
+    url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
+    CMD.cmd_log("wget '#{url}' -O '#{file}' && chmod +rx #{file}")
+  end
 
   def self.hg_build(organism)
     require 'rbbt/sources/ensembl_ftp'
