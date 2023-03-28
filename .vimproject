@@ -85,9 +85,10 @@ rbbt-sources=/$PWD filter="*.rb *.rake Rakefile *.rdoc *.R *.sh *.js *.haml *.sa
   }
  }
  share=share{
-  install=install{
+  install=install filter="*"{
    lib=lib{
     helpers.rb
+    rake_helper.rb
    }
    JoChem=JoChem{
     Rakefile
