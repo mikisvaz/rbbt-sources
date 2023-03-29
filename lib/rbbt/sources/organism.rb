@@ -72,9 +72,13 @@ module Organism
     Open.mkdir File.dirname(file) unless File.directory?(file)
     url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
     CMD.cmd_log("wget '#{url}' -O '#{file}'")
-    CMD.cmd("chmod 755 '#{file}'")
+    CMD.cmd("chmod 0755 '#{file}'")
     nil
   end
+
+  CMD.tool :liftOver, Rbbt.software.opt.bin.liftOver
+
+  Rbbt.set_software_env
 
   def self.hg_build(organism)
     require 'rbbt/sources/ensembl_ftp'
@@ -176,8 +180,7 @@ module Organism
 
           Open.write(map_file, Open.read(map_url))
           new_mutations = TmpFile.with_file do |target_bed|
-            FileUtils.chmod(755, Rbbt.software.opt.bin.liftOver.produce.find)
-            CMD.cmd("#{Rbbt.software.opt.bin.liftOver.find} '#{source_bed}' '#{map_file}' '#{target_bed}' '#{unmapped_file}'").read
+            CMD.cmd_log(:liftOver, "'#{source_bed}' '#{map_file}' '#{target_bed}' '#{unmapped_file}'")
             Open.read(target_bed) do |line|
               chr, position_alt, position, name = line.chomp.split("\t")
               chr.sub! /chr/, ''
