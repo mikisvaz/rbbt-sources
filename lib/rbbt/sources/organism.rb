@@ -73,6 +73,7 @@ module Organism
     url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
     CMD.cmd_log("wget '#{url}' -O '#{file}'")
     CMD.cmd("chmod 0755 '#{file}'")
+    Rbbt.set_software_env
     nil
   end
 
