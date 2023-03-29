@@ -71,7 +71,7 @@ module Organism
   Rbbt.claim Rbbt.software.opt.bin.liftOver, :proc do |file|
     Open.mkdir File.dirname(file) unless File.directory?(file)
     url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
-    CMD.cmd_log("wget '#{url}' -O '#{file}' && chmod +rx #{file}")
+    CMD.cmd_log("wget '#{url}' -O '#{file}' && chmod 755 #{file}")
   end
 
   def self.hg_build(organism)
