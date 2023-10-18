@@ -18,7 +18,7 @@ module GO
 
 
   MULTIPLE_VALUE_FIELDS = %w(is_a)
-  TSV_GENE_ONTOLOGY = File.join(Persist.cachedir, 'gene_ontology')
+  #TSV_GENE_ONTOLOGY = File.join(Persist.cachedir, 'gene_ontology')
 
   # This method needs to be called before any translations can be made, it is
   # called automatically the first time the id2name method is called. It loads

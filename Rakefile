@@ -13,9 +13,9 @@ begin
     gem.test_files = Dir['test/**/test_*.rb']
 
     gem.add_dependency('rbbt-util', ">= 4.0.0")
-    gem.add_dependency('nokogiri')
     gem.add_dependency('net-ftp')
     gem.add_dependency('bio')
+    #gem.add_dependency('nokogiri')
   end
   Jeweler::GemcutterTasks.new  
 rescue LoadError

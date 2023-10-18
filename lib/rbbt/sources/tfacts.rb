@@ -114,6 +114,7 @@ module TFactS
         pmids = "" if pmids.nil?
 
         values = [target, "", species, source, pmids]
+        values = values.collect{|v| [v]}
         tsv.zip_new(tf, values)
       end
 

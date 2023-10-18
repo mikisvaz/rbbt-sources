@@ -57,7 +57,7 @@ module Signor
     #uni2name = Organism.identifiers(organism).index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
     uni2name = UniProt.identifiers.Hsa.index :target => "Associated Gene Name", :fields => ["UniProt/SwissProt Accession"], :persist => true
 
-    parser = TSV::Parser.new Signor.data
+    parser = TSV::Parser.new Signor.data.produce
     fields = parser.fields
     dumper = TSV::Dumper.new :key_field => "Source (UniProt/SwissProt Accession)", :fields => ["Target (Associated Gene Name)", "Effect", "Sign", "PMID"], :type => :double, :merge => true, :organism => Signor.organism
     dumper.init

@@ -14,7 +14,7 @@ module PRO
   #self.search_paths[:default] = :lib
 
   PRO.claim PRO.identifiers, :proc do 
-    url = "ftp://ftp.pir.georgetown.edu/databases/ontology/pro_obo/PRO_mappings/uniprotmapping.txt"
+    url = "ftp://ftp.proteininformationresource.org/databases/ontology/pro_obo/PRO_mappings/uniprotmapping.txt"
 
     dumper = TSV::Dumper.new :key_field => "PRO ID", :fields => ["UniProt/SwissProt Accession"], :type => :double, :namespace => PRO.organism
     dumper.init
@@ -22,7 +22,7 @@ module PRO
       pro, uni = line.split("\t")
       [pro, [uni.split(":").last]]
     end
-    TSV.collapse_stream dumper
+    dumper.tsv merge: true
   end
 
   PRO.claim PRO.uniprot_equivalences, :proc do
