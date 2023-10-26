@@ -19,7 +19,11 @@ module Signor
   end
   
   Signor.claim Signor.data, :proc do
-    Signor[".source/all.csv"].tsv :header_hash => '', :merge => true, :zipped => true
+    begin
+      Signor[".source/all.csv"].tsv :header_hash => '', :merge => true, :zipped => true
+    rescue
+      Signor[".source/all.csv"].tsv :header_hash => '', :merge => true, :one2one => true
+    end
   end
 
   Signor.claim Signor.protein_protein, :proc do 

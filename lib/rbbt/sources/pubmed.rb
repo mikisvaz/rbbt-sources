@@ -246,6 +246,7 @@ module PubMed
       values = []
       chunks = Misc.divide(ids, (ids.length / 20) + 1)
       Log::ProgressBar.with_bar(chunks.length, :desc => "Downloading articles from PubMed") do |bar|
+        bar.init
         chunks.each do |list|
           begin
             Misc.try3times do
