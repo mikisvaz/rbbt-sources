@@ -15,7 +15,7 @@ module BioMart
 
   BIOMART_URL = 'http://www.ensembl.org/biomart/martservice?query='
 
-  MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.exists? ? Rbbt.etc.biomart.missing_in_archive.yaml : {}
+  MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.exists? ? Rbbt.etc.biomart.missing_in_archive.find.yaml : {}
 
   private
 
@@ -33,7 +33,7 @@ module BioMart
    
   def self.set_archive(date)
     if defined? Rbbt and Rbbt.etc.allowed_biomart_archives.exists?
-      raise "Biomart archive #{ date } is not allowed in this installation" unless Rbbt.etc.allowed_biomart_archives.read.split("\n").include? date
+      raise "Biomart archive #{ date } is not allowed in this installation" unless Rbbt.etc.allowed_biomart_archives.find.read.split("\n").include? date
     end
     Thread.current['archive'] = date
     Thread.current['archive_url'] = BIOMART_URL.sub(/www/, date + '.archive')

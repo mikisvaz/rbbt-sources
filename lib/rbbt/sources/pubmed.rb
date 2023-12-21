@@ -241,10 +241,11 @@ module PubMed
     pmids = [pmids] unless Array === pmids
     pmids = pmids.compact.collect{|id| id}
 
+    chunk_size = 50
     result_files = FileCache.cache_online_elements(pmids, 'pubmed-{ID}.xml') do |ids|
       result = {}
       values = []
-      chunks = Misc.divide(ids, (ids.length / 20) + 1)
+      chunks = Misc.divide(ids, (ids.length / chunk_size) + 1)
       Log::ProgressBar.with_bar(chunks.length, :desc => "Downloading articles from PubMed") do |bar|
         bar.init
         chunks.each do |list|
