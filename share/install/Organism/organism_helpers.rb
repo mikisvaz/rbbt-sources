@@ -806,7 +806,7 @@ file 'gene_set' do |t|
   build_code = Organism.GRC_build(organism)
   scientific_name = $scientific_name
   url = "ftp://ftp.ensembl.org/pub/release-#{num}/gtf/#{scientific_name.downcase.sub(" ", '_')}/#{scientific_name.sub(" ", '_')}.#{build_code}.#{num}.gtf.gz"
-  CMD.cmd("wget '#{url}' -O #{t.name}.gz")
+  Open.download(url, "#{t.name}.gz")
   nil
 end
 
@@ -826,6 +826,6 @@ file 'cdna_fasta' do |t|
   build_code = Organism.GRC_build(organism)
   scientific_name = Organism.scientific_name(organism)
   url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/#{scientific_name.downcase.sub(" ", '_')}/cdna/#{scientific_name.sub(" ", '_')}.#{build_code}.cdna.all.fa.gz"
-  CMD.cmd("wget '#{url}' -O #{t.name}.gz")
+  Open.download(url, "#{t.name}.gz")
   nil
 end
