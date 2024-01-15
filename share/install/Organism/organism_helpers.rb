@@ -825,7 +825,7 @@ file 'cdna_fasta' do |t|
   num = release.split("-").last
   build_code = Organism.GRC_build(organism)
   scientific_name = Organism.scientific_name(organism)
-  url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/#{scientific_name.downcase.sub(" ", '_')}/cdna/#{scientific_name.sub(" ", '_')}.#{build_code}.cdna.all.fa.gz"
+  url = "ftp://ftp.ensembl.org/pub/release-#{num}/fasta/#{scientific_name.downcase.sub(" ", '_')}/cdna/#{scientific_name.sub(" ", '_')}.#{build_code}.#{num}.cdna.all.fa.gz"
   Open.download(url, "#{t.name}.gz")
   nil
 end
