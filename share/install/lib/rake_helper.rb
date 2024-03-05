@@ -9,7 +9,7 @@ SOURCE_DIR = 'source'
 def define_source_tasks(sources)
   sources.each do |name, url|
     file File.join(SOURCE_DIR, name) do |t|
-      FileUtils.mkdir SOURCE_DIR unless File.exists? SOURCE_DIR
+      FileUtils.mkdir SOURCE_DIR unless File.exist? SOURCE_DIR
       Log.log "Retrieving file '#{name}' into '#{t.name}': '#{url}'", Log::LOW
       Open.write(t.name, Open.open(url, :cache => false, :wget_options => {"--no-check-certificate" => true, "--quiet" => false, :pipe => true}))
     end
@@ -87,5 +87,5 @@ end
 task :all => :default 
 
 task :clean do
-  ($__tsv_tasks + $__files).each do |file| FileUtils.rm file.to_s if File.exists?(file.to_s) end
+  ($__tsv_tasks + $__files).each do |file| FileUtils.rm file.to_s if File.exist?(file.to_s) end
 end
