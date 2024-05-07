@@ -51,6 +51,7 @@ module PubMed
       end
       [lastname.gsub(/\s/,'_'), year || "NOYEAR", abrev] * ""
     end
+
     def self.parse_xml(xml)
       require 'nokogiri'
 
@@ -91,6 +92,16 @@ module PubMed
         [lastname, forename] * ", "
       end * " and "
 
+      info[:mesh] = parser.search("MeshHeadingList/MeshHeading").collect do |mesh|
+        descriptor = mesh.search("DescriptorName").first.attr('UI')
+        qualifiers = mesh.search("QualifierName").collect{|q| q.attr('UI')}
+        [descriptor] + qualifiers.collect{|q| descriptor + q }
+      end.compact.flatten
+
+      info[:substance] = parser.search("NameOfSubstance").collect do |substance|
+        substance.attr('UI')
+      end
+
       info[:bibentry] = bibentry.downcase if bibentry
 
       info[:pmc_pdf] = parser.search("PubmedData/ArticleIdList/ArticleId").select{|id| id[:IdType] == "pmc"}.first
@@ -102,7 +113,7 @@ module PubMed
       info
     end
 
-    attr_accessor :title, :abstract, :journal, :author, :pmid, :bibentry, :pmc_pdf, :gscholar_pdf, :pdf_url
+    attr_accessor :title, :abstract, :journal, :author, :pmid, :bibentry, :pmc_pdf, :gscholar_pdf, :pdf_url, :mesh, :substance
     attr_accessor *XML_KEYS.collect{|p| p.first }
 
     def initialize(xml)
@@ -141,7 +152,7 @@ module PubMed
                  `wget --user-agent=firefox #{ pdf_url } -O #{ pdf } -t 3`
                  TmpFile.with_file do |txt|
                    `pdftotext #{ pdf } #{ txt }`
-                   text = Open.read(txt) if File.exists? txt
+                   text = Open.read(txt) if File.exist?(txt)
                  end
                end
                text
