@@ -118,7 +118,7 @@ file 'identifiers' do |t|
   name_pos = identifiers.identify_field "Associated Gene Name"
   entrez2name = Entrez.entrez2name($taxs)
   identifiers.process "Entrez Gene ID" do |entrez, ensembl, values|
-    names = values[name_pos]
+    names = values[name_pos] || []
 
     matches = entrez.select do |e|
       entrez2name.include?(e) && (names & entrez2name[e]).any?
@@ -156,6 +156,7 @@ file 'identifiers' do |t|
   identifiers.with_unnamed do
     identifiers.each do |key, values|
       values.each do |list|
+        list ||= []
         list.reject!{|v| v.nil? or v.empty?}
         list.uniq!
       end

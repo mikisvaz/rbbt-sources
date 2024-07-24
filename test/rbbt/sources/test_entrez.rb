@@ -14,6 +14,11 @@ class TestEntrez < Test::Unit::TestCase
     assert(lexicon['855611'].include? 'S000005056') 
   end
 
+  def test_entrez2name
+    tax    = $yeast_tax
+    Entrez.entrez2name(tax)
+  end
+
   def test_entrez2pubmed
     tax   = $yeast_tax
 

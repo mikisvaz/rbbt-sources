@@ -10,7 +10,7 @@ $scientific_name = "Saccharomyces cerevisiae"
 $biomart_db = 'scerevisiae_gene_ensembl'
 
 $biomart_lexicon = [ 
-  [ 'Associated Gene Name' , "external_gene_id"], 
+  [ 'Associated Gene Name' , "external_gene_name"], 
 ]
 
 $biomart_protein_identifiers = [
@@ -27,13 +27,13 @@ $biomart_probe_identifiers = [
 $biomart_identifiers = [ 
   [ 'Entrez Gene ID', "entrezgene"],
   [ 'Ensembl Protein ID', "ensembl_peptide_id"  ],
-  [ 'Associated Gene Name', "external_gene_id"  ],
+  [ 'Associated Gene Name', "external_gene_name"  ],
   [ 'Protein ID', "protein_id"  ],
   [ 'RefSeq Protein ID', "refseq_peptide"  ],
   [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
   [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
   [ 'EMBL (Genbank) ID' , "embl"] , 
-  [ 'RefSeq mRNA' , "refseq_mrna"] , 
+  #[ 'RefSeq mRNA' , "refseq_mrna"] , 
 ]
 
 $biomart_go= [

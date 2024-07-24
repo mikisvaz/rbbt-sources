@@ -108,7 +108,7 @@ module BioMart
       TSV.merge_row_fields Open.open(result_file), new_datafile
       data = new_datafile
     else
-      TSV.merge_different_fields data, result_file, new_datafile
+      TSV.merge_different_fields Open.open(data), Open.open(result_file), new_datafile, one2one: false, sort: true
       FileUtils.rm data
       data = new_datafile
     end
@@ -211,7 +211,17 @@ module BioMart
     changes = {}
     missing.select{|m| m.include? "~" }.each do |str|
       orig,_sep, new = str.partition "~"
-      changes[orig] = new
+      if orig.include?(":")
+        target_db, _sep, orig = orig.partition(":")
+        if target_db[0] == "-"
+          next if database == target_db[1..-1]
+        else
+          next unless database == target_db
+        end
+        changes[orig] = new
+      else
+        changes[orig] = new
+      end
     end
     changed = true
     while changed
