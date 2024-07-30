@@ -260,6 +260,11 @@ module Organism
     Organism[organism]["scientific_name"].produce.read.strip
   end
 
+  def self.make_organism(name)
+    first, _, second = name.partition(/[ _]/)
+    first[0].upcase + second[0..1].downcase
+  end
+
   def self.organism(name)
     installable_organisms.select{|organism|
       organism == name or Organism.scientific_name(organism) =~ /#{ name }/i
