@@ -33,7 +33,7 @@ $biomart_identifiers = [
   [ 'UniProt/SwissProt ID', "uniprot_swissprot"  ],
   [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"  ],
   [ 'EMBL (Genbank) ID' , "embl"] , 
-  #[ 'RefSeq mRNA' , "refseq_mrna"] , 
+  [ 'RefSeq DNA' , "refseq_dna"] , 
 ]
 
 $biomart_go= [
