@@ -25,8 +25,8 @@ module GO
   # the gene_ontology.obo file and extracts all the fields, although right now,
   # only the name field is used.
   def self.init
-    Persist.persist_tsv(nil, 'gene_ontology', {}, :persist => true) do |info|
-      info.serializer = :marshal if info.respond_to? :serializer
+    Persist.persist_tsv(nil, 'gene_ontology', {}, :persist => true, serializer: :marshal) do |info|
+      #info.serializer = :marshal if info.respond_to? :serializer
       Rbbt.share.databases.GO.gene_ontology.produce.read.split(/\[Term\]/).each{|term| 
         term_info = {}
 

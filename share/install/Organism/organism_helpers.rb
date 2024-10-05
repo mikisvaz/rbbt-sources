@@ -418,7 +418,7 @@ file 'gene_go_bp' => 'gene_go' do |t|
    
   gene_go.monitor = true
   gene_go.process "GO ID" do |key, go_id, values|
-    clean = values.zip_fields.select do |id, type|
+    clean = NamedArray.zip_fields(values).select do |id, type|
       type == "biological_process"
     end
     clean.collect{|id, type| id}
