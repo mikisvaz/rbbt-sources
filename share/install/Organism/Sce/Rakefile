@@ -5,9 +5,10 @@ require File.join(File.dirname(__FILE__), '../../lib/helpers')
 
 $taxs = [559292,4932]
 $scientific_name = "Saccharomyces cerevisiae"
+$ensembl_domain = 'fungi'
 #$ortholog_key = "yeast_ensembl_gene"
 
-$biomart_db = 'scerevisiae_gene_ensembl'
+$biomart_db = 'scerevisiae_eg_gene'
 
 $biomart_lexicon = [ 
   [ 'Associated Gene Name' , "external_gene_name"], 
@@ -49,4 +50,5 @@ $biomart_go_2009= [
 
 $namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
 Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
+Thread.current["ensembl_domain"] = $ensembl_domain
 load File.join(File.dirname(__FILE__), '../organism_helpers.rb')

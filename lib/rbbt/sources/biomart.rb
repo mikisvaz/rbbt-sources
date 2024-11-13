@@ -13,7 +13,7 @@ module BioMart
   
   class BioMart::QueryError < StandardError; end
 
-  BIOMART_URL = 'http://www.ensembl.org/biomart/martservice?query='
+  BIOMART_URL = 'ensembl.org/biomart/martservice'
 
   MISSING_IN_ARCHIVE = Rbbt.etc.biomart.missing_in_archive.exists? ? Rbbt.etc.biomart.missing_in_archive.find.yaml : {}
 
@@ -22,7 +22,7 @@ module BioMart
   @@biomart_query_xml = <<-EOT
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Query>
-<Query completionStamp="1" virtualSchemaName = "default" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >
+<Query completionStamp="1" virtualSchemaName = "<!--VIRTUALSCHEMANAME-->" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >
 <Dataset name = "<!--DATABASE-->" interface = "default" >
 <!--FILTERS-->
 <!--MAIN-->
@@ -36,14 +36,10 @@ module BioMart
       raise "Biomart archive #{ date } is not allowed in this installation" unless Rbbt.etc.allowed_biomart_archives.find.read.split("\n").include? date
     end
     Thread.current['archive'] = date
-    Thread.current['archive_url'] = BIOMART_URL.sub(/www/, date + '.archive')
-    Log.debug "Using Archive URL #{ Thread.current['archive_url'] }"
   end
 
   def self.unset_archive
-    Log.debug "Restoring current version URL #{BIOMART_URL}"
     Thread.current['archive'] = nil
-    Thread.current['archive_url'] = nil
   end
 
   def self.with_archive(data)
@@ -53,6 +49,21 @@ module BioMart
     ensure
       unset_archive
     end
+  end
+
+  def self.final_url(query, archive = nil, ensembl_domain = nil)
+    url_domain = if archive.nil?
+      if ensembl_domain.nil?
+        'www'
+      else
+        ensembl_domain
+      end
+    elsif ensembl_domain
+      [archive, ensembl_domain] * "-"
+    else
+      [archive, 'archive'] * "."
+    end
+    "http://" + url_domain + "." + BIOMART_URL + "?query=#{query}"
   end
 
   def self.get(database, main, attrs = nil, filters = nil, data = nil, open_options = {})
@@ -75,11 +86,17 @@ module BioMart
 
     query = @@biomart_query_xml.dup
     query.sub!(/<!--DATABASE-->/,database)
+    if Thread.current["ensembl_domain"]
+      query.sub!(/<!--VIRTUALSCHEMANAME-->/, Thread.current["ensembl_domain"] + "_mart")
+    else
+      query.sub!(/<!--VIRTUALSCHEMANAME-->/,'default')
+    end
     query.sub!(/<!--FILTERS-->/, filters.collect{|name, v| v.nil? ? "<Filter name = \"#{ name }\" excluded = \"0\"/>" : "<Filter name = \"#{ name }\" value = \"#{Array === v ? v * "," : v}\"/>" }.join("\n") )
     query.sub!(/<!--MAIN-->/,"<Attribute name = \"#{main}\" />")
     query.sub!(/<!--ATTRIBUTES-->/, attrs.collect{|name| "<Attribute name = \"#{ name }\"/>"}.join("\n") )
 
-    url = Thread.current['archive_url'] ? Thread.current['archive_url'] + query.gsub(/\n/,' ') : BIOMART_URL + query.gsub(/\n/,' ')
+    url = final_url(query,  Thread.current["archive"], Thread.current["ensembl_domain"])
+
 
     begin
       response = Open.read(url, open_options.dup)
