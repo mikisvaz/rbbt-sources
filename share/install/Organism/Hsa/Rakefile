@@ -109,3 +109,27 @@ $biomart_go_2009= [
 #$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
 Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
 load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
+
+file 'regulators' do |t|
+  regulatory_id = ['Regulatory stable ID', 'regulatory_stable_id']
+  regulatory_fields = [
+    ['Chromosome Name','chromosome_name'],
+    ['Region Start', 'chromosome_start'],
+    ['Region End', 'chromosome_end'],
+    ['Feature type', 'feature_type_name'],
+]
+  regulators = BioMart.tsv('hsapiens_regulatory_feature', regulatory_id, regulatory_fields, [], nil, :type => :list, :namespace => Thread.current['namespace'])
+
+  Misc.sensiblewrite(t.name, regulators.to_s)
+end
+
+file 'regulator_activity' do |t|
+  regulatory_id = ['Regulatory stable ID', 'regulatory_stable_id']
+  regulatory_fields = [
+    ['Epigenome name','epigenome_name'],
+    ['Activity', 'activity'],
+]
+  regulators = BioMart.tsv('hsapiens_regulatory_feature', regulatory_id, regulatory_fields, [], nil, :type => :double, :namespace => Thread.current['namespace'])
+
+  Misc.sensiblewrite(t.name, regulators.to_s)
+end
