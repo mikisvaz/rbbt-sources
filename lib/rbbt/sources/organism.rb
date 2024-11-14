@@ -9,6 +9,10 @@ module Organism
   ARCHIVE_MONTH_INDEX = {}
   %w(jan feb mar apr may jun jul aug sep oct nov dec).each_with_index{|d,i| ARCHIVE_MONTH_INDEX[d] = i }
 
+  def self.rake_organism_helper
+    Rbbt.share.install.Organism["organism_helpers.rb"].find
+  end
+
   def self.compare_archives(a1, a2)
     a1 = a1.partition("/").last if a1 and a1.include? "/"
     a2 = a2.partition("/").last if a2 and a2.include? "/"
@@ -339,18 +343,6 @@ module Organism
     chromosome_sizes
   end
 
-  Organism.installable_organisms.each do |organism|
-    if Rbbt.share.install.Organism[organism].Rakefile.exists?
-      rakefile = Rbbt.share.install.Organism[organism].Rakefile.find
-    else
-      rakefile = Rbbt.share.install.Organism[organism + '.rake'].find
-    end
-
-    claim Organism[organism], :rake, rakefile
-
-    module_eval "#{ organism } = with_key '#{organism}'"
-  end
-
   Rbbt.claim Rbbt.software.opt.bin.liftOver, :proc do |file|
     Open.mkdir File.dirname(file) unless File.directory?(file)
     url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
@@ -364,5 +356,15 @@ module Organism
 
   Rbbt.set_software_env
 
+  Organism.installable_organisms.each do |organism|
+    if Rbbt.share.install.Organism[organism].Rakefile.exists?
+      rakefile = Rbbt.share.install.Organism[organism].Rakefile.find
+    else
+      rakefile = Rbbt.share.install.Organism[organism + '.rake'].find
+    end
 
+    claim Organism[organism], :rake, rakefile
+
+    module_eval "#{ organism } = with_key '#{organism}'"
+  end
 end

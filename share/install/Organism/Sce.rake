@@ -35,4 +35,5 @@ $biomart_identifiers = [
 $namespace = File.basename(__FILE__).sub(/\.rake$/,'')
 Thread.current["namespace"] = $namespace
 Thread.current["ensembl_domain"] = $ensembl_domain
-load File.join(File.dirname(__FILE__), 'organism_helpers.rb')
+#load File.join(File.dirname(__FILE__), 'organism_helpers.rb')
+load Organism.rake_organism_helper
