@@ -1,8 +1,3 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', '..', 'lib'))
-require 'rbbt/sources/biomart'
-require 'rbbt/sources/entrez'
-require File.join(File.dirname(__FILE__), '../../lib/helpers')
-
 $taxs = [559292,4932]
 $scientific_name = "Saccharomyces cerevisiae"
 $ensembl_domain = 'fungi'
@@ -37,18 +32,7 @@ $biomart_identifiers = [
   [ 'RefSeq DNA' , "refseq_dna"] , 
 ]
 
-$biomart_go= [
-  ["GO ID", 'go_id'],
-  ["GO Namespace", 'namespace_1003'],
-]
-
-$biomart_go_2009= [
-  ["GO BP ID", 'go_biological_process_id'],
-  ["GO MF ID", 'go_molecular_function_id'],
-  ["GO CC ID", 'go_cellular_component_id'],
-]
-
-$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
-Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
+$namespace = File.basename(__FILE__).sub(/\.rake$/,'')
+Thread.current["namespace"] = $namespace
 Thread.current["ensembl_domain"] = $ensembl_domain
-load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
+load File.join(File.dirname(__FILE__), 'organism_helpers.rb')

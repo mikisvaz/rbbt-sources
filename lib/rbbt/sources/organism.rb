@@ -43,7 +43,8 @@ module Organism
   end
 
   def self.installed_organisms
-    Rbbt.share.install.Organism.find.glob('???').collect{|f| File.basename(f)}
+    Rbbt.share.install.Organism.find.glob('???').collect{|f| File.basename(f) } + 
+    Rbbt.share.install.Organism.find.glob('*.rake').collect{|f| File.basename(f).sub(/\.rake/, '') }
   end
 
   def self.prepared_organisms
@@ -61,25 +62,6 @@ module Organism
       Rbbt.etc.allowed_biomart_archives.list :
       nil
   end
-
-  Organism.installable_organisms.each do |organism|
-    claim Organism[organism], :rake, Rbbt.share.install.Organism[organism].Rakefile.find
-
-    module_eval "#{ organism } = with_key '#{organism}'"
-  end
-
-  Rbbt.claim Rbbt.software.opt.bin.liftOver, :proc do |file|
-    Open.mkdir File.dirname(file) unless File.directory?(file)
-    url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
-    CMD.cmd_log("wget '#{url}' -O '#{file}'")
-    CMD.cmd("chmod 0755 '#{file}'")
-    Rbbt.set_software_env
-    nil
-  end
-
-  CMD.tool :liftOver, Rbbt.software.opt.bin.liftOver
-
-  Rbbt.set_software_env
 
   def self.hg_build(organism)
     require 'rbbt/sources/ensembl_ftp'
@@ -356,5 +338,31 @@ module Organism
 
     chromosome_sizes
   end
+
+  Organism.installable_organisms.each do |organism|
+    if Rbbt.share.install.Organism[organism].Rakefile.exists?
+      rakefile = Rbbt.share.install.Organism[organism].Rakefile.find
+    else
+      rakefile = Rbbt.share.install.Organism[organism + '.rake'].find
+    end
+
+    claim Organism[organism], :rake, rakefile
+
+    module_eval "#{ organism } = with_key '#{organism}'"
+  end
+
+  Rbbt.claim Rbbt.software.opt.bin.liftOver, :proc do |file|
+    Open.mkdir File.dirname(file) unless File.directory?(file)
+    url = "http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/liftOver"
+    CMD.cmd_log("wget '#{url}' -O '#{file}'")
+    CMD.cmd("chmod 0755 '#{file}'")
+    Rbbt.set_software_env
+    nil
+  end
+
+  CMD.tool :liftOver, Rbbt.software.opt.bin.liftOver
+
+  Rbbt.set_software_env
+
 
 end

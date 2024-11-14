@@ -1,8 +1,3 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', '..', 'lib'))
-require 'rbbt/sources/biomart'
-require 'rbbt/sources/entrez'
-require File.join(File.dirname(__FILE__), '../../lib/helpers')
-
 $taxs = [10090]
 $scientific_name = "Mus musculus"
 $ortholog_key = "mmusculus_homolog_ensembl_gene"
@@ -43,18 +38,7 @@ $biomart_identifiers = [
   [ 'EMBL (Genbank) ID' , "embl"] , 
 ]
 
-$biomart_go= [
-  ["GO ID", 'go_id'],
-  ["GO Namespace", 'namespace_1003'],
-]
-
-$biomart_go_2009= [
-  ["GO BP ID", 'go_biological_process_id'],
-  ["GO MF ID", 'go_molecular_function_id'],
-  ["GO CC ID", 'go_cellular_component_id'],
-]
-
-$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
-Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
-load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
+$namespace = File.basename(__FILE__).sub(/\.rake$/,'')
+Thread.current["namespace"] = $namespace
+load File.join(File.dirname(__FILE__), 'organism_helpers.rb')
 

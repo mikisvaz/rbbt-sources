@@ -1,8 +1,3 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', '..', 'lib'))
-require 'rbbt/sources/biomart'
-require 'rbbt/sources/entrez'
-require File.join(File.dirname(__FILE__), '../../lib/helpers')
-
 $taxs = [9606]
 $scientific_name = "Homo sapiens"
 $ortholog_key = "hsapiens_homolog_ensembl_gene"
@@ -95,20 +90,9 @@ $biomart_identifiers = [
   [ 'Illumina HumanWG 6 v3', 'illumina_humanwg_6_v3' ],
 ]
 
-$biomart_go= [
-  ["GO ID", 'go_id'],
-  ["GO Namespace", 'namespace_1003'],
-]
-
-$biomart_go_2009= [
-  ["GO BP ID", 'go_biological_process_id'],
-  ["GO MF ID", 'go_molecular_function_id'],
-  ["GO CC ID", 'go_cellular_component_id'],
-]
-
-#$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
-Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
-load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
+$namespace = File.basename(__FILE__).sub(/\.rake$/,'')
+Thread.current["namespace"] = $namespace
+load File.join(File.dirname(__FILE__), 'organism_helpers.rb')
 
 file 'regulators' do |t|
   regulatory_id = ['Regulatory stable ID', 'regulatory_stable_id']

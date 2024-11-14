@@ -1,8 +1,3 @@
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', '..', 'lib'))
-require 'rbbt/sources/biomart'
-require 'rbbt/sources/entrez'
-require File.join(File.dirname(__FILE__), '../../lib/helpers')
-
 $taxs = [10116]
 $scientific_name = "Rattus norvegicus"
 
@@ -50,6 +45,6 @@ $biomart_protein_identifiers = [
   [ 'UniProt/SwissProt Accession', "uniprot_swissprot_accession"],
 ]
 
-$namespace = File.basename(File.dirname(File.expand_path(__FILE__)))
-Thread.current["namespace"] = File.basename(File.dirname(File.expand_path(__FILE__)))
-load File.join(File.dirname(__FILE__), '../organism_helpers.rb')
+$namespace = File.basename(__FILE__).sub(/\.rake$/,'')
+Thread.current["namespace"] = $namespace
+load File.join(File.dirname(__FILE__), 'organism_helpers.rb')

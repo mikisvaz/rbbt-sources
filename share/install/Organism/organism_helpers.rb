@@ -1,7 +1,10 @@
-require 'net/ftp'
-require 'rbbt/sources/ensembl_ftp'
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__),'..', '..', '..', 'lib'))
 
-#Thread.current['namespace'] = $namespace
+require 'net/ftp'
+require 'rbbt/sources/biomart'
+require 'rbbt/sources/entrez'
+require File.join(File.dirname(__FILE__), '../lib/helpers')
+require 'rbbt/sources/ensembl_ftp'
 
 $biomart_ensembl_gene = ['Ensembl Gene ID', 'ensembl_gene_id']
 $biomart_ensembl_protein = ['Ensembl Protein ID', 'ensembl_peptide_id']
@@ -75,6 +78,17 @@ $biomart_exon_phase = [
 
 $biomart_pfam= [
   ["Pfam Domain", 'pfam'],
+]
+
+$biomart_go= [
+  ["GO ID", 'go_id'],
+  ["GO Namespace", 'namespace_1003'],
+]
+
+$biomart_go_2009= [
+  ["GO BP ID", 'go_biological_process_id'],
+  ["GO MF ID", 'go_molecular_function_id'],
+  ["GO CC ID", 'go_cellular_component_id'],
 ]
 
 $biomart_gene_biotype= [
