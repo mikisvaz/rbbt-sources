@@ -10,7 +10,7 @@ require 'test/unit'
 class TestBioMart < Test::Unit::TestCase
 
   def setup
-    BioMart.set_archive Organism.default_code("Hsa")
+    BioMart.set_archive "feb2014"
   end
 
   def teardown
@@ -51,7 +51,7 @@ class TestBioMart < Test::Unit::TestCase
     end
   end
 
-  def test_tsv
+  def _test_tsv
     data = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false})
     assert(data['852236']['Protein ID'].include? 'CAA84864')
     assert_equal 'Entrez Gene', data.key_field

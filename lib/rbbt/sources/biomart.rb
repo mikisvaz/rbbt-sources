@@ -3,6 +3,7 @@ require 'rbbt/tsv'
 require 'rbbt/tsv/attach'
 require 'rbbt/util/log'
 require 'cgi'
+require 'rbbt/sources/organism'
 
 # This module interacts with BioMart. It performs queries to BioMart and
 # synthesises a hash with the results. Note that this module connects to the
