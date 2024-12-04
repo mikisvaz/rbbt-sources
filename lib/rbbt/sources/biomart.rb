@@ -162,7 +162,7 @@ module BioMart
 
     Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
 
-    max_items = 2
+    max_items = 1
     chunks = []
     chunk = []
     attrs.each{|a|

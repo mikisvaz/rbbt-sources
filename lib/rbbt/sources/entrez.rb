@@ -8,6 +8,19 @@ module Entrez
 
   Rbbt.claim Rbbt.share.databases.entrez.gene_info, :url, 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene_info.gz'
   Rbbt.claim Rbbt.share.databases.entrez.gene2pubmed, :url, 'ftp://ftp.ncbi.nih.gov/gene/DATA/gene2pubmed.gz'
+  Rbbt.claim Rbbt.share.databases.entrez.tax_ids, :proc do |filename|
+    TmpFile.with_dir do |dir|
+      Misc.in_dir dir do
+        CMD.cmd("wget 'https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz'")
+        CMD.cmd("tar xvfz taxdump.tar.gz")
+        CMD.cmd("grep 'scientific name' names.dmp  |cut -f 1,3 > tmp.tsv")
+        tsv = TSV.open('tmp.tsv', type: :single)
+        tsv.key_field = "Entrez Tax ID"
+        tsv.fields = ["Scientific Name"]
+        Open.write(filename, tsv.to_s)
+      end
+    end
+  end
 
   def self.entrez2native(taxs, options = {})
     options = Misc.add_defaults options, :key_field => 1, :fields => [5], :persist => true, :merge => true

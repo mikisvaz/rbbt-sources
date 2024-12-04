@@ -105,7 +105,13 @@ $biomart_exons = [
 #{{{ Rules
 
 file 'entrez_taxids' do |t|
-  Misc.sensiblewrite(t.name, $taxs * "\n")
+  if $tax && $tax.any?
+    Misc.sensiblewrite(t.name, $taxs * "\n")
+  else
+    tsv = Rbbt.share.databases.entrez.tax_ids.tsv(:key_field => "Scientific Name", merge: true, type: :flat)
+    taxs = tsv[$scientific_name] || []
+    Misc.sensiblewrite(t.name, taxs * "\n")
+  end
 end
 
 file 'scientific_name' do |t|
@@ -118,7 +124,8 @@ file 'ortholog_key' do |t|
   Misc.sensiblewrite(t.name, $ortholog_key)
 end
 
-file 'identifiers' do |t|
+file 'identifiers' => 'entrez_taxids' do |t|
+  tax_codes = Open.read(t.prerequisites.first).strip.split("\n")
   identifiers = BioMart.tsv($biomart_db, $biomart_ensembl_gene, $biomart_identifiers, [], nil, :namespace => Thread.current['namespace'])
   identifiers.unnamed =  true
 
@@ -130,18 +137,20 @@ file 'identifiers' do |t|
   end
 
   name_pos = identifiers.identify_field "Associated Gene Name"
-  entrez2name = Entrez.entrez2name($taxs)
-  identifiers.process "Entrez Gene ID" do |entrez, ensembl, values|
-    names = values[name_pos] || []
+  if tax_codes and tax_codes.any?
+    entrez2name = Entrez.entrez2name(tax_codes)
+    identifiers.process "Entrez Gene ID" do |entrez, ensembl, values|
+      names = values[name_pos] || []
 
-    matches = entrez.select do |e|
-      entrez2name.include?(e) && (names & entrez2name[e]).any?
-    end
+      matches = entrez.select do |e|
+        entrez2name.include?(e) && (names & entrez2name[e]).any?
+      end
 
-    if matches.any?
-      matches
-    else
-      entrez
+      if matches.any?
+        matches
+      else
+        entrez
+      end
     end
   end
 
@@ -161,11 +170,13 @@ file 'identifiers' do |t|
     identifiers = identifiers.reorder(:key, ordered_fields)
   end
 
-  entrez_synonyms = Rbbt.share.databases.entrez.gene_info.find.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :fixed_grep => false, :key_field => 1, :fields => [4]
-  entrez_synonyms.key_field = "Entrez Gene ID"
-  entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
+  if tax_codes and tax_codes.any?
+    entrez_synonyms = Rbbt.share.databases.entrez.gene_info.find.tsv :grep => tax_codes.collect{|tax| "^#{tax}"}, :fixed_grep => false, :key_field => 1, :fields => [4]
+    entrez_synonyms.key_field = "Entrez Gene ID"
+    entrez_synonyms.fields = ["Entrez Gene Name Synonyms"]
 
-  identifiers.attach entrez_synonyms
+    identifiers.attach entrez_synonyms
+  end
 
   identifiers.with_unnamed do
     identifiers.each do |key, values|
@@ -181,10 +192,11 @@ file 'identifiers' do |t|
   Misc.sensiblewrite(t.name, identifiers.to_s)
 end
 
-file 'lexicon' => 'identifiers' do |t|
+file 'lexicon' => ['identifiers', 'entrez_taxids'] do |t|
   tsv = TSV.open(t.prerequisites.first).slice(["Associated Gene Name", "Entrez Gene Name Synonyms"])
+  tax_codes = Open.read(t.prerequisites.last).strip.split("\n")
 
-  entrez_description = Rbbt.share.databases.entrez.gene_info.tsv :grep => $taxs.collect{|tax| "^#{tax}"}, :fixed_grep => false, :key_field => 1, :fields => 8
+  entrez_description = Rbbt.share.databases.entrez.gene_info.tsv :grep => tax_codes.collect{|tax| "^#{tax}"}, :fixed_grep => false, :key_field => 1, :fields => 8
   entrez_description.key_field = "Entrez Gene ID"
   entrez_description.fields = ["Entrez Gene Description"]
 
@@ -323,8 +335,9 @@ end
 
 # {{{ Other info
 
-file 'gene_pmids' do |t|
-  tsv =  Entrez.entrez2pubmed($taxs)
+file 'gene_pmids' => 'entrez_taxids' do |t|
+  tax_codes = Open.read(t.prerequisites.first).strip.split("\n")
+  tsv =  Entrez.entrez2pubmed(tax_codes)
   text = "#: :namespace=#{Thread.current['namespace']}\n"
   text += "#Entrez Gene ID\tPMID"
   tsv.each do |gene, pmids|
@@ -526,6 +539,9 @@ end
 
 rule /^chromosome_.*/ do |t|
   chr = t.name.match(/chromosome_(.*)/)[1]
+  path = File.expand_path(t.name)
+  dirname = File.dirname(path)
+  organism = File.basename(dirname)
 
   # HACK: Skip LRG chromosomes
   raise "LRG and GL chromosomes not supported: #{ chr }" if chr =~ /^(?:LRG_|GL0)/
@@ -534,28 +550,51 @@ rule /^chromosome_.*/ do |t|
 
   release = Ensembl.releases[archive]
 
-  ftp = Net::FTP.new("ftp.ensembl.org")
+  fasta_url = Ensembl::FTP.ftp_name_for(organism, 'fasta').last
+  server, _, path = fasta_url.partition("/")
+  path = "/" + path
+
+  ftp = Net::FTP.new(server)
   ftp.passive = true
   ftp.login
-  if release.nil? or release == 'current'
-    ftp.chdir("pub/current_fasta/")
-  else
-    ftp.chdir("pub/#{ release }/fasta/")
-  end
-  ftp.chdir($scientific_name.downcase.sub(" ",'_'))
+  ftp.chdir(path)
   ftp.chdir('dna')
-  file = ftp.nlst.select{|file| file =~ /chromosome\.#{ chr }\.fa/}.first
 
-  raise "Fasta file for chromosome not found: '#{ chr }' - #{ archive }, #{ release }" if file.nil?
+  file = ftp.nlst.select{|file| file =~ /dna_sm\.chromosome\.#{ chr }\.fa/}.first
+  if file
+    Log.debug("Downloading chromosome sequence: #{ file } - #{release} #{t.name}")
 
-  Log.debug("Downloading chromosome sequence: #{ file } - #{release} #{t.name}")
-
-  Misc.lock t.name + '.rake' do
-    TmpFile.with_file do |tmpfile|
-      ftp.getbinaryfile(file, tmpfile)
-      Misc.sensiblewrite(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
-      ftp.close
+    Misc.lock t.name + '.rake' do
+      TmpFile.with_file do |tmpfile|
+        ftp.getbinaryfile(file, tmpfile)
+        Misc.sensiblewrite(t.name, Open.read(tmpfile, :gzip => true).sub(/^>.*\n/,'').gsub(/\s/,''))
+        ftp.close
+      end
     end
+  else
+    file = ftp.nlst.select{|file| file =~ /dna_sm\.toplevel\.fa\.gz/}.first if file.nil?
+    Misc.lock t.name + '.rake' do
+      TmpFile.with_file do |tmpfile|
+        ftp.getbinaryfile(file, tmpfile)
+        txt = Open.read(tmpfile, :gzip => true)
+
+        chr_txt = []
+
+        in_chr = false
+        txt.split("\n").each do |line|
+          if line.start_with?(">#{chr}")
+            in_chr = true
+          elsif line.start_with?(">")
+            in_chr = false
+          else
+            chr_txt << line if in_chr
+          end
+        end
+        Misc.sensiblewrite(t.name, chr_txt * "" )
+        ftp.close
+      end
+    end
+    raise "Fasta file for chromosome not found: '#{ chr }' - #{ archive }, #{ release }" if file.nil?
   end
 end
 
@@ -632,9 +671,11 @@ file 'transcript_sequence' => ["exons", "transcript_exons", "blacklist_chromosom
     begin
       raise "LRG, GL, HG, NT, KI, and HSCHR chromosomes not supported: #{chr}" if blacklist_chromosomes.include? chr
       p = File.expand_path("./chromosome_#{chr}")
-      Organism.root.annotate p
-      p.sub!(%r{.*/organisms/},'share/organisms/')
-      chr_str = p.produce.read
+      pkgdir = Thread.current["resource"]
+      p = Path.setup(pkgdir.identify(p), pkgdir: pkgdir)
+      p = pkgdir[p]
+      p.produce or raise "Could not produce #{p}; pkgdir: #{p.pkgdir}"
+      chr_str = p.read
     rescue Exception
       Log.warn("Chr #{ chr } failed (#{transcript_ranges.length} transcripts not covered): #{$!.message}")
       raise $! unless $!.message =~ /not supported/
@@ -671,7 +712,7 @@ file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
     organism = File.join(organism, archive)
   end
 
-  translation        = Ensembl::FTP.ensembl_tsv(organism, 'translation', 'transcript_id', %w(seq_start start_exon_id seq_end end_exon_id), :type => :list, :unmamed => true)
+  translation        = Ensembl::FTP.ensembl_tsv(organism, 'translation', 'transcript_id', %w(seq_start start_exon_id seq_end end_exon_id), :type => :list, :unnamed => true)
 
   if Ensembl::FTP.has_table?(organism, 'exon_stable_id')
     exon2ensembl       = Ensembl::FTP.ensembl_tsv(organism, 'exon_stable_id', 'exon_id', ['stable_id'], :type => :single, :unnamed => true) 
@@ -685,9 +726,9 @@ file 'transcript_5utr' => ["exons", "transcript_exons", "transcripts"] do |t|
     transcript2ensembl = Ensembl::FTP.ensembl_tsv(organism, 'transcript', 'transcript_id', ['stable_id'], :type => :single, :unnamed => true) 
   end
 
-  transcript_protein = TSV.open("./transcripts", :key_field => "Ensembl Transcript ID", :fields => ["Ensembl Protein ID"], :type => :single,  :unmamed => true)
-  transcript_exons   = TSV.open("./transcript_exons", :unmamed => true)
-  exon_ranges        = TSV.open("./exons",:fields => ["Exon Chr Start", "Exon Chr End"], :cast => :to_i, :unmamed => true)
+  transcript_protein = TSV.open("./transcripts", :key_field => "Ensembl Transcript ID", :fields => ["Ensembl Protein ID"], :type => :single,  :unnamed => true)
+  transcript_exons   = TSV.open("./transcript_exons", :unnamed => true)
+  exon_ranges        = TSV.open("./exons",:fields => ["Exon Chr Start", "Exon Chr End"], :cast => :to_i, :unnamed => true)
 
   transcript_utr5 = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["5' UTR Length"], :cast => :to_i, :type => :single)
   transcript_utr3 = TSV.setup({}, :key_field => "Ensembl Transcript ID", :fields => ["3' UTR Length"], :cast => :to_i, :type => :single)
@@ -734,7 +775,7 @@ end
 file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr", "transcript_phase", "transcript_sequence"] do |t|
   transcript_5utr     = TSV.open(File.expand_path('./transcript_5utr'), :unnamed => true)
   transcript_3utr     = TSV.open(File.expand_path('./transcript_3utr'), :unnamed => true)
-  transcript_phase     = TSV.open(File.expand_path('./transcript_phase'), :unnamed => true)
+  transcript_phase    = TSV.open(File.expand_path('./transcript_phase'), :unnamed => true)
   transcript_sequence = TSV.open(File.expand_path('./transcript_sequence'), :unnamed => true)
   transcript_protein  = TSV.open(File.expand_path('./transcripts'), :fields => ["Ensembl Protein ID"], :type => :single, :unnamed => true)
 

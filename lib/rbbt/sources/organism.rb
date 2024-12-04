@@ -246,9 +246,13 @@ module Organism
     Organism[organism]["scientific_name"].produce.read.strip
   end
 
-  def self.make_organism(name)
+  def self.make_organism(name, long = false)
     first, _, second = name.partition(/[ _]/)
-    first[0].upcase + second[0..1].downcase
+    if long
+      first[0].upcase + second.downcase.sub(/[^a-z]/, '')
+    else
+      first[0].upcase + second[0..1].downcase
+    end
   end
 
   def self.organism(name)
