@@ -515,9 +515,9 @@ file 'gene_pfam' do |t|
 end
 
 file 'chromosomes' do |t|
-  goterms = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => Thread.current['namespace'])
+  tsv = BioMart.tsv($biomart_db, ['Chromosome Name', "chromosome_name"] , [] , [], nil, :type => :double, :namespace => Thread.current['namespace'])
 
-  Misc.sensiblewrite(t.name, goterms.to_s)
+  Misc.sensiblewrite(t.name, tsv.keys * "\n")
 end
 
 file 'blacklist_chromosomes' => 'chromosomes' do |t|

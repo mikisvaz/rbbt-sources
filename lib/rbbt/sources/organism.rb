@@ -33,7 +33,8 @@ module Organism
   end
 
   def self.default_code(organism = "Hsa")
-    organism.split("/").first << "/feb2014"
+    latest = Rbbt.etc.allowed_biomart_archives.list.sort{|a,b| compare_archives(a, b)}.last
+    organism.split("/").first << "/" << latest
   end
 
   def self.organism_codes(organism = nil)
@@ -249,7 +250,7 @@ module Organism
   def self.make_organism(name, long = false)
     first, _, second = name.partition(/[ _]/)
     if long
-      first[0].upcase + second.downcase.sub(/[^a-z]/, '')
+      first[0].upcase + second.downcase.gsub(/[^a-z]/,'')
     else
       first[0].upcase + second[0..1].downcase
     end
@@ -334,7 +335,8 @@ module Organism
   def self.chromosome_sizes(organism = Organism.default_code("Hsa"))
     chromosome_sizes = {}
 
-    Organism[organism].glob_all("chromosome_*").each do |file|
+    Organism.chromosomes(organism).produce.tsv.each do |chr|
+      file = Organism[organism]["chromosome_#{chr}"].produce.find
       chromosome = file.split("_").last.split(".").first
       size = if Open.gzip?(file) || Open.bgzip?(file)
                CMD.cmd("zcat '#{ file }' | wc -c ").read
