@@ -244,7 +244,7 @@ module Organism
   end
 
   def self.scientific_name(organism)
-    Organism[organism]["scientific_name"].produce.read.strip
+    Organism[organism].scientific_name.read.strip
   end
 
   def self.make_organism(name, long = false)
@@ -291,7 +291,7 @@ module Organism
     organism ||= "Hsa"
 
     @@gene_start_end ||= {}
-    gene_start_end = @@gene_start_end[organism] ||= Organism.gene_positions(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["Gene Start", "Gene End"], :type => :list, :cast => :to_i, :unmamed => true)
+    gene_start_end = @@gene_start_end[organism] ||= Organism.gene_positions(organism).tsv(:persist => true, :key_field => "Ensembl Gene ID", :fields => ["Gene Start", "Gene End"], :type => :list, :cast => :to_i, :unnamed => true)
 
     ranges = genes.collect{|gene| 
       start, eend = gene_start_end[gene]

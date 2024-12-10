@@ -53,7 +53,7 @@ module Ensembl
         ftp.login
         dir = File.join('pub', release, subdir)
         ftp.chdir(dir)
-        file = ftp.list(name.downcase.gsub(" ",'_') + "_core_*").reject{|f| f =~ /\.gz$/}.collect{|l| l.split(" ").last}.last
+        file = ftp.list(name.downcase.gsub(" ",'_') + "*").reject{|f| f.split("_").length > 3 && ! f.include?("_core_") }.collect{|l| l.split(" ").last}.last
         ftp.close
       end
       [release, File.join(Ensembl::FTP::SERVER, dir, file)]

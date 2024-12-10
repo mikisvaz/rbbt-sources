@@ -541,7 +541,13 @@ rule /^chromosome_.*/ do |t|
   chr = t.name.match(/chromosome_(.*)/)[1]
   path = File.expand_path(t.name)
   dirname = File.dirname(path)
+
   organism = File.basename(dirname)
+  if organism =~ /^[a-z]{3}20[0-9]{2}/
+    archive = organism
+    organism = File.basename(File.dirname(dirname))
+    organism = File.join(organism, archive)
+  end
 
   # HACK: Skip LRG chromosomes
   raise "LRG and GL chromosomes not supported: #{ chr }" if chr =~ /^(?:LRG_|GL0)/
