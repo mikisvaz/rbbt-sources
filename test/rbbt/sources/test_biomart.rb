@@ -51,7 +51,35 @@ class TestBioMart < Test::Unit::TestCase
     end
   end
 
-  def _test_tsv
+  def __test_transcrip_exons
+    Log.with_severity 1 do
+      TmpFile.with_file do |f|
+        fields = ['ensembl_transcript_id','ensembl_exon_id','rank']
+        main = fields[0]
+        attrs = fields.values_at(1, 2)
+        attrs_first = [attrs.first]
+        attrs_last = [attrs.last]
+        database = 'hsapiens_gene_ensembl'
+
+        filename = BioMart.get(database, main, attrs, {"ensembl_transcript_id" => ['ENST00000357654']}, nil, :nocache => false, :wget_options => {:quiet => false}, :filename => f)
+        ppp Open.read(filename)
+
+        filename = BioMart.get(database, main, attrs_first, {"ensembl_transcript_id" => ['ENST00000357654']}, nil, :nocache => false, :wget_options => {:quiet => false}, :filename => f)
+        ppp Open.read(filename)
+
+        filename = BioMart.get(database, main, attrs_last, {"ensembl_transcript_id" => ['ENST00000357654']}, nil, :nocache => false, :wget_options => {:quiet => false}, :filename => f)
+        ppp Open.read(filename)
+
+        filename = BioMart.query(database, main, attrs, {"ensembl_transcript_id" => ['ENST00000357654']}, nil, :nocache => true, :wget_options => {:quiet => false}, :filename => f)
+        ppp Open.read(filename)
+
+        data = TSV.open Open.open(filename)
+        assert(data['852236']['external_gene_id'].include? 'YBL044W')
+      end
+    end
+  end
+
+  def test_tsv
     data = BioMart.tsv('scerevisiae_gene_ensembl',['Entrez Gene', 'entrezgene'], [['Protein ID', 'protein_id'],['RefSeq Peptide','refseq_peptide']], [], nil, :nocache => false, :wget_options => { :quiet => false})
     assert(data['852236']['Protein ID'].include? 'CAA84864')
     assert_equal 'Entrez Gene', data.key_field

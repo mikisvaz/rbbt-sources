@@ -23,7 +23,7 @@ module BioMart
   @@biomart_query_xml = <<-EOT
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE Query>
-<Query completionStamp="1" virtualSchemaName = "<!--VIRTUALSCHEMANAME-->" formatter = "TSV" header = "0" uniqueRows = "1" count = "" datasetConfigVersion = "0.6" >
+<Query completionStamp="1" virtualSchemaName = "<!--VIRTUALSCHEMANAME-->" formatter = "TSV" header = "0" uniqueRows = "1" datasetConfigVersion = "0.6" >
 <Dataset name = "<!--DATABASE-->" interface = "default" >
 <!--FILTERS-->
 <!--MAIN-->
@@ -123,10 +123,17 @@ module BioMart
 
     new_datafile = TmpFile.tmp_file
     if data.nil?
-      TSV.merge_row_fields Open.open(result_file), new_datafile
+      Open.open(result_file) do |file|
+        Open.write(new_datafile, Open.collapse_stream(file))
+      end
       data = new_datafile
     else
-      TSV.merge_different_fields Open.open(data), Open.open(result_file), new_datafile, one2one: false, sort: true
+      Open.open(result_file) do |stream_result|
+        Open.open(data) do |stream_data|
+          Open.write(new_datafile, Open.collapse_stream(TSV.paste_streams([stream_data, stream_result]), compact: true))
+        end
+      end
+      #TSV.merge_different_fields Open.open(data), Open.open(result_file), new_datafile, one2one: false, sort: :first
       FileUtils.rm data
       data = new_datafile
     end
@@ -160,7 +167,7 @@ module BioMart
 
     IndiferentHash.setup(open_options)
 
-    Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{(filters || []) * ', '}] #{open_options.inspect}"
+    Log.low "BioMart query: '#{main}' [#{(attrs || []) * ', '}] [#{Log.fingerprint filters}] #{open_options.inspect}"
 
     max_items = 1
     chunks = []
@@ -196,7 +203,7 @@ module BioMart
       results
     else
       Open.write(filename) do |f|
-        f.puts "#: " << Misc.hash2string(TSV::ENTRIES.collect{|key| [key, open_options[key]]})
+        f.puts "#: " << Misc.hash2string(TSV.annotations{|key| [key, open_options[key]]})
         if field_names.nil?
           f.puts "#" << [main, attrs].flatten * "\t"
         else

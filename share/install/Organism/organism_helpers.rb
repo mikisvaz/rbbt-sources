@@ -644,6 +644,16 @@ end
 require 'bio'
 
 file 'transcript_sequence' => ["exons", "transcript_exons", "blacklist_chromosomes"] do |t|
+  path = File.expand_path(t.name)
+  dirname = File.dirname(path)
+
+  organism = File.basename(dirname)
+  if organism =~ /^[a-z]{3}20[0-9]{2}/
+    archive = organism
+    organism = File.basename(File.dirname(dirname))
+    organism = File.join(organism, archive)
+  end
+
   exon_info = TSV.open('exons', :type => :list, :fields => ["Exon Strand", "Exon Chr Start", "Exon Chr End", "Chromosome Name"], :unnamed => true)
 
   chr_transcript_ranges ||= {}
@@ -676,10 +686,8 @@ file 'transcript_sequence' => ["exons", "transcript_exons", "blacklist_chromosom
   chr_transcript_ranges.each do |chr, transcript_ranges|
     begin
       raise "LRG, GL, HG, NT, KI, and HSCHR chromosomes not supported: #{chr}" if blacklist_chromosomes.include? chr
-      p = File.expand_path("./chromosome_#{chr}")
       pkgdir = Thread.current["resource"]
-      p = Path.setup(pkgdir.identify(p), pkgdir: pkgdir)
-      p = pkgdir[p]
+      p = pkgdir[organism]["chromosome_#{chr}"]
       p.produce or raise "Could not produce #{p}; pkgdir: #{p.pkgdir}"
       chr_str = p.read
     rescue Exception
@@ -787,6 +795,7 @@ file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr",
 
 
   protein_sequence = TSV.setup({}, :key_field => "Ensembl Protein ID", :fields => ["Sequence"], :type => :single)
+  transcript_sequence.monitor = true
   transcript_sequence.through do |transcript, sequence|
     protein = transcript_protein[transcript]
     next if protein.nil? or protein.empty?
@@ -839,6 +848,7 @@ file 'uniprot2ensembl' => ["protein_sequence", "protein_identifiers"] do |t|
     uni_seq = UniProt.get_uniprot_sequence(uni)
     ensps = uni2ensps[uni]
     next if ensps.nil? or ensps.empty?
+
     best_ensp = ensps.sort_by do |ensp|
       ensp_seq = ensp2seq[ensp]
       if ensp_seq

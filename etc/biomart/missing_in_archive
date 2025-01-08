@@ -19,6 +19,8 @@
     - refseq_ncrna_predicted 
 ">jun2015":
     - uniprot_swissprot_accession~uniprot_swissprot
+">jan2023":
+    - external_transcript_id~external_transcript_name
 <aug2014:
     - external_gene_name~external_gene_id
 may2010:
