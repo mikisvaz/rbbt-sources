@@ -130,7 +130,7 @@ module BioMart
     else
       Open.open(result_file) do |stream_result|
         Open.open(data) do |stream_data|
-          Open.write(new_datafile, Open.collapse_stream(TSV.paste_streams([stream_data, stream_result]), compact: true))
+          Open.write(new_datafile, Open.collapse_stream(TSV.paste_streams([stream_data, stream_result], sort: true, sort_cmd_args: '-s -k1,1'), compact: true))
         end
       end
       #TSV.merge_different_fields Open.open(data), Open.open(result_file), new_datafile, one2one: false, sort: :first
