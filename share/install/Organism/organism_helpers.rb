@@ -786,7 +786,7 @@ end
 file 'transcript_3utr' => ["transcript_5utr"] do |t|
 end
 
-file 'protein_sequence' => ["transcripts", "transcript_5utr", "transcript_3utr", "transcript_phase", "transcript_sequence"] do |t|
+file 'protein_sequence' => ["exon_phase", "blacklist_chromosomes", "transcripts", "transcript_5utr", "transcript_3utr", "transcript_phase", "transcript_sequence"] do |t|
   transcript_5utr     = TSV.open(File.expand_path('./transcript_5utr'), :unnamed => true)
   transcript_3utr     = TSV.open(File.expand_path('./transcript_3utr'), :unnamed => true)
   transcript_phase    = TSV.open(File.expand_path('./transcript_phase'), :unnamed => true)
