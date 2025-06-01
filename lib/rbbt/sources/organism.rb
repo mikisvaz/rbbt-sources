@@ -335,7 +335,8 @@ module Organism
   def self.chromosome_sizes(organism = Organism.default_code("Hsa"), include_blacklisted: false)
     chromosome_sizes = {}
 
-    blacklist_chromosomes = Organism.blacklist_chromosomes(organism) if ! include_blacklisted
+    blacklist_chromosomes = Organism.blacklist_chromosomes(organism).list if ! include_blacklisted
+
     Organism.chromosomes(organism).produce.tsv.each do |chr|
       next if ! include_blacklisted and blacklist_chromosomes.include? chr
       file = Organism[organism]["chromosome_#{chr}"].produce.find
