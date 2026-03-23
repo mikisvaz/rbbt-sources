@@ -33,6 +33,7 @@ module Organism
   end
 
   def self.default_code(organism = "Hsa")
+    return nil if organism.nil?
     latest = Rbbt.etc.allowed_biomart_archives.list.sort{|a,b| compare_archives(a, b)}.last
     organism.split("/").first << "/" << latest
   end
